@@ -1,0 +1,27 @@
+<html>
+    <head>
+        <meta http-equiv="Content-type" content="text/html; charset=utf-8">
+        <title>.:!:.</title>
+        <script src="submodules/mod/mod.js" type="text/javascript" charset="utf-8"></script>
+    </head>
+    <body id="body">
+        <script type="text/javascript" charset="utf-8">
+            mod.useTagInjection = true;
+            mod.basePath = 'src/';
+            mod({
+                name : "Main",
+                dependencies : [
+                    '../tests/NoteTests.js',
+                    '../tests/GeomTests.js',
+                    '../tests/GlobalTests.js',
+                ],
+                init : function initMain (m) {
+                    return undefined;
+                },
+                callback : function callbackMain (m) {
+                    m.assert.stat();
+                }
+            });
+        </script>
+    </body>
+</html>
