@@ -1,22 +1,19 @@
 /** * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * *
  *    Dispatcher.js
- *    The Dispatcher Addin
+ *    The Dispatcher Addin.
  *    Copyright (c) 2012 Schell Scivally. All rights reserved.
  *
  *    @author    Schell Scivally
- *    @since    Thu Jan 12 18:33:06 PST 2012
- * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * **/  
+ *    @since    Tue Jan 17 15:30:50 PST 2012
+ * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * **/
 mod({
     name : 'Dispatcher',
-    dependencies : [ 'Global.js', 'Note/NoteCenter.js' ],
+    dependencies : [ 'Note/Note.js', 'Note/NoteCenter.js' ],
     init : function initDispatcher (m) {
         /**
          * Initializes the Dispatcher Addin
          * @param - m Object - The mod modules object.
          */
-        
-        // A private, module-level NoteCenter instance for dispatching events.
-        //var eventCenter = NoteCenter();
         
         var addin = function addinDispatcher (self) {
             /**
@@ -26,11 +23,26 @@ mod({
              */
             self = m.ifndefInitObj(self, m.initialObject()); 
             
-            m.safeAddin(self, 'listen', function Dispatcher_listen (event, callback, eatsNote) {
-/*                event = ifndefInitObj(event, Note());
-                callback = ifndefIniObj(event)
-                var observer = Observer({event:event,focus:self,callback:callback});
-                eventCenter.addObserver(observer);*/
+            m.safeAddin(self, 'noteCenter', m.NoteCenter.defaultNoteCenter);
+            
+            m.safeAddin(self, 'dispatch', function Dispatcher_dispatch(note) {
+                /**
+                 * Dispatches *note* to this dispatcher's note center.
+                 */
+                note.dispatcher = self;
+                self.noteCenter.dispatch(note);
+            });
+            
+            m.safeAddin(self, 'sendNotification', function Dispatcher_sendNotification(name, body) {
+                /**
+                 * Dispatches a note with *name* and *body* to this dispatcher's note center.
+                 */
+                var note = m.Note({
+                    dispatcher : self,
+                    name : name, 
+                    body : body
+                });
+                self.dispatch(note);
             });
             
             return self;

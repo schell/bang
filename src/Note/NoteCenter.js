@@ -8,7 +8,7 @@
  * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * **/
 mod({
     name : 'NoteCenter',
-    dependencies : [ 'Global.js', 'Note.js', 'Note/Observer.js' ],
+    dependencies : [ 'Global.js', 'Note/Note.js' ],
     init : function initNoteCenter (m) {
         /**
          * Initializes the NoteCenter Addin
@@ -26,85 +26,124 @@ mod({
             // protected observers array
             var _observers = [];
             
-            m.safeAddin(self, 'addObserver', function NoteCenter_addObserver (observer) {
+            function packObserver(listener, dispatcher, noteName, callback) {
                 /**
-                 * Adds *observer* to the array of observers.
+                 * Packs up a listener, note and callback.
                  */
-                if (!m.defined(observer)) {
-                    // Maybe we should throw an error here?
-                    return;
-                }
-                
-                _observers.push(observer);
+                return {
+                    listener : listener,
+                    dispatcher : dispatcher,
+                    name : noteName,
+                    callback : callback
+                };
+            }
+            
+            m.safeAddin(self, 'totalInterests', function NoteCenter_totalInterests() {
+                /**
+                 * Returns the total number of stored interests.
+                 * @return - Number
+                 */
+                return _observers.length;
             });
             
-            // Some helper functions for determining what an observer is listening for...
-            function isListeningForThisNote (observer, note) {
-                if (observer.note.name === note.name && observer.note.dispatcher === note.dispatcher) {
-                    return true;
+            m.safeAddin(self, 'addInterest', function NoteCenter_addInterest(listener, dispatcher, name, callback) {
+                /**
+                 * Registers *listener* as interested in receiving notifications of *name*, 
+                 * coming from *dispatcher*. Calls *callback* when notes of this type get dispatched.
+                 */
+                
+                // At the very least we need a listener, a callback and a dispatcher or a note name
+                if (!m.defined(listener)) {
+                    throw new Error('Listener must be defined.');
+                } else if (!m.defined(callback)) {
+                    throw new Error('Callback must be defined.');
+                } else if (!m.defined(dispatcher) && !m.defined(name)) {
+                    throw new Error('At least on of either dispatcher or note name must be defined.');
                 }
-                return false;
-            };
-            function isListeningForAllNotesFromObject (observer, dispatcher) {
-                if (!m.defined(observer.note.name) && observer.note.dispatcher === dispatcher) {
-                    return true;
-                }
-                return false;
-            };
-            function isListeningForAllNotesWithName (observer, name) {
-                if (!m.defined(observer.dispatcher) && observer.note.name === name) {
-                    return true;
-                }
-                return false;
-            };
+                
+                var observer = packObserver(listener, dispatcher, name, callback);
+                _observers.push(observer);
+            });
             
             m.safeAddin(self, 'dispatch', function NoteCenter_dispatch (note) {
                 /**
                  * Dispatches *note* to listening observers.
                  * @param - note Note
                  */
+                if (!m.defined(note)) {
+                    throw new Error('Note to dispatch must be defined.');
+                }
+                
+                var callback = function NoteCenter_dispatch_callback(observer, note) {
+                    /**
+                     * Calls the observer's callback function and sets *dispatched*.
+                     */
+                    observer.callback.call(observer.listener, note);
+                };
+                
                 for (var i = _observers.length - 1; i >= 0; i--){
                     var observer = _observers[i];
-                    var noteGotEaten = false;
-                    var callback = function NoteCenter_dispatch_callback() {
-                        /**
-                         * Calls the observer's callback function and sets *dispatched*.
-                         */
-                        observer.callback.call(observer.listener, note);
-                        if (observer.consumesNote) {
-                            // Don't pass the note on.
-                            noteGotEaten = true;
-                        }
-                    };
-                    if (!m.defined(observer.note)) {
-                        // We need an note 
-                        continue;
-                    }
-                    if (isListeningForThisNote(observer, note)) {
-                        // The observer is listening for this particular note on this particular object,
-                        // so dispatch!
-                        callback();
-                    } else if (isListeningForAllNotesFromObject(observer, note.dispatcher)) {
-                        // The observer is listening for all notes from this particular object,
-                        // so dispatch!
-                        callback();
-                    } else if (isListeningForAllNotesWithName(observer, note.name)) {
-                        // The observer is listening for all notes with this particular name,
-                        // so dispatch!
-                        callback();
-                    }
                     
-                    if (noteGotEaten) {
-                        return;
+                    if (m.defined(observer.dispatcher)) {
+                        // This observer is listening to a specific object.
+                        if (observer.dispatcher === note.dispatcher) {
+                            // This observer is listening to this specific object.
+                            if (m.defined(observer.name)) {
+                                // This observer is listening for a specific notification.
+                                if (observer.name === note.name) {
+                                    // This observer is listening for this specific notification.
+                                    callback(observer, note);
+                                    continue;
+                                }
+                            } else {
+                                // This observer is listening for any notes from this specific object.
+                                callback(observer, note);
+                                continue;
+                            }
+                        }
+                    } else if (m.defined(observer.name) && observer.name === note.name) {
+                        // This observer is listening to all notifications with this name, 
+                        // coming from no specific object.
+                        callback(observer, note);
+                        continue;
                     }
                 }
             });
             
-            m.safeAddin(self, 'removeObserver', function NoteCenter_removeObserver (observer) {
-                var ndx = _observers.indexOf(observer);
-                while (ndx !== -1) {
-                    _observers.splice(ndx, 1);
-                    ndx = _observers.indexOf(observer);
+            m.safeAddin(self, 'removeInterest', function NoteCenter_removeInterest(listener, dispatcher, name, callback) {
+                if (!m.defined(listener)) {
+                    throw new Error('Listener must be defined.');
+                } else if (!m.defined(dispatcher) && !m.defined(name)) {
+                    throw new Error('At least on of either dispatcher or note name must be defined.');
+                }
+                
+                for (var i=0; i < _observers.length; i++) {
+                    var observer = _observers[i];
+                    if (observer.listener === listener) {
+                        // We found an observer with this listener...
+                        if (m.defined(dispatcher) && m.defined(name)) {
+                            // We want to remove interests with this dispatcher and a specific name...
+                            if (m.defined(observer.dispatcher) && observer.dispatcher === dispatcher) {
+                                // This observer is listening to this dispatcher...
+                                if (m.defined(observer.name) && observer.name === name) {
+                                    // This observer is listening for this specific notification...
+                                    _observers.splice(i, 1);
+                                    i--;
+                                    continue;
+                                }
+                            }
+                        } else if (m.defined(dispatcher) && m.defined(observer.dispatcher) && dispatcher === observer.dispatcher) {
+                            // We want to remove all interests from this listener with this dispatcher...
+                            _observers.splice(i, 1);
+                            i--;
+                            continue;
+                        } else if (m.defined(name) && m.defined(observer.name) && name === observer.name) {
+                            // We want to remove all interests from this listener with this note name...
+                            _observers.splice(i, 1);
+                            i--;
+                            continue;
+                        }
+                    }
                 }
             });
             
@@ -114,6 +153,9 @@ mod({
             
             return self;
         };
+        
+        // A default note center for our listeners and dispatchers to use...
+        addin.defaultNoteCenter = addin();
         
         return addin;
         

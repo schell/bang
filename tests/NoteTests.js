@@ -22,49 +22,80 @@ mod({
         var assert = m.assert;
         var Note = m.Note;
         var NoteCenter = m.NoteCenter;
-        var Observer = m.Observer;
+        var Listener = m.Listener;
+        var Dispatcher = m.Dispatcher;
         
-        assert.testSuite = 'Note tests';
+        (function NoteCenter_tests() {
+            assert.testSuite = 'NoteCenter tests';
         
-        var ec = NoteCenter();
-        var dispatcher = {hi:'hi there, im a dispatcher...'};
-        // Some browsers won't let us use Note() because it already exists so we'll
-        // use the shorthand addin
-        var note = Note.from(dispatcher,'bigNote');
-        var calls = 0;
-        var observer = Observer({
-            note:note,
-            callback : function test (n) {
-                calls++;
-            }
-        });
-        ec.addObserver(observer);
-        ec.dispatch(note);
-        assert.eq(calls, 1, 'NoteCenter can register observers and dispatch notes.');
+            var ec = NoteCenter();
+            var dispatcher = {hi:'hi there, im a dispatcher...'};
+            var listener = {hi:'hi there, im a listener...'};
+            var anotherListener = {hi:'hi there, im another listener...'};
+            var note = Note.from(dispatcher,'bigNote');
+            var calls = 0;
+            var testCalls = function testCalls(n) {
+                    calls++;
+            };
+            ec.addInterest(listener, dispatcher, 'bigNote', testCalls);
         
-        ec.removeObserver(observer);
-        ec.dispatch(note);
-        assert.eq(calls, 1, 'NoteCenter can remove observers.');
+            assert.eq(ec.totalInterests(), 1, 'NoteCenter can add interests.');
         
-        var nameObserver = Observer({
-            note : Note.from(undefined, 'asdf'),
-            callback : function test (n) {
-                calls++;
-            }
-        });
-        ec.addObserver(nameObserver);
-        ec.dispatch(Note.from({},'asdf'));
-        assert.eq(calls, 2, 'NoteCenter can dispatch notes to observers listening for just names.');
+            ec.dispatch(note);
+            assert.eq(calls, 1, 'NoteCenter can dispatch notes.');
         
-        var objectObserver = Observer({
-            note : Note.from(ec),
-            callback : function test (n) {
-                calls++;
-            }
-        });
-        ec.addObserver(objectObserver);
-        ec.dispatch(Note.from(ec, 'this name should not matter...'));
-        assert.eq(calls, 3, 'NoteCenter can dispatch notes to observers listening for just objects.');
+            ec.removeInterest(listener, dispatcher, 'bigNote');
+            assert.eq(ec.totalInterests(), 0, 'NoteCenter can remove interests.');
+        
+            ec.dispatch(note);
+            assert.eq(calls, 1, 'Removing interests stops dispatching of notes.');
+        
+            ec.addInterest(listener, undefined, 'asdf', testCalls);
+            ec.addInterest(anotherListener, undefined, 'asdf', testCalls);
+            var noteWithoutDispatcher = Note({
+                name : 'asdf'
+            });
+            ec.dispatch(noteWithoutDispatcher);
+            assert.eq(calls, 3, 'NoteCenter can dispatch notes to observers listening for just names.');
+        
+            var objectListener = {hi:'hi there, i only listener for objects...'};
+            ec.addInterest(objectListener, dispatcher, undefined, testCalls);
+            var noteWithoutName = Note({
+                dispatcher : dispatcher
+            });
+            var noteWithNameAndObject = Note({
+                dispatcher : dispatcher,
+                name : 'blahblah'
+            });
+            ec.dispatch(noteWithoutName);
+            ec.dispatch(noteWithNameAndObject);
+            assert.eq(calls, 5, 'NoteCenter can dispatch notes to observers listening for just objects.');
+        
+            ec.removeInterest(listener, undefined, 'asdf');
+            ec.removeInterest(anotherListener, undefined, 'asdf');
+            assert.eq(ec.totalInterests(), 1, 'NoteCenter can remove observers listening for just note names.');
+        
+            ec.removeInterest(objectListener, dispatcher, undefined);
+            assert.eq(ec.totalInterests(), 0, 'NoteCenter can remove observers listening forjust objects.');
+        })();
+        
+        (function Listener_Dispatcher_tests() {
+            assert.testSuite = 'Listener/Dispatcher Tests';
+            
+            var listener = Listener();
+            var dispatcher = Dispatcher();
+            var payload = false;
+            var callback = function(note) {
+                payload = note.body;
+            };
+            listener.addInterest(dispatcher, 'a note name', callback);
+            dispatcher.sendNotification('a note name', 666);
+            assert.eq(payload, 666, 'Listeners can receive notification from dispatchers.');
+            
+            listener.removeInterest(dispatcher, 'a note name');
+            dispatcher.sendNotification('a note name', 777);
+            assert.eq(payload, 666, 'Listeners can remove interests.');
+        })();
         
         return {};
     }
