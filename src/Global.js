@@ -66,7 +66,7 @@ mod({
 			 *	@return obj - an object, the one init'd
 			 */
 			obj = obj || defaultObj;
-			for (key in defaultObj) {
+			for (var key in defaultObj) {
 				if (!(key in obj)) {
 					obj[key] = defaultObj[key];
 				}
@@ -85,7 +85,7 @@ mod({
 		        eq : function (uno, dos, statement) {
 					var testFunc = function test(testObj) {
 						console.log(tests.length, statement);
-			            console.log('	asserting '+uno.toString()+' == '+dos.toString());
+			            console.log('	asserting '+uno.toString()+' === '+dos.toString());
 			            if (uno !== dos) {
 			                var failString = '('+uno+' !== '+dos+') '+assert.suite+' - '+statement;
 			                console.log('	ERROR '+failString);
@@ -95,10 +95,9 @@ mod({
 			            return true;
 					};
 					var testObj = {
-						test : testFunc,
-						arguments : arguments
+						test : testFunc
 					};
-					testObj.success = testObj.test(testObj);
+                    testObj.success = testObj.test(testObj);
 					tests.push(testObj);
 		        },
 		        stat : function () {
@@ -107,14 +106,14 @@ mod({
 					for (var i = 0; i < tests.length; i++) {
 						var test = tests[i];
 						if ('failString' in test) {
-							if (fails == 0) {
+							if (fails === 0) {
 								console.log('FAIL...');
 							}
 		                    console.log('	'+ i + ' ' + test.failString);
 							fails++;
 						}
 					}
-		            if (fails == 0) {
+		            if (fails === 0) {
 		                console.log('OKAY!');
 		            }
 		            console.log('passes:'+(tests.length - fails)+' fails:'+fails);
@@ -125,18 +124,18 @@ mod({
 		})();
 
 		m.animateWithFunction = function (animationFunction) {
-			/**
-			 * Calls *animationFunction* over and over again.
-             * @param - animationFunction Function - The function to call over and over, repeatedly.
-			 */
-			var request = window.requestAnimationFrame 		 ||
-						  window.webkitRequestAnimationFrame ||
-						  window.mozRequestAnimationFrame	 ||
-						  window.onRequestAnimationFrame	 ||
-						  window.msRequestAnimationFrame	 ||
-						  function (callback) {
-						  	setTimeout(callback, 1000/12);
-						  };
+            /** * *
+            * Calls *animationFunction* over and over again.
+            * @param - animationFunction Function - The function to call over and over, repeatedly.
+            * * **/
+            var request = window.requestAnimationFrame       ||
+                          window.webkitRequestAnimationFrame ||
+                          window.mozRequestAnimationFrame    ||
+                          window.onRequestAnimationFrame     ||
+                          window.msRequestAnimationFrame     ||
+                          function (callback) {
+                          setTimeout(callback, 1000/12);
+                          };
 
 			var animate = function (time) {
 				/**
@@ -170,21 +169,23 @@ mod({
              */
             var self = {};
             self.addToString = function (newToString) {
-                /**
-                 * Adds another toString function to the object.
-                 * @param - newToString Function
-                 */
-                if ('toString' in self) {
-                    var oldToString = self.toString;
-                    self.toString = function () {
-                        return oldToString()+'+'+newToString();
-                    };
-                } else {
-                    self.toString = newToString;
+                /** * *
+                * Adds another toString function to the object.
+                * @param - newToString Function
+                * * **/
+                if (self.toString().indexOf(newToString()) === -1) {
+                    if ('toString' in self) {
+                        var oldToString = self.toString;
+                        self.toString = function () {
+                            return oldToString()+'+'+newToString();
+                        };
+                    } else {
+                        self.toString = newToString;
+                    }
                 }
             };
             self.toString = function () {
-                return '[initialObject]';
+                return '[init]';
             };
             
             return self;
@@ -219,4 +220,4 @@ mod({
 		// return the global object
 		return {};
     }
-})
+});

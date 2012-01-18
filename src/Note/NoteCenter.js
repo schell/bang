@@ -154,9 +154,6 @@ mod({
             return self;
         };
         
-        // A default note center for our listeners and dispatchers to use...
-        addin.defaultNoteCenter = addin();
-        
         return addin;
         
     }

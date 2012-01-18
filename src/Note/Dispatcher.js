@@ -8,7 +8,7 @@
  * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * **/
 mod({
     name : 'Dispatcher',
-    dependencies : [ 'Note/Note.js', 'Note/NoteCenter.js' ],
+    dependencies : [ 'Note/Note.js', 'Note/NotePasser.js', 'Note/NoteCenter.js' ],
     init : function initDispatcher (m) {
         /**
          * Initializes the Dispatcher Addin
@@ -23,7 +23,8 @@ mod({
              */
             self = m.ifndefInitObj(self, m.initialObject()); 
             
-            m.safeAddin(self, 'noteCenter', m.NoteCenter.defaultNoteCenter);
+            // Add in NotePasser properties
+            m.NotePasser(self);
             
             m.safeAddin(self, 'dispatch', function Dispatcher_dispatch(note) {
                 /**
@@ -43,6 +44,10 @@ mod({
                     body : body
                 });
                 self.dispatch(note);
+            });
+            
+            self.addToString(function Dispatcher_toString() {
+                return '[Dispatcher]';
             });
             
             return self;

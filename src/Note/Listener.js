@@ -23,7 +23,8 @@ mod({
              */
             self = m.ifndefInitObj(self, m.initialObject()); 
             
-            m.safeAddin(self, 'noteCenter', m.NoteCenter.defaultNoteCenter);
+            // Add in NotePasser properties...
+            m.NotePasser(self);
             
             m.safeAddin(self, 'addInterest', function View_addNoteListener(dispatcher, noteName, callback) {
                 /**
@@ -46,6 +47,10 @@ mod({
                 dispatcher = m.ifndefInitObj(dispatcher, undefined);
                 noteName = m.ifndefInitObj(noteName, undefined);
                 self.noteCenter.removeInterest(listener, dispatcher, noteName);
+            });
+            
+            self.addToString(function Listener_toString() {
+                return '[Listener]';
             });
             
             return self;

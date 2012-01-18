@@ -28,7 +28,10 @@ mod({
             m.safeAddin(self, 'body', undefined);
             
             self.addToString(function () {
-                return '[Note dispatcher:'+dispatcher.toString()+' name:'+self.name+' body:'+body+']';
+                var dispatcher = (self.dispatcher || 'undefined').toString();
+                var name = (self.name || 'undefined').toString();
+                var body = (self.body || 'undefined').toString();
+                return '[Note(dispatcher:'+dispatcher+' name:'+name+' body:'+body+')]';
             });
             
             return self;

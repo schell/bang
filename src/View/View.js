@@ -23,7 +23,16 @@ mod({
              */
             self = m.ifndefInitObj(self, m.initialObject()); 
             
+            // Addin properties of Listener
+            m.Listener(self);
             
+            // Addin properties of Dispatcher
+            m.Dispatcher(self);
+            
+            self.addToString(function View_toString() 
+            
+                return '[View]';
+            });
             
             return self;
         };
