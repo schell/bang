@@ -152,12 +152,33 @@ mod({
         m.safeAddin = function safeAddin (obj, key, value) {
             /**
              * Adds *value* to *obj* as the property *key*, unless *key*
-             * already exists on *obj*
+             * already exists on *obj*.
              * @param - obj Object - The object to add *value* to.
              * @param - key String - The property name of *value*.
              * @param - value Object - Some object to add to *obj*.
              */
             if (!(key in obj)) {
+                obj[key] = value;
+                return true;
+            }
+            return false;
+        };
+        
+        m.safeOverride = function safeOverride (obj, key, superKey, value) {
+            /** * *
+            * Adds *value* to *obj* as the property *key*. If *key*
+            * already exists the existing *key* is stored on *obj*
+            * as *superKey*.
+            * @param - obj Object - The object to add *value* to.
+            * @param - key String - The property name of *value*.
+            * @param - superKey String - The new property name of the super value.
+            * @param - value Object - Some object to add to *obj*.
+            * * **/
+            if (key.toString() in obj) {
+                var superValue = obj[key];
+                obj[key] = value;
+                return m.safeAddin(obj, superKey, superValue);
+            } else {
                 obj[key] = value;
             }
         };
