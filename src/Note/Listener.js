@@ -21,7 +21,11 @@ mod({
              * @param - self Object - The object to add Listener properties to.
              * @return self Listener Object 
              */
-            self = m.ifndefInitObj(self, m.initialObject()); 
+            self = m.Object(self); 
+            
+            self.addToString(function Listener_toString() {
+                return '[Listener]';
+            });
             
             // Add in NotePasser properties...
             m.NotePasser(self);
@@ -47,10 +51,6 @@ mod({
                 dispatcher = m.ifndefInitObj(dispatcher, undefined);
                 noteName = m.ifndefInitObj(noteName, undefined);
                 self.noteCenter.removeInterest(listener, dispatcher, noteName);
-            });
-            
-            self.addToString(function Listener_toString() {
-                return '[Listener]';
             });
             
             return self;

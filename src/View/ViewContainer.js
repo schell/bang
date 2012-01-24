@@ -8,7 +8,7 @@
 * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * **/
 mod({
     name : 'ViewContainer',
-    dependencies : [ 'Global.js', 'View/View.js' ],
+    dependencies : [ 'Global.js', 'View/View.js', 'Notifications.js' ],
     init : function initViewContainer (m) {
         /**
          * Initializes the ViewContainer Addin
@@ -21,7 +21,11 @@ mod({
              * @param - self Object - The object to add ViewContainer properties to.
              * @return self ViewContainer Object 
              */
-            self = m.ifndefInitObj(self, m.initialObject()); 
+            self = m.Object(self); 
+            
+            self.addToString(function ViewContainer_toString() {
+                return '[ViewContainer]';
+            });
             
             // Addin View
             m.View(self);
@@ -39,15 +43,48 @@ mod({
             });
             
             m.safeAddin(self, 'addSubview', function ViewContainer_addSubview(subview) {
-                subview.context = self.context;
                 _subviews.push(subview);
+                // Let everyone know that this added a view...
+                subview.sendNotification(m.Notifications.WAS_ADDED_TO_VIEWCONTAINER, self);
+                self.sendNotification(m.Notifications.DID_ADD_SUBVIEW, subview);
+            });
+            
+            m.safeAddin(self, 'treeString', function ViewContainer_treeString(n) {
+                n = n || 0;
+                var s = '';
+                var t = '';
+                for (var i=0; i < n; i++) {
+                    t += '    ';
+                }
+                s += t + self.toString()+'\n';
+                for (i=0; i < _subviews.length; i++) {
+                    var subview = _subviews[i];
+                    if ('treeString' in subview) {
+                        s += subview.treeString(n+1);
+                    } else {
+                        s += t + '    ' + subview.toString();
+                    }
+                }
+                return s + '\n';
             });
             
             m.safeOverride(self, 'draw', 'view_draw', function ViewContainer_draw() {
+                self.context.save();
                 self.view_draw();
+                // Transform here for subviews...
+                self.context.translate(self.frame.origin.x, self.frame.origin.y);
+                self.context.rotate(self.rotation);
                 for (var i=0; i < _subviews.length; i++) {
                     _subviews[i].draw();
                 }
+                self.context.restore();
+            });
+            
+            //--------------------------------------
+            //  INTERESTS
+            //--------------------------------------
+            m.safeOverride(self, 'onAddedToViewContainer', 'view_onAddedToViewContainer', function ViewContainer_onAddedToViewContainer(note) {
+                self.view_onAddedToViewContainer(note);
             });
             
             return self;

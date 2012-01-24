@@ -21,7 +21,11 @@ mod({
              * @param - self Object - The object to add Size properties to.
              * @return self Size Object 
              */
-            self = m.ifndefInitObj(self, m.initialObject()); 
+            self = m.Object(self); 
+            
+            self.addToString(function Size_toString() {
+                return '[Size('+self.width+','+self.height+')]';
+            });
             
             m.safeAddin(self, 'width', 0);
             m.safeAddin(self, 'height', 0);
@@ -36,10 +40,6 @@ mod({
             
             m.safeAddin(self, 'copy', function Size_copy () {
                 return addin.from(self.width, self.height);
-            });
-            
-            self.addToString(function Size_toString() {
-                return '[Size('+self.width+','+self.height+')]';
             });
             
             return self;

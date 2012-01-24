@@ -21,7 +21,7 @@ mod({
              * @param - self Object - The object to add Geom properties to.
              * @return self Geom Object 
              */
-            self = m.ifndefInitObj(self, m.initialObject()); 
+            self = m.Object(self); 
             
             return self;
         };

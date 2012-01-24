@@ -21,7 +21,11 @@ mod({
              * @param - self Object - The object to add Dispatcher properties to.
              * @return self Dispatcher Object 
              */
-            self = m.ifndefInitObj(self, m.initialObject()); 
+            self = m.Object(self); 
+            
+            self.addToString(function Dispatcher_toString() {
+                return '[Dispatcher]';
+            });
             
             // Add in NotePasser properties
             m.NotePasser(self);
@@ -39,15 +43,10 @@ mod({
                  * Dispatches a note with *name* and *body* to this dispatcher's note center.
                  */
                 var note = m.Note({
-                    dispatcher : self,
                     name : name, 
                     body : body
                 });
                 self.dispatch(note);
-            });
-            
-            self.addToString(function Dispatcher_toString() {
-                return '[Dispatcher]';
             });
             
             return self;

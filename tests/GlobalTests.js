@@ -8,7 +8,7 @@ mod({
         assert.suite = 'Global Tests';
                     
         // test safeAddin adds property
-        var object = m.initialObject();
+        var object = m.Object();
         m.safeAddin(object, 'key', 6);
         m.safeAddin(object, 'key', 7);
         assert.eq('key' in object, true, 'safeAddin can add property');
@@ -16,8 +16,14 @@ mod({
         
         m.safeOverride(object, 'key', 'super_key', 666);
         assert.eq(('super_key' in object) && object.super_key === 6 && ('key' in object) && object.key === 666, true, 'safeOverride can override property.');
-        console.log(object);
         
-        console.log('GlobalTests.js - Global tests done.');
+        var initObject = m.Object();
+        assert.eq(initObject.toString(), '['+initObject.tag+']', 'Initial objects have tag as toString.');
+        
+        var taggedObject = {
+            tag : 'tagged'
+        };
+        m.Object(taggedObject);
+        assert.eq(taggedObject.toString(), '[tagged]', 'Initial object does not override tag.');
     }
 });

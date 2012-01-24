@@ -24,15 +24,15 @@ mod({
              * @param - self Object - The object to add NotePasser properties to.
              * @return self NotePasser Object 
              */
-            self = m.ifndefInitObj(self, m.initialObject()); 
-            
-            defaultNoteCenter = defaultNoteCenter || m.NoteCenter();
-            
-            m.safeAddin(self, 'noteCenter', defaultNoteCenter);
+            self = m.Object(self); 
             
             self.addToString(function NotePassert_toString() {
                 return '[NotePasser]';
             });
+            
+            defaultNoteCenter = defaultNoteCenter || m.NoteCenter();
+            
+            m.safeAddin(self, 'noteCenter', defaultNoteCenter);
             
             return self;
         };

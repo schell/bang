@@ -17,7 +17,9 @@ mod({
         var assert = m.assert;
         assert.testSuite = 'View Tests';
         
-        var view = m.View();
+        var view = m.View({
+            tag : 'view'
+        });
         var payload = false;
         var callback = function(note) {
             payload = note.body;
@@ -38,9 +40,36 @@ mod({
         
         assert.testSuite = 'ViewContainer Tests';
         
-        var container = m.ViewContainer();
+        var calledUpdateContext = false;
+        view.addInterest(view, m.Notifications.DID_UPDATE_CONTEXT, function updatedContext(note) {
+            calledUpdateContext = true;
+        });
+        var container = m.ViewContainer({
+            tag : 'container'
+        });
+        container.context = 1000;
         container.addSubview(view);
         assert.eq(container.subviews().length, 1, 'ViewContainer can add subviews.');
+        assert.eq(view.parent === container, true, 'ViewContainers set their subview\'s parent property to itself.');
+        assert.eq(view.context, 1000, 'Views update their context when added to parent.');
+        assert.eq(calledUpdateContext, true, 'View sends notification when context is updated.');
+        
+        var topOfTree = m.ViewContainer({
+            tag : 'tree_0'
+        });
+        var treeLength = 10;
+        var lastBranch = topOfTree;
+        for (var i=0; i < treeLength; i++) {
+            var branch = m.ViewContainer({
+                tag : 'tree_'+(i+1).toString()
+            });
+            lastBranch.addSubview(branch);
+            lastBranch = branch;
+        }
+        
+        topOfTree.context = 666;
+        topOfTree.sendNotification(m.Notifications.DID_UPDATE_CONTEXT, topOfTree.context);
+        assert.eq(lastBranch.context, 666, 'Branches of displaylist update context when update note sent.');
         
         assert.testSuite = 'Stage Tests';
         
@@ -64,29 +93,46 @@ mod({
         assert.eq(document.getElementById(stage.canvas.id) !== null, true, 'Stage is injected into parent div.');
         
         stage.addSubview(view);
-        assert.eq(m.defined(view.context) && view.context === stage.context, true, 'ViewContainers set their subview\'s context.');
+        assert.eq(m.defined(view.context) && view.context === stage.context, true, 'Subviews inherit parent\'s context.');
         
         function makeDrawFunction(view, color) {
             return function () {
                 view.context.save();
                 view.context.fillStyle = color;
-                view.context.fillRect(view.frame.origin.x, view.frame.origin.y, view.frame.size.width, view.frame.size.height);
+                view.context.fillRect(0, 0, view.frame.size.width, view.frame.size.height);
                 view.context.restore();
             };
         }
         
         var red = m.View({
-            frame : m.Rectangle.from(10, 10, 100, 100)
+            frame : m.Rectangle.from(-50, -50, 100, 100),
+            scale : m.Size.from(0.5, 1.0)
         });
-        red.drawQueue.push(makeDrawFunction(red, 'rgba(255, 0, 0, 1.0)'));
+        red.addToString(function(){return '[red]';});
+        red.drawQueue.push(makeDrawFunction(red, 'rgba(255, 0, 0, 0.5)'));
         
         var blue = m.View({
-            frame : m.Rectangle.from(0, 0, 100, 100)
+            frame : m.Rectangle.from(50, 50, 100, 100),
+            scale : m.Size.from(0.5, 0.5)
         });
+        blue.addToString(function(){return '[blue]';});
         blue.drawQueue.push(makeDrawFunction(blue, 'rgba(0, 0, 255, 0.5)'));
         
-        stage.addSubview(red);
-        stage.addSubview(blue);
+        var redAndBlue = m.ViewContainer({
+            frame : m.Rectangle.from(100, 100, 100, 100)
+        });
+        redAndBlue.addSubview(red);
+        redAndBlue.addSubview(blue);
+        redAndBlue.drawQueue.push(makeDrawFunction(redAndBlue, 'rgba(0, 255, 0, 0.5)'));
+        redAndBlue.addInterest(undefined, m.Notifications.FRAME_TICK, function tick(note) {
+            red.rotation += 0.1;
+            if (red.rotation > 180) {
+                red.rotation = 0;
+            }
+        });
+        redAndBlue.addToString(function(){return '[redAndBlue]';});
+        
+        stage.addSubview(redAndBlue);
         
         return {};
     }

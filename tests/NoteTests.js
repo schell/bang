@@ -8,7 +8,7 @@
  * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * **/
 mod({
     name : 'NoteTests',
-    dependencies : [ 'Note.js' ],
+    dependencies : [ 'Notifications.js' ],
     init : function initNoteCenterTests (m) {
         /**
          * Initializes the NoteCenterTests 
@@ -95,6 +95,16 @@ mod({
             listener.removeInterest(dispatcher, 'a note name');
             dispatcher.sendNotification('a note name', 777);
             assert.eq(payload, 666, 'Listeners can remove interests.');
+            
+            var itself = m.Object();
+            Listener(itself);
+            Dispatcher(itself);
+            var listensToItself = false;
+            itself.addInterest(itself, 'asdf', function asdfCallback(n) {
+                listensToItself = true;
+            });
+            itself.sendNotification('asdf', 666);
+            assert.eq(listensToItself, true, 'Listeners can listen to themselves.');
         })();
         
         return {};

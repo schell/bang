@@ -25,7 +25,11 @@ mod({
  			 */
             
             // Initialize self...
-            self = m.ifndefInitObj(self, m.initialObject());
+            self = m.Object(self);
+            
+            self.addToString(function Point_toString() {
+ 				return "[Point("+self.x+","+self.y+")]";
+ 			});
             
             // Add x and y to self...
             m.safeAddin(self, 'x', 0);
@@ -74,10 +78,6 @@ mod({
  					return p1;
  				}
  				return p2;
- 			});
-            
- 			self.addToString(function Point_toString() {
- 				return "[Point("+self.x+","+self.y+")]";
  			});
             
             return self;

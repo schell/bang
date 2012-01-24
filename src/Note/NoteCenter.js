@@ -21,7 +21,11 @@ mod({
              * @param - self Object - The object to add NoteCenter properties to.
              * @return self NoteCenter Object 
              */
-            self = m.ifndefInitObj(self, m.initialObject()); 
+            self = m.Object(self); 
+            
+            self.addToString(function NoteCenter_toString() {
+                return '[NoteCenter]';
+            });
             
             // protected observers array
             var _observers = [];
@@ -30,12 +34,13 @@ mod({
                 /**
                  * Packs up a listener, note and callback.
                  */
-                return {
+                var observer = m.Object({
                     listener : listener,
                     dispatcher : dispatcher,
                     name : noteName,
                     callback : callback
-                };
+                });
+                return observer;
             }
             
             m.safeAddin(self, 'totalInterests', function NoteCenter_totalInterests() {
@@ -127,7 +132,14 @@ mod({
                                 // This observer is listening to this dispatcher...
                                 if (m.defined(observer.name) && observer.name === name) {
                                     // This observer is listening for this specific notification...
-                                    _observers.splice(i, 1);
+                                    if (m.defined(callback)) {
+                                        // This listener wants to remove a specific callback
+                                        if (callback === observer.callback) {
+                                             _observers.splice(i, 1);
+                                        }
+                                    } else {
+                                        _observers.splice(i, 1);
+                                    }
                                     i--;
                                     continue;
                                 }
@@ -145,10 +157,6 @@ mod({
                         }
                     }
                 }
-            });
-            
-            self.addToString(function NoteCenter_toString() {
-                return '[NoteCenter]';
             });
             
             return self;

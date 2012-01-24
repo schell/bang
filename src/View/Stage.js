@@ -21,7 +21,7 @@ mod({
              * @param - self Object - The object to add Stage properties to.
              * @return self Stage Object 
              */
-            self = m.ifndefInitObj(self, m.initialObject()); 
+            self = m.Object(self); 
             
             self.addToString(function Stage_toString() {
                 return '[Stage]';
@@ -31,18 +31,22 @@ mod({
             m.ViewContainer(self);
             
             // Some default values
-            self.frame.width = self.frame.width || 500;
-            self.frame.height = self.frame.height || 500;
+            self.frame.size.width = self.frame.size.width || 500;
+            self.frame.size.height = self.frame.size.height || 500;
             
             m.safeOverride(self, 'draw', 'viewContainer_draw', function Stage_draw() {
+                // Send out a global frame tick notification...
+                self.sendNotification(m.Notifications.FRAME_TICK);
+                // Clear the stage...
                 self.context.clearRect(self.frame.origin.x, self.frame.origin.y, self.frame.size.width, self.frame.size.height);
+                // Draw the stage...
                 self.viewContainer_draw();
             });
             
             m.safeAddin(self, 'canvas', function Stage_initCanvas() {
                 var canvas = document.createElement('canvas');
-                canvas.width = self.frame.width;
-                canvas.height = self.frame.height;
+                canvas.width = self.frame.size.width;
+                canvas.height = self.frame.size.height;
                 canvas.id = 'Stage_'+Math.random().toString().substr(2);
                 self.context = canvas.getContext('2d');
                 // set up drawing
