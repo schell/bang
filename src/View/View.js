@@ -47,12 +47,26 @@ mod({
             // The scale size of this view
             m.safeAddin(self, 'scale', m.Size.from(1.0, 1.0));
             
+            m.safeAddin(self, 'x', function View_x(x) {
+                /** * *
+                * Gets or sets the x position of this view.
+                * @param - x Number
+                * * **/
+                if (m.defined(x)) {
+                    // We want to put the perceived origin at x
+                    // so account for scale...
+                    var setX = x/self.scale;
+                    self.frame.origin.x = setX;
+                }
+                return self.frame.origin.x * self.scale.width;
+            });
+            
             // An array to hold draw functions
             m.safeAddin(self, 'drawQueue', []);
             
             m.safeAddin(self, 'draw', function View_draw() {
                 self.context.save();
-                self.context.translate(self.frame.origin.x, self.frame.origin.y);
+                
                 self.context.rotate(self.rotation);
                 self.context.scale(self.scale.width, self.scale.height);
                 

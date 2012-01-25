@@ -99,7 +99,7 @@ mod({
             return function () {
                 view.context.save();
                 view.context.fillStyle = color;
-                view.context.fillRect(0, 0, view.frame.size.width, view.frame.size.height);
+                view.context.fillRect(view.frame.origin.x, view.frame.origin.y, view.frame.size.width, view.frame.size.height);
                 view.context.restore();
             };
         }
@@ -125,14 +125,12 @@ mod({
         redAndBlue.addSubview(blue);
         redAndBlue.drawQueue.push(makeDrawFunction(redAndBlue, 'rgba(0, 255, 0, 0.5)'));
         redAndBlue.addInterest(undefined, m.Notifications.FRAME_TICK, function tick(note) {
-            red.rotation += 0.1;
-            if (red.rotation > 180) {
-                red.rotation = 0;
-            }
+            red.rotation = (red.rotation + 0.1) % Math.PI;
         });
         redAndBlue.addToString(function(){return '[redAndBlue]';});
-        
         stage.addSubview(redAndBlue);
+        
+        assert.eq(blue.x(), 25, 'View returns correct perceived x position');
         
         return {};
     }
