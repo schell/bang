@@ -125,10 +125,11 @@ mod({
             };
         })();
 
-        m.animateWithFunction = function (animationFunction) {
+        m.requestAnimation = function (animationFunction) {
             /** * *
             * Calls *animationFunction* over and over again.
             * @param - animationFunction Function - The function to call over and over, repeatedly.
+            * @returns - Function
             * * **/
             var request = window.requestAnimationFrame       ||
                           window.webkitRequestAnimationFrame ||
@@ -136,19 +137,38 @@ mod({
                           window.onRequestAnimationFrame     ||
                           window.msRequestAnimationFrame     ||
                           function (callback) {
-                          setTimeout(callback, 1000/12);
+                              setTimeout(callback, 1000/12);
+                              return callback;
                           };
-
+            var animation = {
+                id : 0
+            };
             var animate = function (time) {
                 /**
                  * Calls the animation function and schedules another call.
                  * 
                  */
+                // Update the animation id first
+                animation.id = request(animate);
                 animationFunction(time);
-                request(animate);
             };
 
-            request(animate);
+            animation.id = request(animate);
+            return animation;
+        };
+        
+        m.cancelAnimation = function (animation) {
+            /** * *
+            * Cancels an animation request returned by m.requestAnimation.
+            * @param - animationFunction Function
+            * * **/
+            var timeout = function (id) {
+                clearTimeout(id);
+            };
+                         
+            var cancel = window.cancelRequestAnimationFrame || window.webkitCancelRequestAnimationFrame || window.cancelAnimationFrame || timeout;
+
+            cancel(animation.id);
         };
         
         m.safeAddin = function safeAddin (obj, key, value) {

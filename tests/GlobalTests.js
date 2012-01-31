@@ -25,5 +25,19 @@ mod({
         };
         m.Object(taggedObject);
         assert.eq(taggedObject.toString(), '[tagged]', 'Initial object does not override tag.');
+        
+        var calls = 0;
+        var animation;
+        var animate = function (time) {
+            calls++;
+            m.cancelAnimation(animation);
+            console.log(''); // make our tests look nice
+            assert.eq(calls, 1, 'Can cancel animation.');
+        };
+        animation = m.requestAnimation(animate);
+        setTimeout(function () {
+            assert.eq(calls, 1, 'Can start and cancel animation.');
+            assert.stat();
+        }, 500);
     }
 });

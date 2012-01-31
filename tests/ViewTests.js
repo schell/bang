@@ -8,7 +8,7 @@
 * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * **/
 mod({
     name : 'ViewTests',
-    dependencies : [ 'View/View.js', 'View/ViewContainer.js', 'View/Stage.js' ],
+    dependencies : [ 'Ease/Ease.js', 'View/View.js', 'View/ViewContainer.js', 'View/Stage.js' ],
     init : function initViewTests (m) {
         /** * *
         * Initializes the ViewTests
@@ -106,7 +106,8 @@ mod({
         
         var red = m.View({
             hitArea : m.Rectangle.from(-50, -50, 100, 100),
-            transform : m.Matrix().scale(0.5, 0.5)
+            transform : m.Matrix().scale(0.5, 0.5),
+            alpha : 0.5
         });
         red.addToString(function(){return '[red]';});
         red.drawQueue.push(makeDrawFunction(red, 'rgb(255, 0, 0)'));
@@ -120,9 +121,7 @@ mod({
         blue.drawQueue.push(makeDrawFunction(blue, 'rgb(0, 0, 255)'));
         
         var green = m.ViewContainer({
-            hitArea : m.Rectangle.from(0, 0, 100, 100),
-            transform : m.Matrix().translate(100, 100),
-            alpha : 0.5
+            hitArea : m.Rectangle.from(0, 0, 100, 100)
         });
         green.addSubview(red);
         green.addSubview(blue);
@@ -132,6 +131,26 @@ mod({
         });
         green.addToString(function(){return '[redAndBlue]';});
         stage.addSubview(green);
+        
+        var ease = m.Ease({
+            properties : {
+                x : 400,
+                y : 400,
+                alpha : 0.1
+            },
+            duration : 1000,
+            target : green,
+            equation : 'easeInOutExpo'
+        });
+        ease.onComplete = function () {
+            ease.properties = {
+                x : ease.properties.x === 0 ? 400 : 0,
+                y : ease.properties.x === 0 ? 400 : 0,
+                alpha : ease.properties.x === 0 ? 0.1 : 1
+            };
+            ease.interpolate();
+        };
+        ease.interpolate();
         
         return {};
     }

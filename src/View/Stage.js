@@ -66,7 +66,7 @@ mod({
             });
 
             // set up drawing
-            m.animateWithFunction(self.draw);
+            m.requestAnimation(self.draw);
             
             return self;
         };
