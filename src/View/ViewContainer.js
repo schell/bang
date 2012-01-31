@@ -69,21 +69,18 @@ mod({
             });
             
             m.safeOverride(self, 'draw', 'view_draw', function ViewContainer_draw() {
-                self.context.save();
+                // Draw according to View.js...
                 self.view_draw();
+                
                 // Transform here for subviews...
                 self.applyTransform();
+                
                 for (var i=0; i < _subviews.length; i++) {
+                    // Draw the subviews...
                     _subviews[i].draw();
                 }
-                self.context.restore();
-            });
-            
-            //--------------------------------------
-            //  INTERESTS
-            //--------------------------------------
-            m.safeOverride(self, 'onAddedToViewContainer', 'view_onAddedToViewContainer', function ViewContainer_onAddedToViewContainer(note) {
-                self.view_onAddedToViewContainer(note);
+                // Restore the context...
+                self.restoreTransform();
             });
             
             return self;

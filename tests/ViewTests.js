@@ -109,22 +109,24 @@ mod({
             transform : m.Matrix().scale(0.5, 0.5)
         });
         red.addToString(function(){return '[red]';});
-        red.drawQueue.push(makeDrawFunction(red, 'rgba(255, 0, 0, 0.5)'));
+        red.drawQueue.push(makeDrawFunction(red, 'rgb(255, 0, 0)'));
         
         var blue = m.View({
             hitArea : m.Rectangle.from(0, 0, 100, 100),
-            transform : m.Matrix().translate(50, 50).scale(0.6, 0.6)
+            transform : m.Matrix().translate(50, 50).scale(0.6, 0.6),
+            alpha : 0.5
         });
         blue.addToString(function(){return '[blue]';});
-        blue.drawQueue.push(makeDrawFunction(blue, 'rgba(0, 0, 255, 0.5)'));
+        blue.drawQueue.push(makeDrawFunction(blue, 'rgb(0, 0, 255)'));
         
         var green = m.ViewContainer({
             hitArea : m.Rectangle.from(0, 0, 100, 100),
-            transform : m.Matrix().translate(100, 100)
+            transform : m.Matrix().translate(100, 100),
+            alpha : 0.5
         });
         green.addSubview(red);
         green.addSubview(blue);
-        green.drawQueue.push(makeDrawFunction(green, 'rgba(0, 255, 0, 0.5)'));
+        green.drawQueue.push(makeDrawFunction(green, 'rgb(0, 255, 0)'));
         green.addInterest(undefined, m.Notifications.FRAME_TICK, function tick(note) {
             red.transform.rotate(2);
         });

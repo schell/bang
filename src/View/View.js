@@ -48,6 +48,9 @@ mod({
             // A transformation matrix...
             m.safeAddin(self, 'transform', m.Matrix().loadIdentity());
             
+            // An alpha to use for compounding against context's alpha...
+            m.safeAddin(self, 'alpha', 1.0);
+            
             m.safeAddin(self, 'x', function View_x(x) {
                 /** * *
                 * Gets and/or sets the x position of this view.
@@ -62,10 +65,20 @@ mod({
                 * * **/
                 return self.transform.y(y);
             });
+            
+            // Whether or not this view's transformations have been applied...
+            var _transformApplied = false;
             m.safeAddin(self, 'applyTransform', function View_applyTransform() {
                 /** * *
                 * Applies this view's transform to its context.
                 * * **/
+                if (_transformApplied) {
+                    return;
+                }
+                _transformApplied = true;
+                
+                self.context.save();
+                
                 var a = self.transform.a();
                 var b = self.transform.b();
                 var c = self.transform.c();
@@ -74,11 +87,23 @@ mod({
                 var y = self.transform.y();
                 
                 self.context.transform(a,b,c,d,x,y);
+                self.context.globalAlpha *= self.alpha;
+            });
+            m.safeAddin(self, 'restoreTransform', function View_restoreTransform() {
+                /** * *
+                * Restores the context to its state before applying the transforming
+                * operations of this view.
+                * * **/
+                if (_transformApplied) {
+                    _transformApplied = false;
+                    self.context.restore();
+                }
             });
             
             m.safeAddin(self, 'draw', function View_draw() {
-                self.context.save();
-                
+                /** * *
+                * Draws this view into the 2d context.
+                * * **/
                 self.applyTransform();
                 
                 for (var i=0; i < self.drawQueue.length; i++) {
@@ -86,7 +111,7 @@ mod({
                     drawFunc();
                 }
                 
-                self.context.restore();
+                self.restoreTransform();
             });
             
             //--------------------------------------
