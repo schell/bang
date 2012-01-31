@@ -8,7 +8,7 @@
  * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * **/
  mod({
      name : 'RectangleTests',
-     dependencies : [ 'Geom/Rectangle.js' ],
+     dependencies : [ 'Geometry.js' ],
      init : function initRectangleTests (m) {
          /**
           * Initializes the RectangleTests 
@@ -26,11 +26,57 @@
          
 		assert.suite = 'Geom Tests';
         
-		var pnt1 = Point({x:1,y:1});
-		var pnt2 = Point({x:10, y:10});
-		var pnt3 = Point({x:-10, y:-10});
+        var mat = m.Matrix();
+        mat.translate(1, 2, 3);
+        assert.eq(mat.x(), 1, 'Matrix can translate x');
+        assert.eq(mat.y(), 2, 'Matrix can translate y');
+        assert.eq(mat.z(), 3, 'Matrix can translate z');
+        mat.scale(0.5, 0.3, 0.1);
+        assert.eq(mat.a(), 0.5, 'Matrix can scale x');
+        assert.eq(mat.d(), 0.3, 'Matrix can scale y');
         
-        assert.eq(pnt3.x, -10, 'Point can construct with default values');
+        mat.loadIdentity();
+        
+        var vec = m.Vector({
+            elements : [
+                2,
+                4,
+                6
+            ]
+        });
+        
+        mat.translate(1, 1, 1);
+        
+        var tVec = mat.transformVector(vec);
+        assert.eq(tVec.x(), 3, 'Matrix can translate Vector in x');
+        assert.eq(tVec.y(), 5, 'Matrix can translate Vector in y');
+        assert.eq(tVec.z(), 7, 'Matrix can translate Vector in z');
+        
+        tVec = mat.transformVector(tVec);
+        assert.eq(tVec.x(), 4, 'Matrix can translate Vector in x');
+        assert.eq(tVec.y(), 6, 'Matrix can translate Vector in y');
+        assert.eq(tVec.z(), 8, 'Matrix can translate Vector in z');
+        
+        mat.loadIdentity();
+        mat.scale(0.5, 0.5, 0.5);
+        tVec = mat.transformVector(tVec);
+        assert.eq(tVec.x(), 2, 'Matrix can scale Vector in x');
+        assert.eq(tVec.y(), 3, 'Matrix can scale Vector in y');
+        assert.eq(tVec.z(), 4, 'Matrix can scale Vector in z');
+        
+        mat.loadIdentity();
+        mat.rotate(90,m.Vector.Z());
+        tVec = mat.transformVector(tVec);
+        assert.eq(Math.round(tVec.x()), -3, 'Matrix can rotate Vector in about Z (x)');
+        assert.eq(Math.round(tVec.y()), 2, 'Matrix can rotate Vector in about Z (y)');
+        assert.eq(Math.round(tVec.z()), 4, 'Matrix can rotate Vector in about Z (z)');
+        
+        // Point tests
+		var pnt1 = Point.from(1, 1);
+		var pnt2 = Point.from(10, 10);
+		var pnt3 = Point.from(-10, -10);
+        
+        assert.eq(pnt3.x(), -10, 'Point can construct with default values');
         
         var pnt1copy = pnt1.copy();
         assert.eq(pnt1.isEqualTo(pnt1copy), true, 'Point can make copies');
@@ -39,16 +85,15 @@
         
         assert.eq(pnt1.closer(pnt2, pnt3), pnt2, 'Point can determine closest point');
         
-        var size = Size();
-        assert.eq(size.width, 0, 'Size initializes width');
-        assert.eq(size.height, 0, 'Size initializes height');
-         
-        size.width = 4;
-        size.height = 3;
-         
-        var otherSize = Size({width:10,height:4});
-        var likeSize = size.copy();
-        assert.eq(size.isEqualTo(otherSize) === false && size.isEqualTo(likeSize) === true, true, 'Size can determine equality');
+        var unitSquare = m.Polygon({
+            points : [
+                m.Point.from(-1,  1),
+                m.Point.from( 1,  1),
+                m.Point.from( 1, -1),
+                m.Point.from(-1, -1)
+            ]
+        });
+        assert.eq(unitSquare.containsPoint(m.Point()), true, 'Polygon unit square contains origin');
         
 		var p1 = Point.from(0, 0);
 		var p2 = Point.from(10, 10);
@@ -65,27 +110,26 @@
 		for (var i = 0; i < sectioned.length; i++) {
 			unioned = unioned.union(sectioned[i]);
 		}
-		assert.eq(r1.origin.distanceTo(p1), 0, 'First rectangle '+r1.toString()+' has origin 0,0');
-		assert.eq(r2.origin.distanceTo(p3), 0, 'Second rectangle '+r2.toString()+' has origin -10,-10');
-		assert.eq(r3.origin.distanceTo(p3), 0, 'Third rectangle '+r3.toString()+' has origin -10,-10');
-		assert.eq(r3.size.width, 20, 'Third rectangle '+r3.toString()+' has width 20');
-		assert.eq(r3.size.height, 20, 'Third rectangle '+r3.toString()+' has height 20');
+		assert.eq(r1.origin().distanceTo(p1), 0, 'First rectangle '+r1.toString()+' has origin 0,0');
+		assert.eq(r2.origin().distanceTo(p3), 0, 'Second rectangle '+r2.toString()+' has origin -10,-10');
+		assert.eq(r3.origin().distanceTo(p3), 0, 'Third rectangle '+r3.toString()+' has origin -10,-10');
+		assert.eq(r3.size().width(), 20, 'Third rectangle '+r3.toString()+' has width 20');
+		assert.eq(r3.size().height(), 20, 'Third rectangle '+r3.toString()+' has height 20');
 		assert.eq(r3.containsPoint(Point.from(0, 0)), true, 'Third rectangle contains point 0,0');
 		assert.eq(sectioned.length, 6, 'Third rectangle sections into 6 sub-rectangles');
-		assert.eq(sectioned[0].origin.distanceTo(Point.from(-10, -10)), 0, '1 section origin is correct');
-		assert.eq(sectioned[0].size.width, 10, '1 section width is correct');
-		assert.eq(sectioned[0].size.height, 10, '1 section height is correct');
-		assert.eq(sectioned[1].origin.distanceTo(Point.from(0, -10)), 0, '2 section origin is correct');
-		assert.eq(sectioned[2].origin.distanceTo(Point.from(5, -10)), 0, '3 section origin is correct');
-		assert.eq(sectioned[2].size.width, 5, '2 section width is correct');
-		assert.eq(sectioned[3].origin.distanceTo(Point.from(-10, 0)), 0, '4 section origin is correct');
-		assert.eq(sectioned[4].origin.distanceTo(Point.from(0, 0)), 0, '5 section origin is correct');
-		assert.eq(sectioned[5].origin.distanceTo(Point.from(5, 0)), 0, '6 section origin is correct');
+		assert.eq(sectioned[0].origin().distanceTo(Point.from(-10, -10)), 0, '1 section origin is correct');
+		assert.eq(sectioned[0].size().width(), 10, '1 section width is correct');
+		assert.eq(sectioned[0].size(). height(), 10, '1 section height is correct');
+		assert.eq(sectioned[1].origin().distanceTo(Point.from(0, -10)), 0, '2 section origin is correct');
+		assert.eq(sectioned[2].origin().distanceTo(Point.from(5, -10)), 0, '3 section origin is correct');
+		assert.eq(sectioned[2].size().width(), 5, '2 section width is correct');
+		assert.eq(sectioned[3].origin().distanceTo(Point.from(-10, 0)), 0, '4 section origin is correct');
+		assert.eq(sectioned[4].origin().distanceTo(Point.from(0, 0)), 0, '5 section origin is correct');
+		assert.eq(sectioned[5].origin().distanceTo(Point.from(5, 0)), 0, '6 section origin is correct');
 		assert.eq(r3.isEqualTo(r3eq), true, 'Third rectangle is equal to',r3eq.toString());
 		assert.eq(r3.isEqualTo(r3.copy()), true, 'Can copy rectangles');
 		assert.eq(unioned.isEqualTo(r3), true, 'Can union rectangles '+unioned.toString()+' '+r3.toString());
          
-         
-         return {};
+        return {};
      }
  });

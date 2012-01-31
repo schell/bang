@@ -31,28 +31,25 @@ mod({
             m.ViewContainer(self);
             
             // Some default values
-            self.frame.size.width = self.frame.size.width || 500;
-            self.frame.size.height = self.frame.size.height || 500;
-            
-            m.safeOverride(self, 'draw', 'viewContainer_draw', function Stage_draw() {
-                // Send out a global frame tick notification...
-                self.sendNotification(m.Notifications.FRAME_TICK);
-                // Clear the stage...
-                self.context.clearRect(self.frame.origin.x, self.frame.origin.y, self.frame.size.width, self.frame.size.height);
-                // Draw the stage...
-                self.viewContainer_draw();
-            });
+            self.hitArea = m.Rectangle.from(0, 0, 500, 500);
             
             m.safeAddin(self, 'canvas', function Stage_initCanvas() {
                 var canvas = document.createElement('canvas');
-                canvas.width = self.frame.size.width;
-                canvas.height = self.frame.size.height;
+                canvas.width = self.hitArea.size().width();
+                canvas.height = self.hitArea.size().height();
                 canvas.id = 'Stage_'+Math.random().toString().substr(2);
                 self.context = canvas.getContext('2d');
-                // set up drawing
-                m.animateWithFunction(self.draw);
                 return canvas;
             }());
+            
+            m.safeOverride(self, 'draw', 'viewContainer_draw', function Stage_draw() {
+                // Send out a global hitArea tick notification...
+                self.sendNotification(m.Notifications.FRAME_TICK);
+                // Clear the stage...
+                self.context.clearRect(0, 0, self.canvas.width, self.canvas.height);
+                // Draw the stage...
+                self.viewContainer_draw();
+            });
             
             m.safeAddin(self, 'context', undefined);
             
@@ -67,6 +64,9 @@ mod({
                 }
                 parent.appendChild(self.canvas);
             });
+
+            // set up drawing
+            m.animateWithFunction(self.draw);
             
             return self;
         };

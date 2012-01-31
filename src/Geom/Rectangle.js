@@ -1,14 +1,18 @@
 /** * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * *
- *    Rectangle.js
- *    The Rectangle Addin
- *    Copyright (c) 2012 Schel Scivally. All rights reserved.
- *
- *    @author    Schell Scivally
- *    @since    Thu Jan 12 13:07:30 PST 2012
+ * Rectangle.js
+ * The Rectangle Addin
+ * 
+ * p0-p1
+ * |  |
+ * p3-p2
+ * Copyright (c) 2012 Schel Scivally. All rights reserved.
+ * 
+ * @author    Schell Scivally
+ * @since    Thu Jan 12 13:07:30 PST 2012
  * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * **/
 mod({
     name : 'Rectangle',
-    dependencies : [ 'Geom/Point.js', 'Geom/Size.js' ],
+    dependencies : [ 'Geom/Polygon.js', 'Geom/Point.js', 'Geom/Size.js' ],
     init : function initRectangle (m) {
         /**
          * Initializes the Rectangle Addin
@@ -21,43 +25,48 @@ mod({
              * @param - self Object - The object to add Rectangle properties to.
              * @return self Rectangle 
              */
-            self = m.Object(self); 
-
-            //--------------------------------------
-            //  ALIASES
-            //--------------------------------------
-            var Point = m.Point;
-            var Size = m.Size;
-            //--------------------------------------
-            //  PROPERTIES
-            //--------------------------------------
-            m.safeAddin(self, 'origin', Point());
-            m.safeAddin(self, 'size', Size());
+            // Addin Polygon
+            self = m.Polygon(self); 
+            
+            if (self.points.length === 0) {
+                self.points = addin.from(0, 0, 0, 0).points;
+            }
             //--------------------------------------
             //  FUNCTIONS
             //--------------------------------------
-
-            self.addToString(function Rectangle_toString () {
-                return '[Rectangle(x:'+self.origin.x+' y:'+self.origin.y+' w:'+self.size.width+' h:'+self.size.height+')]';
+            m.safeAddin(self, 'origin', function Rectangle_origin() {
+                /** * *
+                * Returns the origin of the Rectangle.
+                * @returns - Point
+                * * **/
+                return self.points[0].copy();
             });
-            
+            m.safeAddin(self, 'size', function Rectangle_size() {
+                /** * *
+                * Returns the size of the Rectangle.
+                * @returns - Size
+                * * **/
+                var tl = self.origin();
+                var br = self.points[2];
+                var w = br.x() - tl.x();
+                var h = br.y() - tl.y();
+                return m.Size.from(w, h);
+            });
             m.safeAddin(self, 'isEqualTo', function Rectangle_isEqualTo (rectangle) {
                 /**
                  * Returns whether or not *rectangle* is equal to self.
                  * @param - rectangle Rectangle
                  * @return - Boolean
                  */
-                return self.origin.isEqualTo(rectangle.origin) && self.size.isEqualTo(rectangle.size);
+                return self.origin().isEqualTo(rectangle.origin()) && self.size().isEqualTo(rectangle.size());
             });
-
-            m.safeAddin(self, 'copy', function Rectangle_copy () {
+            m.safeOverride(self, 'copy', 'polygon_copy', function Rectangle_copy() {
                 /**
                  * Returns a copy of self.
                  * @return - Rectangle
                  */
-                var r = addin();
-                r.origin = self.origin.copy();
-                r.size = self.size.copy();
+                var r = self.polygon_copy();
+                addin(r);
                 return r;
             });
 
@@ -66,7 +75,7 @@ mod({
                  * Returns the left edge x value.
                  * @return - Number
                  */
-                return self.origin.x;
+                return self.origin().x();
             });
 
             m.safeAddin(self, 'top', function Rectangle_top () {
@@ -74,7 +83,11 @@ mod({
                  * Returns the top edge y value.
                  * @return - Number
                  */
-                return self.origin.y;
+                return self.origin().y();
+            });
+            
+            self.addToString(function Rectangle_toString () {
+                return '[Rectangle(x:'+self.left()+' y:'+self.top()+' w:'+self.size().width()+' h:'+self.size().height()+')]';
             });
 
             m.safeAddin(self, 'right', function Rectangle_right () {
@@ -82,7 +95,7 @@ mod({
                  * Returns the right edge x value.
                  * @return - Number
                  */
-                return self.origin.x + self.size.width;
+                return self.points[1].x();
             });
 
             m.safeAddin(self, 'bottom', function Rectangle_bottom () {
@@ -90,7 +103,7 @@ mod({
                  * Returns the bottom edge y value.
                  * @return - Number
                  */
-                return self.origin.y + self.size.height;
+                return self.points[2].y();
             });
             
             m.safeAddin(self, 'area', function Rectangle_area () {
@@ -98,17 +111,7 @@ mod({
                  * Returns the area (in pixels^2) of this rectangle
                  * @return - Number
                  */
-                return self.size.width * self.size.height;
-            });
-
-            m.safeAddin(self, 'containsPoint', function Rectangle_containsPoint (point) {
-                /**
-                 * Returns whether or not *point* is inside self rectangle
-                 * @param point - a Point object to test    
-                 * @return - Boolean
-                 */
-                return point.x >= self.left() && point.x <= self.right() && 
-                    point.y >= self.top() && point.y <= self.bottom();
+                return self.size().width() * self.size().height();
             });
 
             m.safeAddin(self, 'union', function Rectangle_union (rectangle) {
@@ -142,9 +145,9 @@ mod({
                     horizontallyAt : []
                 });
                 cutObj.verticallyAt.unshift(0);
-                cutObj.verticallyAt.push(self.size.width);
+                cutObj.verticallyAt.push(self.size().width());
                 cutObj.horizontallyAt.unshift(0);
-                cutObj.horizontallyAt.push(self.size.height);
+                cutObj.horizontallyAt.push(self.size().height());
                 var verticals = (cutObj.verticallyAt.length - 1);
                 var horizontals = (cutObj.horizontallyAt.length - 1);
                 var sections = [];
@@ -166,26 +169,27 @@ mod({
         };
         
         addin.from = function Rectangle_from (x, y, w, h) {
-            /**
-             * Returns a new Rectangle with dimensions *x*,*y*,*w*,*h*.
-             * @param - x Number - The x position.
-             * @param - y Number - The y position.
-             * @param - w Number - The width.
-             * @param - h Number - The height
-             * @return - Rectangle
-             */
-            var r = addin();
+            /** * *
+            * Returns a new Rectangle with dimensions *x*,*y*,*w*,*h*.
+            * @param - x Number - The x position.
+            * @param - y Number - The y position.
+            * @param - w Number - The width.
+            * @param - h Number - The height
+            * @return - Rectangle
+            ** * */
             x = m.ifndefInitNum(x, 0);
             y = m.ifndefInitNum(y, 0);
             w = m.ifndefInitNum(w, 0);
             h = m.ifndefInitNum(h, 0);
-            
-            r.origin.x = x;
-            r.origin.y = y;
-            r.size.width = w;
-            r.size.height = h;
-            
-            return r;
+             
+            return addin({
+                points : [
+                    m.Point.from(x, y),
+                    m.Point.from(x+w, y),
+                    m.Point.from(x+w, y+h),
+                    m.Point.from(x, y+h)
+                ]
+            });
         };
         
         addin.fromTwoPoints = function Rectangle_fromTwoPoints (p1, p2) {
@@ -203,19 +207,19 @@ mod({
             y = 0;
             w = 0;
             h = 0;
-            if (p1.x < p2.x) {
-                x = p1.x;
-                w = p2.x - p1.x;
+            if (p1.x() < p2.x()) {
+                x = p1.x();
+                w = p2.x() - p1.x();
             } else {
-                x = p2.x;
-                w = p1.x - p2.x;
+                x = p2.x();
+                w = p1.x() - p2.x();
             }
-            if (p1.y < p2.y) {
-                y = p1.y;
-                h = p2.y - p1.y;
+            if (p1.y() < p2.y()) {
+                y = p1.y();
+                h = p2.y() - p1.y();
             } else {
-                y = p2.y;
-                h = p1.y - p2.y;
+                y = p2.y();
+                h = p1.y() - p2.y();
             }
             
             return addin.from(x, y, w, h);

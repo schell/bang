@@ -72,8 +72,7 @@ mod({
                 self.context.save();
                 self.view_draw();
                 // Transform here for subviews...
-                self.context.translate(self.frame.origin.x, self.frame.origin.y);
-                self.context.rotate(self.rotation);
+                self.applyTransform();
                 for (var i=0; i < _subviews.length; i++) {
                     _subviews[i].draw();
                 }

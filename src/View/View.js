@@ -8,7 +8,7 @@
  * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * **/
 mod({
     name : 'View',
-    dependencies : [ 'Global.js', 'Notifications.js', 'Geom.js' ],
+    dependencies : [ 'Global.js', 'Notifications.js', 'Geometry.js' ],
     init : function initView(m) {
         /**
          * Initializes the View Addin
@@ -27,48 +27,59 @@ mod({
                 return '[View]';
             });
             
-            // Addin properties of Listener
+            // Addin properties of Listener...
             m.Listener(self);
             
-            // Addin properties of Dispatcher
+            // Addin properties of Dispatcher...
             m.Dispatcher(self);
             
-            // A Rectangle specifying the hit area of this object
-            m.safeAddin(self, 'frame', m.Rectangle());
+            // An array to hold draw functions...
+            m.safeAddin(self, 'drawQueue', []);
             
-            // A reference to the canvas context
+            // A Rectangle specifying the hit area of this object...
+            m.safeAddin(self, 'hitArea', m.Rectangle());
+            
+            // A reference to the canvas context...
             m.safeAddin(self, 'context', undefined);
             
             // A reference to this view's parent container...
             m.safeAddin(self, 'parent', undefined);
             
-            // The rotation of this view
-            m.safeAddin(self, 'rotation', 0);
-            // The scale size of this view
-            m.safeAddin(self, 'scale', m.Size.from(1.0, 1.0));
+            // A transformation matrix...
+            m.safeAddin(self, 'transform', m.Matrix().loadIdentity());
             
             m.safeAddin(self, 'x', function View_x(x) {
                 /** * *
-                * Gets or sets the x position of this view.
+                * Gets and/or sets the x position of this view.
                 * @param - x Number
                 * * **/
-                if (m.defined(x)) {
-                    // We want to put the perceived origin at x
-                    // so account for scale...
-                    var setX = x/self.scale;
-                    self.frame.origin.x = setX;
-                }
-                return self.frame.origin.x * self.scale.width;
+                return self.transform.x(x);
             });
-            
-            // An array to hold draw functions
-            m.safeAddin(self, 'drawQueue', []);
+            m.safeAddin(self, 'y', function View_y(y) {
+                /** * *
+                * Gets and/or sets the y position of this view.
+                * @param - y Number
+                * * **/
+                return self.transform.y(y);
+            });
+            m.safeAddin(self, 'applyTransform', function View_applyTransform() {
+                /** * *
+                * Applies this view's transform to its context.
+                * * **/
+                var a = self.transform.a();
+                var b = self.transform.b();
+                var c = self.transform.c();
+                var d = self.transform.d();
+                var x = self.transform.x();
+                var y = self.transform.y();
+                
+                self.context.transform(a,b,c,d,x,y);
+            });
             
             m.safeAddin(self, 'draw', function View_draw() {
                 self.context.save();
                 
-                self.context.rotate(self.rotation);
-                self.context.scale(self.scale.width, self.scale.height);
+                self.applyTransform();
                 
                 for (var i=0; i < self.drawQueue.length; i++) {
                     var drawFunc = self.drawQueue[i];

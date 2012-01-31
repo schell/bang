@@ -99,38 +99,37 @@ mod({
             return function () {
                 view.context.save();
                 view.context.fillStyle = color;
-                view.context.fillRect(view.frame.origin.x, view.frame.origin.y, view.frame.size.width, view.frame.size.height);
+                view.context.fillRect(view.hitArea.left(), view.hitArea.top(), view.hitArea.size().width(), view.hitArea.size().height());
                 view.context.restore();
             };
         }
         
         var red = m.View({
-            frame : m.Rectangle.from(-50, -50, 100, 100),
-            scale : m.Size.from(0.5, 1.0)
+            hitArea : m.Rectangle.from(-50, -50, 100, 100),
+            transform : m.Matrix().scale(0.5, 0.5)
         });
         red.addToString(function(){return '[red]';});
         red.drawQueue.push(makeDrawFunction(red, 'rgba(255, 0, 0, 0.5)'));
         
         var blue = m.View({
-            frame : m.Rectangle.from(50, 50, 100, 100),
-            scale : m.Size.from(0.5, 0.5)
+            hitArea : m.Rectangle.from(0, 0, 100, 100),
+            transform : m.Matrix().translate(50, 50).scale(0.6, 0.6)
         });
         blue.addToString(function(){return '[blue]';});
         blue.drawQueue.push(makeDrawFunction(blue, 'rgba(0, 0, 255, 0.5)'));
         
-        var redAndBlue = m.ViewContainer({
-            frame : m.Rectangle.from(100, 100, 100, 100)
+        var green = m.ViewContainer({
+            hitArea : m.Rectangle.from(0, 0, 100, 100),
+            transform : m.Matrix().translate(100, 100)
         });
-        redAndBlue.addSubview(red);
-        redAndBlue.addSubview(blue);
-        redAndBlue.drawQueue.push(makeDrawFunction(redAndBlue, 'rgba(0, 255, 0, 0.5)'));
-        redAndBlue.addInterest(undefined, m.Notifications.FRAME_TICK, function tick(note) {
-            red.rotation = (red.rotation + 0.1) % Math.PI;
+        green.addSubview(red);
+        green.addSubview(blue);
+        green.drawQueue.push(makeDrawFunction(green, 'rgba(0, 255, 0, 0.5)'));
+        green.addInterest(undefined, m.Notifications.FRAME_TICK, function tick(note) {
+            red.transform.rotate(2);
         });
-        redAndBlue.addToString(function(){return '[redAndBlue]';});
-        stage.addSubview(redAndBlue);
-        
-        assert.eq(blue.x(), 25, 'View returns correct perceived x position');
+        green.addToString(function(){return '[redAndBlue]';});
+        stage.addSubview(green);
         
         return {};
     }
