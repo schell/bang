@@ -95,6 +95,12 @@ mod({
         stage.addSubview(view);
         assert.eq(m.defined(view.context) && view.context === stage.context, true, 'Subviews inherit parent\'s context.');
         
+        var rsTest = m.View();
+        rsTest.scaleX(0.5);
+        rsTest.rotation(45);
+        assert.eq(rsTest.scaleX(), 0.5, 'Rotation does not affect store scaleX value.');
+        assert.eq(rsTest.rotation(), 45, 'ScaleX does not affect store rotation value.');
+        
         function makeDrawFunction(view, color) {
             return function () {
                 view.context.save();
@@ -106,17 +112,17 @@ mod({
         
         var red = m.View({
             hitArea : m.Rectangle.from(-50, -50, 100, 100),
-            transform : m.Matrix().scale(0.5, 0.5),
-            alpha : 0.5
+            transform : m.Matrix().scale(0.5, 0.5)
         });
+        red.alpha(0.5);
         red.addToString(function(){return '[red]';});
         red.drawQueue.push(makeDrawFunction(red, 'rgb(255, 0, 0)'));
         
         var blue = m.View({
             hitArea : m.Rectangle.from(0, 0, 100, 100),
-            alpha : 0.5,
             rotation : 0
         });
+        red.alpha(0.5);
         blue.addToString(function(){return '[blue]';});
         blue.drawQueue.push(makeDrawFunction(blue, 'rgb(0, 0, 255)'));
         var green = m.ViewContainer({
@@ -177,7 +183,43 @@ mod({
         scaled.tween.interpolate();
         stage.addSubview(scaled);
         
-        
+        var bar = m.View({
+            hitArea : m.Rectangle.from(-250, -5, 500, 10)
+        });
+        /*
+        bar.scaleX(0.1);
+        bar.scaleY(0.1);
+        bar.rotation(45);
+        bar.transform.loadIdentity();
+        assert.eq(bar.scaleX(), 1.0, 'View resets cached scaleX value when transform loads matrix identity.');
+        assert.eq(bar.scaleY(), 1.0, 'View resets cached scaleY value when transform loads matrix identity.');
+        assert.eq(bar.rotation(), 0, 'View resets cached rotation value when transform loads matrix identity.');
+        */
+        var sx = 0.5;
+        bar.alpha(0.5);
+        //bar.x(250);
+        //bar.y(250);
+        //bar.scaleX(sx);
+        //bar.rotation(90);
+        bar.transform.translate(250, 250);
+        //bar.scaleX(0.5);
+        //bar.rotation(10);
+        assert.eq(bar.scaleX() === sx && bar.scaleY() === 1.0, true, 'Rotation does not affect scale.');
+        console.log(bar.scaleX(),bar.scaleY());
+        bar.tween = m.Ease({
+            target : bar,
+            duration : 1000,
+            equation : 'linear',
+            properties : {
+                rotation : 360
+            },
+            onComplete : function () {
+                bar.tween.interpolate();
+            }
+        });
+        //bar.tween.interpolate();
+        bar.drawQueue.push(makeDrawFunction(bar, 'rgb(0, 0, 0)'));
+        stage.addSubview(bar);
         return {};
     }
 });

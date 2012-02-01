@@ -48,8 +48,18 @@ mod({
             // A transformation matrix...
             m.safeAddin(self, 'transform', m.Matrix().loadIdentity());
             
-            // An alpha to use for compounding against context's alpha...
-            m.safeAddin(self, 'alpha', 1.0);
+            // A private alpha value...
+            var _alpha = 1.0;
+            m.safeAddin(self, 'alpha', function View_alpha(a) {
+                /** * *
+                * Getter/setter for this view's alpha (transparency) value.
+                * This is a getter/setter just for consistency's sake with x,y,scaleX,scaleY...
+                * @param - a Number
+                * @returns - Number
+                * * **/
+                _alpha = m.ifndefInitNum(a, _alpha);
+                return _alpha;
+            });
             
             m.safeAddin(self, 'x', function View_x(x) {
                 /** * *
@@ -65,21 +75,57 @@ mod({
                 * * **/
                 return self.transform.y(y);
             });
+            // A private var to hold the scaleX...
+            var _scaleX = 1.0;
             m.safeAddin(self, 'scaleX', function View_scaleX(x) {
                 /** * *
                 * Getter/setter for the scale factor in x of this view.
                 * @param - x Number
                 * @returns - Number
                 * * **/
-                return self.transform.scaleX(x);
+                
+                _scaleX = m.ifndefInitNum(x, _scaleX);
+                self.transform.scaleX(x);
+                return _scaleX;
             });
+            // A private var to hold the scaleY...
+            var _scaleY = 1.0;
             m.safeAddin(self, 'scaleY', function View_scaleY(y) {
                 /** * *
                 * Getter/setter for the scale factor in y of this view.
                 * @param - y Number
                 * @returns - Number
                 * * **/
-                return self.transform.scaleY(y);
+                _scaleY = m.ifndefInitNum(y, _scaleY);
+                self.transform.scaleY(y);
+                return _scaleY;
+            });
+            // A private var to hold this view's rotation...
+            var _rotation = 0;
+            m.safeAddin(self, 'rotation', function View_rotation(r) {
+                /** * *
+                * Getter/setter for the rotation of this view.
+                * @param - r Number
+                * @returns - Number
+                * * **/
+                _rotation = m.ifndefInitNum(r, _rotation) % 360;
+                // Store all the other transform values...
+                var store = {
+                    x : self.x(),
+                    y : self.y(),
+                    scaleX : self.scaleX(),
+                    scaleY : self.scaleY()
+                };
+                var mat = m.Matrix().rotate(_rotation);
+                self.transform.elements = mat.elements;
+                // Reset those other values we stored...
+                self.x(store.x);
+                self.y(store.y);
+                //self.z(store.z);
+                //self.scaleX(store.scaleX);
+                //self.scaleY(store.scaleY);
+                //self.scaleZ(store.scaleZ);
+                return _rotation;
             });
             // Whether or not this view's transformations have been applied...
             var _transformApplied = false;
@@ -102,7 +148,7 @@ mod({
                 var y = self.transform.y();
                 
                 self.context.transform(a,b,c,d,x,y);
-                self.context.globalAlpha *= self.alpha;
+                self.context.globalAlpha *= _alpha;
             });
             m.safeAddin(self, 'restoreTransform', function View_restoreTransform() {
                 /** * *
@@ -150,6 +196,13 @@ mod({
                 self.sendNotification(m.Notifications.DID_UPDATE_CONTEXT, self.context);
             });
             self.addInterest(self, m.Notifications.WAS_ADDED_TO_VIEWCONTAINER, self.onAddedToViewContainer);
+            
+            function onTransformLoadsIdentity(note) {
+                _rotation = 0;
+                _scaleX = 1.0;
+                _scaleY = 1.0;
+            }
+            self.addInterest(self.transform, m.Notifications.DID_LOAD_IDENTITY, onTransformLoadsIdentity);
             
             return self;
         };

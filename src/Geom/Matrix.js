@@ -18,7 +18,7 @@
 * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * **/
 mod({
     name : 'Matrix',
-    dependencies : [ 'Geometry.js' ],
+    dependencies : [ 'Geometry.js', 'Notifications.js' ],
     init : function initMatrix (m) {
         /**
          * Initializes the Matrix Addin
@@ -41,14 +41,30 @@ mod({
             // Addin Vector
             m.Vector(self);
             
-            // A cache of the current rotation...
-            // We need this because a transformation matrix holds 
-            // only enough info to extract an ambiguous value of rotation.
-            m.safeAddin(self, 'rotation2D', 0);
+            // Addin Dispatcher
+            m.Dispatcher(self);
             
             //--------------------------------------
             //  METHODS
             //--------------------------------------
+            m.safeAddin(self, 'toPrettyString', function Matrix_toPrettyString() {
+                /** * *
+                * Returns a pretty string value.
+                * @returns - String
+                * * **/
+                function fixed(el) {
+                    var s = el.toFixed(3);
+                    if (el >= 0) {
+                        s = ' '+s;
+                    }
+                    return s;
+                }
+                var s = '\n' + fixed(self.elements[0]) + ' ' + fixed(self.elements[1]) + ' ' + fixed(self.elements[2]) + ' ' + fixed(self.elements[3]) + '\n';
+                s += fixed(self.elements[4]) + ' ' + fixed(self.elements[5]) + ' ' + fixed(self.elements[6]) + ' ' + fixed(self.elements[7]) + '\n';
+                s += fixed(self.elements[8]) + ' ' + fixed(self.elements[9]) + ' ' + fixed(self.elements[10]) + ' ' + fixed(self.elements[11]) + '\n';
+                s += fixed(self.elements[12]) + ' ' + fixed(self.elements[13]) + ' ' + fixed(self.elements[14]) + ' ' + fixed(self.elements[15]);
+                return s;
+            });
             m.safeAddin(self, 'a', function Matrix_a() {
                 /** * *
                 * Returns the 'a' matrix component.
@@ -144,7 +160,8 @@ mod({
                     0.0, 0.0, 1.0, 0.0,
                     0.0, 0.0, 0.0, 1.0
                 ];
-                self.rotation2D = 0;
+                // Let whatever listeners know that we're resetting the transfromation...
+                self.sendNotification(m.Notifications.DID_LOAD_IDENTITY);
                 return self;
             });
             m.safeAddin(self, 'loadOrtho', function Matrix_name(left, right, top, bottom, far, near) {
@@ -255,12 +272,6 @@ mod({
                 x = aroundV.x();
                 y = aroundV.y();
                 z = aroundV.z();
-                
-                if (aroundV.isEqualTo(m.Vector.Z())) {
-                    // Cache the value so we can retrieve an unambiguous value later...
-                    self.rotation2D += angle;
-                }
-                
             
                 var sinAngle, cosAngle;
                 sinAngle = Math.sin(angle * m.Geometry.ONE_DEGREE);
