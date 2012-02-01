@@ -27,11 +27,14 @@ mod({
                 return '[Stage]';
             });
             
-            // Addin ViewContainer
+            // Addin ViewContainer...
             m.ViewContainer(self);
             
-            // Some default values
+            // Some default values...
             self.hitArea = m.Rectangle.from(0, 0, 500, 500);
+            
+            // Whether or not we clear the canvas before redrawing...
+            m.safeAddin(self, 'clearCanvasOnFrameTick', true);
             
             m.safeAddin(self, 'canvas', function Stage_initCanvas() {
                 var canvas = document.createElement('canvas');
@@ -46,7 +49,9 @@ mod({
                 // Send out a global hitArea tick notification...
                 self.sendNotification(m.Notifications.FRAME_TICK);
                 // Clear the stage...
-                self.context.clearRect(0, 0, self.canvas.width, self.canvas.height);
+                if (self.clearCanvasOnFrameTick) {
+                    self.context.clearRect(0, 0, self.canvas.width, self.canvas.height);    
+                }
                 // Draw the stage...
                 self.viewContainer_draw();
             });

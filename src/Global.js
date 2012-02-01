@@ -137,19 +137,25 @@ mod({
                           window.onRequestAnimationFrame     ||
                           window.msRequestAnimationFrame     ||
                           function (callback) {
-                              setTimeout(callback, 1000/12);
+                              setTimeout(callback, 1000/60);
                               return callback;
                           };
             var animation = {
-                id : 0
+                id : 0,
+                cancelled : false
             };
             var animate = function (time) {
                 /**
                  * Calls the animation function and schedules another call.
                  * 
                  */
-                // Update the animation id first
-                animation.id = request(animate);
+                if (animation.cancelled !== false) {
+                    // Abort if the animation has been cancelled...
+                    return;
+                }
+                // Update the animation id...
+                animation.id = animation.cancelled ? false : request(animate);
+                // Animate...
                 animationFunction(time);
             };
 
@@ -167,7 +173,7 @@ mod({
             };
                          
             var cancel = window.cancelRequestAnimationFrame || window.webkitCancelRequestAnimationFrame || window.cancelAnimationFrame || timeout;
-
+            animation.cancelled = true;
             cancel(animation.id);
         };
         

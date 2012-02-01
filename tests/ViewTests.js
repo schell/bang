@@ -114,28 +114,34 @@ mod({
         
         var blue = m.View({
             hitArea : m.Rectangle.from(0, 0, 100, 100),
-            transform : m.Matrix().translate(50, 50).scale(0.6, 0.6),
-            alpha : 0.5
+            alpha : 0.5,
+            rotation : 0
         });
         blue.addToString(function(){return '[blue]';});
         blue.drawQueue.push(makeDrawFunction(blue, 'rgb(0, 0, 255)'));
-        
         var green = m.ViewContainer({
-            hitArea : m.Rectangle.from(0, 0, 100, 100)
+            hitArea : m.Rectangle.from(0, 0, 100, 100),
+            rotation : 0
         });
         green.addSubview(red);
         green.addSubview(blue);
         green.drawQueue.push(makeDrawFunction(green, 'rgb(0, 255, 0)'));
         green.addInterest(undefined, m.Notifications.FRAME_TICK, function tick(note) {
             red.transform.rotate(2);
+            blue.rotation += 2;
+            blue.transform.loadIdentity().scale(0.5,0.5).rotate(blue.rotation);
+            blue.x(100);
+            blue.y(100);
+            green.rotation -= 2;
+            green.transform.loadIdentity().rotate(green.rotation);
+            green.x(200);
+            green.y(200);
         });
         green.addToString(function(){return '[redAndBlue]';});
         stage.addSubview(green);
         
         var ease = m.Ease({
             properties : {
-                x : 400,
-                y : 400,
                 alpha : 0.1
             },
             duration : 1000,
@@ -144,12 +150,11 @@ mod({
         });
         ease.onComplete = function () {
             ease.properties = {
-                x : ease.properties.x === 0 ? 400 : 0,
-                y : ease.properties.x === 0 ? 400 : 0,
-                alpha : ease.properties.x === 0 ? 0.1 : 1
+                alpha : ease.properties.alpha === 1 ? 0.1 : 1
             };
             ease.interpolate();
         };
+        
         ease.interpolate();
         
         return {};
