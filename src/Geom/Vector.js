@@ -183,6 +183,18 @@ mod({
             });
             return self;
         };
+        addin.from = function Vector_from(x, y, z) {
+            /** * *
+            * Returns a 3-space vector <x,y,z>
+            * * **/
+            x = m.ifndefInitNum(x, 0);
+            y = m.ifndefInitNum(y, 0);
+            z = m.ifndefInitNum(z, 0);
+            
+            return addin({
+                elements : [x, y, z]
+            });
+        }
         addin.Origin = function Vector_Origin() {
             /** * *
             * Returns the origin point in 3-space.

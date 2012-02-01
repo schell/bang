@@ -89,7 +89,7 @@ mod({
             });
             m.safeOverride(self, 'y', 'vector_y', function Matrix_y(y) {
                 /** * *
-                * Returns the 'ty' matrix component. Optionally sets the y component
+                * Returns the 'y' matrix component. Optionally sets the y component
                 * if *y* is supplied.
                 * @param - y Number
                 * @returns - Number
@@ -99,13 +99,40 @@ mod({
             });
             m.safeOverride(self, 'z', 'vector_z', function Matrix_z(z) {
                 /** * *
-                * Returns the 'tz' matrix component. Optionally sets the z component
+                * Returns the 'z' matrix component. Optionally sets the z component
                 * if *z* is supplied.
                 * @param - z Number
                 * @returns - Number
                 * * **/
                 self.elements[14] = m.ifndefInitNum(z, self.elements[14]);
                 return self.elements[14];
+            });
+            m.safeAddin(self, 'scaleX', function Matrix_scaleX(x) {
+                /** * *
+                * Getter/setter for the x scale component.
+                * @param - x Number
+                * @returns - Number
+                * * **/
+                self.elements[0] = m.ifndefInitNum(x, self.elements[0]);
+                return self.elements[0];
+            });
+            m.safeAddin(self, 'scaleY', function Matrix_scaleY(y) {
+                /** * *
+                * Getter/setter for the x scale component.
+                * @param - x Number
+                * @returns - Number
+                * * **/
+                self.elements[5] = m.ifndefInitNum(y, self.elements[5]);
+                return self.elements[5];
+            });
+            m.safeAddin(self, 'scaleZ', function Matrix_scaleZ(z) {
+                /** * *
+                * Getter/setter for the z scale component.
+                * @param - z Number
+                * @returns - Number
+                * * **/
+                self.elements[10] = m.ifndefInitNum(z, self.elements[10]);
+                return self.elements[10];
             });
             m.safeAddin(self, 'loadIdentity', function Matrix_loadIdentity() {
                 /** * *

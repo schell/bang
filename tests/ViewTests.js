@@ -142,7 +142,8 @@ mod({
         
         var ease = m.Ease({
             properties : {
-                alpha : 0.1
+                alpha : 0.1,
+                scaleX : 0.5
             },
             duration : 1000,
             target : green,
@@ -150,12 +151,32 @@ mod({
         });
         ease.onComplete = function () {
             ease.properties = {
-                alpha : ease.properties.alpha === 1 ? 0.1 : 1
+                alpha : ease.properties.alpha === 1 ? 0.1 : 1.0
             };
             ease.interpolate();
         };
         
         ease.interpolate();
+        
+        var scaled = m.View({
+            hitArea : m.Rectangle.from(0, 0, 500, 10)
+        });
+        scaled.drawQueue.push(makeDrawFunction(scaled, 'rgb(0, 255, 255)'));
+        scaled.scaleX(0);
+        scaled.tween = m.Ease({
+            target : scaled,
+            duration : 500,
+            properties : {
+                scaleX : 1.0
+            }
+        });
+        scaled.tween.onComplete = function () {
+            scaled.tween.properties.scaleX = Number(!Boolean(scaled.scaleX()));
+            scaled.tween.interpolate();
+        };
+        scaled.tween.interpolate();
+        stage.addSubview(scaled);
+        
         
         return {};
     }

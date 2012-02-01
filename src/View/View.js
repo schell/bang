@@ -65,7 +65,22 @@ mod({
                 * * **/
                 return self.transform.y(y);
             });
-            
+            m.safeAddin(self, 'scaleX', function View_scaleX(x) {
+                /** * *
+                * Getter/setter for the scale factor in x of this view.
+                * @param - x Number
+                * @returns - Number
+                * * **/
+                return self.transform.scaleX(x);
+            });
+            m.safeAddin(self, 'scaleY', function View_scaleY(y) {
+                /** * *
+                * Getter/setter for the scale factor in y of this view.
+                * @param - y Number
+                * @returns - Number
+                * * **/
+                return self.transform.scaleY(y);
+            });
             // Whether or not this view's transformations have been applied...
             var _transformApplied = false;
             m.safeAddin(self, 'applyTransform', function View_applyTransform() {

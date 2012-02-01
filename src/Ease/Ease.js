@@ -316,8 +316,6 @@ mod({
             //--------------------------------------
             // The equation to use for interpolation...
             m.safeAddin(self, 'equation',  'easeInOutQuad');
-            // Then amount of delay before the tween begins...
-            m.safeAddin(self, 'delay', 0);
             m.safeAddin(self, 'onUpdate', function Ease_onUpdate(params) {
                 /** * *
                 * The default function to execute on update of interpolation.
@@ -332,9 +330,38 @@ mod({
             });
             // The parameters to be supplied to onComplete...
             m.safeAddin(self, 'onCompleteParams', []);
+            // A private variable for keeping track of animation ids
+            var _animation = {};
             //--------------------------------------
             //  USE
             //--------------------------------------
+            m.safeAddin(self, 'cancel', function Ease_cancel() {
+                /** * *
+                * Cancels the interpolation. Tweening stops where it is.
+                * * **/
+                m.cancelAnimation(_animation);
+            });
+            m.safeAddin(self, 'finish', function Ease_finish() {
+                /** * *
+                * Cancels the interpolation, sets all properties to their finished state.
+                * Calls the onComplete function.
+                * * **/
+                // Cancel...
+                self.cancel();
+                // Set final values...
+                for (var key in self.properties) {
+                    if (key in self.target) {
+                        if (typeof self.target[key] === 'function') {
+                            // Apply the setter function...
+                            self.target[key](self.properties[key]);
+                        } else {
+                            self.target[key] = self.properties[key];
+                        }
+                    }
+                }
+                // Call onComplete...
+                self.onComplete.apply(null, self.onCompleteParams);
+            });
             m.safeAddin(self, 'interpolate', function Ease_interpolate() {
                 /** * *
                 * Starts interpolation.
@@ -366,27 +393,31 @@ mod({
                         var change = to - from;
                         fromProperties[key] = from; 
                         deltaProperties[key] = change;   
+                    } else {
+                        console.warn(key, 'is not in target',target.toString());
                     }
                 }
-                var animation;
                 var interpolation = function () {
                     time = Date.now() - start;
                     if (time >= duration) {
-                        m.cancelAnimation(animation);
-                        self.onComplete.apply(null, self.onCompleteParams);
-                    }
-                    for (var key in fromProperties) {
-                        var from = fromProperties[key];
-                        var delta = deltaProperties[key];
-                        var current = equation(time, from, delta, duration);
-                        if (propertyTypeIsFunction[key]) {
-                            target[key](current);
-                        } else {
-                            target[key] = current;
+                        self.finish();
+                    } else {
+                        for (var key in fromProperties) {
+                            var from = fromProperties[key];
+                            var delta = deltaProperties[key];
+                            var current = equation(time, from, delta, duration);
+                            if (propertyTypeIsFunction[key]) {
+                                target[key](current);
+                            } else {
+                                target[key] = current;
+                            }
+                            // Update...
+                            self.onUpdate.apply(null, self.onUpdateParams);
                         }
                     }
                 };
-                animation = m.requestAnimation(interpolation);
+                // Start and store our animation...
+                _animation = m.requestAnimation(interpolation);
             });
             return self;
         };
