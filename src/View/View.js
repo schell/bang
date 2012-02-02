@@ -48,85 +48,13 @@ mod({
             // A transformation matrix...
             m.safeAddin(self, 'transform', m.Matrix().loadIdentity());
             
-            // A private alpha value...
-            var _alpha = 1.0;
-            m.safeAddin(self, 'alpha', function View_alpha(a) {
-                /** * *
-                * Getter/setter for this view's alpha (transparency) value.
-                * This is a getter/setter just for consistency's sake with x,y,scaleX,scaleY...
-                * @param - a Number
-                * @returns - Number
-                * * **/
-                _alpha = m.ifndefInitNum(a, _alpha);
-                return _alpha;
-            });
+            m.safeAddin(self, 'alpha', 1.0);
             
-            m.safeAddin(self, 'x', function View_x(x) {
-                /** * *
-                * Gets and/or sets the x position of this view.
-                * @param - x Number
-                * * **/
-                return self.transform.x(x);
-            });
-            m.safeAddin(self, 'y', function View_y(y) {
-                /** * *
-                * Gets and/or sets the y position of this view.
-                * @param - y Number
-                * * **/
-                return self.transform.y(y);
-            });
-            // A private var to hold the scaleX...
-            var _scaleX = 1.0;
-            m.safeAddin(self, 'scaleX', function View_scaleX(x) {
-                /** * *
-                * Getter/setter for the scale factor in x of this view.
-                * @param - x Number
-                * @returns - Number
-                * * **/
-                
-                _scaleX = m.ifndefInitNum(x, _scaleX);
-                self.transform.scaleX(x);
-                return _scaleX;
-            });
-            // A private var to hold the scaleY...
-            var _scaleY = 1.0;
-            m.safeAddin(self, 'scaleY', function View_scaleY(y) {
-                /** * *
-                * Getter/setter for the scale factor in y of this view.
-                * @param - y Number
-                * @returns - Number
-                * * **/
-                _scaleY = m.ifndefInitNum(y, _scaleY);
-                self.transform.scaleY(y);
-                return _scaleY;
-            });
-            // A private var to hold this view's rotation...
-            var _rotation = 0;
-            m.safeAddin(self, 'rotation', function View_rotation(r) {
-                /** * *
-                * Getter/setter for the rotation of this view.
-                * @param - r Number
-                * @returns - Number
-                * * **/
-                _rotation = m.ifndefInitNum(r, _rotation) % 360;
-                // Store all the other transform values...
-                var store = {
-                    x : self.x(),
-                    y : self.y(),
-                    scaleX : self.scaleX(),
-                    scaleY : self.scaleY()
-                };
-                var mat = m.Matrix().rotate(_rotation);
-                self.transform.elements = mat.elements;
-                // Reset those other values we stored...
-                self.x(store.x);
-                self.y(store.y);
-                //self.z(store.z);
-                //self.scaleX(store.scaleX);
-                //self.scaleY(store.scaleY);
-                //self.scaleZ(store.scaleZ);
-                return _rotation;
-            });
+            m.safeAddin(self, 'x', 0.0);
+            m.safeAddin(self, 'y', 0.0);
+            m.safeAddin(self, 'scaleX', 1.0);
+            m.safeAddin(self, 'scaleY', 1.0);
+            m.safeAddin(self, 'rotation', 0.0);
             // Whether or not this view's transformations have been applied...
             var _transformApplied = false;
             m.safeAddin(self, 'applyTransform', function View_applyTransform() {
@@ -140,15 +68,10 @@ mod({
                 
                 self.context.save();
                 
-                var a = self.transform.a();
-                var b = self.transform.b();
-                var c = self.transform.c();
-                var d = self.transform.d();
-                var x = self.transform.x();
-                var y = self.transform.y();
-                
-                self.context.transform(a,b,c,d,x,y);
-                self.context.globalAlpha *= _alpha;
+                self.context.translate(self.x, self.y);
+                self.context.rotate(m.Geometry.ONE_DEGREE*self.rotation);
+                self.context.scale(self.scaleX, self.scaleY);
+                self.context.globalAlpha *= self.alpha;
             });
             m.safeAddin(self, 'restoreTransform', function View_restoreTransform() {
                 /** * *
@@ -196,13 +119,6 @@ mod({
                 self.sendNotification(m.Notifications.DID_UPDATE_CONTEXT, self.context);
             });
             self.addInterest(self, m.Notifications.WAS_ADDED_TO_VIEWCONTAINER, self.onAddedToViewContainer);
-            
-            function onTransformLoadsIdentity(note) {
-                _rotation = 0;
-                _scaleX = 1.0;
-                _scaleY = 1.0;
-            }
-            self.addInterest(self.transform, m.Notifications.DID_LOAD_IDENTITY, onTransformLoadsIdentity);
             
             return self;
         };

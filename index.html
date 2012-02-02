@@ -6,7 +6,7 @@
             body {
                 margin:0;
                 padding:0;
-                background-color:grey;
+                background-color:#AFAFAF;
             }
             canvas {
                 background-color:white;
@@ -21,7 +21,7 @@
             mod({
                 name : "Main",
                 dependencies : [
-                    '../tests/EaseTests.js',
+                    '../submodules/go/go.js',
                     '../tests/ViewTests.js',
                     '../tests/NoteTests.js',
                     '../tests/GeomTests.js',
@@ -31,7 +31,13 @@
                     return undefined;
                 },
                 callback : function callbackMain (m) {
-                    m.assert.stat();
+                    go( m.GlobalTests,
+                        m.GeomTests, 
+                        m.NoteTests,
+                        m.ViewTests,
+                        function() {
+                            m.assert.stat();
+                        }).start();
                 }
             });
         </script>

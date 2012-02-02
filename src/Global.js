@@ -124,7 +124,9 @@ mod({
                 tests : tests
             };
         })();
-
+        
+        // A private variable to hold all animations...
+        var _animations = [];
         m.requestAnimation = function (animationFunction) {
             /** * *
             * Calls *animationFunction* over and over again.
@@ -144,6 +146,10 @@ mod({
                 id : 0,
                 cancelled : false
             };
+            
+            // Store a reference to the animation...
+            _animations.push(animation);
+            
             var animate = function (time) {
                 /**
                  * Calls the animation function and schedules another call.
@@ -163,18 +169,41 @@ mod({
             return animation;
         };
         
-        m.cancelAnimation = function (animation) {
+        m.cancelAnimation = function(animation) {
             /** * *
             * Cancels an animation request returned by m.requestAnimation.
             * @param - animationFunction Function
             * * **/
-            var timeout = function (id) {
+            var timeout = function(id) {
                 clearTimeout(id);
             };
                          
             var cancel = window.cancelRequestAnimationFrame || window.webkitCancelRequestAnimationFrame || window.cancelAnimationFrame || timeout;
             animation.cancelled = true;
             cancel(animation.id);
+            
+            // Remove the animation from our list...
+            var ndx = _animations.indexOf(animation);
+            if (ndx !== -1) {
+                _animations.splice(ndx, 1);
+            }
+        };
+        
+        m.cancelAllAnimations = function() {
+            /** * *
+            * Cancels all animations currently registered.
+            * * **/
+            while (_animations.length) {
+                m.cancelAnimation(_animations[0]);
+            }
+        };
+        
+        m.animationCount = function() {
+            /** * *
+            * Returns the number of registered animations.
+            * @returns - Number
+            * * **/
+            return _animations.length;
         };
         
         m.safeAddin = function safeAddin (obj, key, value) {

@@ -11,17 +11,12 @@ mod({
     dependencies : [ 'Note/Listener.js' ],
     init : function initListenerTests (m) {
         /**
-         * Initializes the ListenerTests
-         * @param - m Object - The mod modules object.
-         */
+        * Initializes the ListenerTests
+        * @param - m Object - The mod modules object.
+        */
         
-         var assert = m.assert;
-         
-         var dispatcher = Listener();
-         
-         dispatcher.listenTo
-        
-        return {};
-        
+        return function runDispatcherTests (callback) {
+            callback();
+        }
     }
 });
