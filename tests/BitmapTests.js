@@ -60,8 +60,8 @@ mod({
                     onComplete : function() {
                         var canEase = confirm('Did the bloody block get smaller?');
                         assert.eq(canEase, true, 'Can tween bitmap.');
-                        if (window.location.href.indexOf('http://localhost') !== -1) {
-                            // We are running from a local server, so we can do
+                        if (window.location.href.indexOf('http://') !== -1) {
+                            // We are running from a server, so we can do
                             // tests without security errors...
                             var imageData = bm.getImageData();
                             assert.eq(imageData !== false, true, 'Bitmap can retrieve image data.');
