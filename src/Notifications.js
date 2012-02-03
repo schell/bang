@@ -19,7 +19,9 @@ mod({
              DID_ADD_SUBVIEW : 'didAddView',
              WAS_ADDED_TO_VIEWCONTAINER : 'wasAddedToViewContainer',
              FRAME_TICK : 'frameTick',
-             DID_LOAD_IDENTITY : 'didLoadIdentity'
+             DID_LOAD_IDENTITY : 'didLoadIdentity',
+             DID_LOAD : 'didLoad',
+             DID_NOT_LOAD : 'didNotLoad'
          };
     }
 });

@@ -86,10 +86,7 @@ mod({
                 throwsError = true;
             }
             assert.eq(throwsError, true, 'Stage throws error if parent DNE.');
-        
-            var parentDiv = document.createElement('div');
-            parentDiv.id = 'bang';
-            document.body.appendChild(parentDiv);
+            
             stage.setParentElement('bang');
             assert.eq(document.getElementById(stage.canvas.id) !== null, true, 'Stage is injected into parent div.');
         

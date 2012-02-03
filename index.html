@@ -15,6 +15,9 @@
         <script src="submodules/mod/mod.js" type="text/javascript" charset="utf-8"></script>
     </head>
     <body id="body">
+        
+        <div id="bang"></div>
+        
         <script type="text/javascript" charset="utf-8">
             mod.useTagInjection = true;
             mod.basePath = 'src/';
@@ -26,15 +29,17 @@
                     '../tests/NoteTests.js',
                     '../tests/GeomTests.js',
                     '../tests/GlobalTests.js',
+                    '../tests/BitmapTests.js'
                 ],
                 init : function initMain (m) {
                     return undefined;
                 },
                 callback : function callbackMain (m) {
-                    go( m.GlobalTests,
-                        m.GeomTests, 
-                        m.NoteTests,
-                        m.ViewTests,
+                    go( //m.GlobalTests,
+                        //m.GeomTests, 
+                        //m.NoteTests,
+                        //m.ViewTests,
+                        m.BitmapTests,
                         function() {
                             m.assert.stat();
                         }).start();
