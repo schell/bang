@@ -1,6 +1,6 @@
 mod({
     name : 'GlobalTests',
-    dependencies : [ 'Global.js' ],
+    dependencies : [ 'Bang/Global.js' ],
     init : function initGlobalTests (m) {
         return function runGlobalTests(callback) {
             // aliases

@@ -8,7 +8,7 @@
  * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * **/
 mod({
     name : 'View',
-    dependencies : [ 'Global.js', 'Notifications.js', 'Geometry.js' ],
+    dependencies : [ 'Bang/Global.js', 'Bang/Notifications.js', 'Bang/Geometry.js' ],
     init : function initView(m) {
         /**
          * Initializes the View Addin

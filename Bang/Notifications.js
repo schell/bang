@@ -8,7 +8,7 @@
  * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * **/
 mod({
     name : 'Notifications',
-    dependencies : [ 'Global.js', 'Note/Listener.js', 'Note/Dispatcher.js', 'Note/NoteCenter.js', 'Note/Note.js' ],
+    dependencies : [ 'Bang/Global.js', 'Bang/Note/Listener.js', 'Bang/Note/Dispatcher.js', 'Bang/Note/NoteCenter.js', 'Bang/Note/Note.js' ],
     init : function initNote (m) {
         /**
          * Initializes the family of system notifications.

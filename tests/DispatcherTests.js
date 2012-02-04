@@ -8,7 +8,7 @@
  * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * **/
 mod({
     name : 'ListenerTests',
-    dependencies : [ 'Note/Listener.js' ],
+    dependencies : [ 'Bang/Note/Listener.js' ],
     init : function initListenerTests (m) {
         /**
         * Initializes the ListenerTests

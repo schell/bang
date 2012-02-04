@@ -8,7 +8,7 @@
 * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * **/
 mod({
     name : 'BitmapTests',
-    dependencies : [ 'Global.js', 'View/Stage.js', 'Ease/Ease.js', 'View/Bitmap.js', 'Error/BitmapLoadError.js', 'Error/BitmapSecurityError.js', '../submodules/go/go.js' ],
+    dependencies : [ 'Bang/Global.js', 'Bang/View/Stage.js', 'Bang/Ease/Ease.js', 'Bang/View/Bitmap.js', 'Bang/Error/BitmapLoadError.js', 'submodules/go/go.js' ],
     init : function initBitmapTests (m) {
         /**
          * Initializes the BitmapTests 

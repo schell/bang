@@ -8,7 +8,7 @@
  * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * **/
 mod({
     name : 'Point',
-    dependencies : [ 'Global.js', 'Geom/Vector.js' ],
+    dependencies : [ 'Bang/Global.js', 'Bang/Geom/Vector.js' ],
     init : function initPoint (m) {
         /**
          * Initializes the Point function/module.

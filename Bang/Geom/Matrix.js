@@ -18,7 +18,7 @@
 * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * **/
 mod({
     name : 'Matrix',
-    dependencies : [ 'Geometry.js', 'Notifications.js' ],
+    dependencies : [ 'Bang/Geometry.js', 'Bang/Notifications.js' ],
     init : function initMatrix (m) {
         /**
          * Initializes the Matrix Addin

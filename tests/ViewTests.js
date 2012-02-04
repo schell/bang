@@ -8,7 +8,7 @@
 * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * **/
 mod({
     name : 'ViewTests',
-    dependencies : [ '../submodules/go/go.js', 'Ease/Ease.js', 'View/View.js', 'View/ViewContainer.js', 'View/Stage.js' ],
+    dependencies : [ 'submodules/go/go.js', 'Bang/Ease/Ease.js', 'Bang/View/View.js', 'Bang/View/ViewContainer.js', 'Bang/View/Stage.js' ],
     init : function initViewTests (m) {
         /** * *
         * Initializes the ViewTests

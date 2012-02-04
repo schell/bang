@@ -8,7 +8,7 @@
 * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * **/
 mod({
     name : 'Stage',
-    dependencies : [ 'View/ViewContainer.js' ],
+    dependencies : [ 'Bang/View/ViewContainer.js' ],
     init : function initStage (m) {
         /**
          * Initializes the Stage Addin

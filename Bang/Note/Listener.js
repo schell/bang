@@ -8,7 +8,7 @@
  * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * **/  
 mod({
     name : 'Listener',
-    dependencies : [ 'Global.js', 'Note/NoteCenter.js' ],
+    dependencies : [ 'Bang/Global.js', 'Bang/Note/NoteCenter.js' ],
     init : function initListener (m) {
         /**
          * Initializes the Listener Addin

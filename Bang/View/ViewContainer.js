@@ -8,7 +8,7 @@
 * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * **/
 mod({
     name : 'ViewContainer',
-    dependencies : [ 'Global.js', 'View/View.js', 'Notifications.js' ],
+    dependencies : [ 'Bang/Global.js', 'Bang/View/View.js', 'Bang/Notifications.js' ],
     init : function initViewContainer (m) {
         /**
          * Initializes the ViewContainer Addin

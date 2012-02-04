@@ -20,16 +20,15 @@
         
         <script type="text/javascript" charset="utf-8">
             mod.useTagInjection = true;
-            mod.basePath = 'src/';
             mod({
                 name : "Main",
                 dependencies : [
-                    '../submodules/go/go.js',
-                    '../tests/ViewTests.js',
-                    '../tests/NoteTests.js',
-                    '../tests/GeomTests.js',
-                    '../tests/GlobalTests.js',
-                    '../tests/BitmapTests.js'
+                    'submodules/go/go.js',
+                    'tests/ViewTests.js',
+                    'tests/NoteTests.js',
+                    'tests/GeomTests.js',
+                    'tests/GlobalTests.js',
+                    'tests/BitmapTests.js'
                 ],
                 init : function initMain (m) {
                     return undefined;

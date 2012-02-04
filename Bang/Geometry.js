@@ -8,7 +8,7 @@
  * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * **/
 mod({
     name : 'Geometry',
-    dependencies : [ 'Global.js', 'Geom/Point.js', 'Geom/Polygon.js', 'Geom/Rectangle.js', 'Geom/Vector.js', 'Geom/Matrix.js' ],
+    dependencies : [ 'Bang/Global.js', 'Bang/Geom/Point.js', 'Bang/Geom/Polygon.js', 'Bang/Geom/Rectangle.js', 'Bang/Geom/Vector.js', 'Bang/Geom/Matrix.js' ],
     init : function initGeom (m) {
         /**
          * Imports geometry addins and exports some math constants.

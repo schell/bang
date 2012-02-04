@@ -8,7 +8,7 @@
  * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * **/
 mod({
     name : 'NoteCenter',
-    dependencies : [ 'Global.js', 'Note/Note.js' ],
+    dependencies : [ 'Bang/Global.js', 'Bang/Note/Note.js' ],
     init : function initNoteCenter (m) {
         /**
          * Initializes the NoteCenter Addin

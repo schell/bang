@@ -8,7 +8,7 @@
 * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * **/
 mod({
     name : 'Ease',
-    dependencies : [ 'Global.js' ],
+    dependencies : [ 'Bang/Global.js' ],
     init : function initEase (m) {
         /** * *
         * Initializes the Ease Addin

@@ -12,7 +12,7 @@
  * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * **/
 mod({
     name : 'Rectangle',
-    dependencies : [ 'Geom/Polygon.js', 'Geom/Point.js', 'Geom/Size.js' ],
+    dependencies : [ 'Bang/Geom/Polygon.js', 'Bang/Geom/Point.js', 'Bang/Geom/Size.js' ],
     init : function initRectangle (m) {
         /**
          * Initializes the Rectangle Addin

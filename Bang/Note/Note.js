@@ -8,7 +8,7 @@
  * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * **/
 mod({
     name : 'Note',
-    dependencies : [ 'Global.js' ],
+    dependencies : [ 'Bang/Global.js' ],
     init : function initNote (m) {
         /**
          * Initializes the Note Addin
