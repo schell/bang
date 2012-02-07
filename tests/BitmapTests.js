@@ -65,9 +65,10 @@ mod({
                             // tests without security errors...
                             var imageData = bm.getImageData();
                             assert.eq(imageData !== false, true, 'Bitmap can retrieve image data.');
-                        } else {
-                            cb();
-                        }
+                        } 
+                        
+                        stage.remove();
+                        cb();
                     }
                 });
                 bm.tween.interpolate();

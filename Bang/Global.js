@@ -155,6 +155,8 @@ mod({
                  * Calls the animation function and schedules another call.
                  * 
                  */
+                time = time || Date.now();
+                
                 if (animation.cancelled !== false) {
                     // Abort if the animation has been cancelled...
                     return;

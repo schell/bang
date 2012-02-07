@@ -26,9 +26,6 @@ mod({
             // Addin View
             m.View(self);
             
-            // A reference to this Bitmap's image tag...
-            m.safeAddin(self, 'image', undefined);
-            
             m.safeAddin(self, 'load', function Bitmap_load(src) {
                 /** * *
                 * Loads a bitmap image.
@@ -53,7 +50,7 @@ mod({
                 * Returns the image data of this Bitmap, or false if no image is loaded.
                 * @returns - ImageData
                 * * **/
-                if (!m.defined(self.image)) {
+                if (!('image' in self)) {
                     return false;
                 }
                 var image = self.image;
@@ -84,16 +81,9 @@ mod({
                 * Draws this bitmap into the 2d context.
                 * * **/
                 self.applyTransform();
-                
                 self.context.drawImage(self.image, 0, 0);
-                
-                for (var i=0; i < self.drawQueue.length; i++) {
-                    var drawFunc = self.drawQueue[i];
-                    drawFunc();
-                }
-                
                 self.restoreTransform();
-                
+                self.view_draw();
             });
             
             

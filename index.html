@@ -28,7 +28,8 @@
                     'tests/NoteTests.js',
                     'tests/GeomTests.js',
                     'tests/GlobalTests.js',
-                    'tests/BitmapTests.js'
+                    'tests/BitmapTests.js',
+                    'tests/SpriteTests.js'
                 ],
                 init : function initMain (m) {
                     return undefined;
@@ -38,7 +39,8 @@
                         //m.GeomTests, 
                         //m.NoteTests,
                         //m.ViewTests,
-                        m.BitmapTests,
+                        //m.BitmapTests,
+                        m.SpriteTests,
                         function() {
                             m.assert.stat();
                         }).start();
