@@ -160,8 +160,6 @@ mod({
                     0.0, 0.0, 1.0, 0.0,
                     0.0, 0.0, 0.0, 1.0
                 ];
-                // Let whatever listeners know that we're resetting the transfromation...
-                self.sendNotification(m.Notifications.DID_LOAD_IDENTITY);
                 return self;
             });
             m.safeAddin(self, 'loadOrtho', function Matrix_name(left, right, top, bottom, far, near) {

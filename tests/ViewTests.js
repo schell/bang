@@ -42,7 +42,7 @@ mod({
             assert.testSuite = 'ViewContainer Tests';
         
             var calledUpdateContext = false;
-            view.addInterest(view, m.Notifications.DID_UPDATE_CONTEXT, function updatedContext(note) {
+            view.addInterest(view, m.Notifications.View.DID_UPDATE_CONTEXT, function updatedContext(note) {
                 calledUpdateContext = true;
             });
             var container = m.ViewContainer({
@@ -69,7 +69,7 @@ mod({
             }
         
             topOfTree.context = 666;
-            topOfTree.sendNotification(m.Notifications.DID_UPDATE_CONTEXT, topOfTree.context);
+            topOfTree.sendNotification(m.Notifications.View.DID_UPDATE_CONTEXT, topOfTree.context);
             assert.eq(lastBranch.context, 666, 'Branches of displaylist update context when update note sent.');
         
             assert.testSuite = 'Stage Tests';
@@ -136,7 +136,7 @@ mod({
             green.addSubview(red);
             green.addSubview(blue);
             green.drawQueue.push(makeDrawFunction(green, 'rgb(0, 255, 0)'));
-            green.addInterest(undefined, m.Notifications.FRAME_TICK, function tick(note) {
+            green.addInterest(undefined, m.Notifications.Stage.FRAME_TICK, function tick(note) {
                 red.rotation += 2;
                 blue.rotation += 2;
                 green.rotation -= 2;

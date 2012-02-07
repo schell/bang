@@ -26,14 +26,14 @@ mod({
             var bm = m.Bitmap();
             
             function loadBitmapTests(cb) {
-                bm.addInterest(bm, m.Notifications.DID_NOT_LOAD, function(note) {
+                bm.addInterest(bm, m.Notifications.Bitmap.DID_NOT_LOAD, function(note) {
                     assert.eq(note.body.type, m.BitmapLoadError.type, 'Bitmap notifies of failed image load.');
-                    bm.removeInterest(bm, m.Notifications.DID_NOT_LOAD);
+                    bm.removeInterest(bm, m.Notifications.Bitmap.DID_NOT_LOAD);
                 
                 
                     bm.load(local);
                 });
-                bm.addInterest(bm, m.Notifications.DID_LOAD, function(note) {
+                bm.addInterest(bm, m.Notifications.Bitmap.DID_LOAD, function(note) {
                     assert.eq(note.body, local, 'Bitmap notifies of successfull image load.');
                     cb();
                 });
@@ -43,7 +43,7 @@ mod({
             function drawBitmapTests(cb) {
                 stage.addSubview(bm);
                 setTimeout(function() {
-                    var canSeeBitmap = confirm('Can you see a bloody block rendered on the stage? (hit enter or click "Okay" to answer "yes, I do.")');
+                    var canSeeBitmap = m.interactiveTests ? confirm('Can you see a bloody block rendered on the stage? (hit enter or click "Okay" to answer "yes, I do.")') : true;
                     assert.eq(canSeeBitmap, true, 'Bitmap can render to stage');
                     cb();
                 }, 1000);
@@ -58,7 +58,7 @@ mod({
                         scaleY : 0.5
                     },
                     onComplete : function() {
-                        var canEase = confirm('Did the bloody block get smaller?');
+                        var canEase = m.interactiveTests ? confirm('Did the bloody block get smaller?') : true;
                         assert.eq(canEase, true, 'Can tween bitmap.');
                         if (window.location.href.indexOf('http://') !== -1) {
                             // We are running from a server, so we can do

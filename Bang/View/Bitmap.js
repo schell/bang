@@ -34,13 +34,13 @@ mod({
                 var image = new Image();
                 image.onload = function onLoadImage() {
                     self.image = image;
-                    self.sendNotification(m.Notifications.DID_LOAD, src);
+                    self.sendNotification(m.Notifications.Bitmap.DID_LOAD, src);
                 };
                 image.onerror = function onErrorImage() {
                     var error = m.BitmapLoadError({
                         message : 'Bitmap could not load '+src
                     });
-                    self.sendNotification(m.Notifications.DID_NOT_LOAD, error);
+                    self.sendNotification(m.Notifications.Bitmap.DID_NOT_LOAD, error);
                 };
                 image.src = src;
             });

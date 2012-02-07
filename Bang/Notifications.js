@@ -15,13 +15,20 @@ mod({
          * @param - m Object - The mod modules object.
          */
          return {
-             DID_UPDATE_CONTEXT : 'didUpdateContext',
-             DID_ADD_SUBVIEW : 'didAddView',
-             WAS_ADDED_TO_VIEWCONTAINER : 'wasAddedToViewContainer',
-             FRAME_TICK : 'frameTick',
-             DID_LOAD_IDENTITY : 'didLoadIdentity',
-             DID_LOAD : 'didLoad',
-             DID_NOT_LOAD : 'didNotLoad'
+             View : {
+                 DID_UPDATE_CONTEXT : 'didUpdateContext',
+                 WAS_ADDED_TO_VIEWCONTAINER : 'wasAddedToViewContainer',
+             },
+             ViewContainer : {
+                 DID_ADD_SUBVIEW : 'didAddSubview', 
+             },
+             Stage : {
+                 FRAME_TICK : 'frameTick',
+             },
+             Bitmap : {
+                 DID_LOAD : 'didLoad',
+                 DID_NOT_LOAD : 'didNotLoad'
+             }
          };
     }
 });

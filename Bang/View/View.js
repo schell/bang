@@ -103,7 +103,7 @@ mod({
             //--------------------------------------
             m.safeAddin(self, 'onParentUpdatedContext', function View_onParentUpdatedContext(note) {
                 self.context = note.body;
-                self.sendNotification(m.Notifications.DID_UPDATE_CONTEXT, self.context);
+                self.sendNotification(m.Notifications.View.DID_UPDATE_CONTEXT, self.context);
             });
             
             m.safeAddin(self, 'onAddedToViewContainer', function View_onAddedToViewContainer(note) {
@@ -114,11 +114,11 @@ mod({
                 // Update...
                 self.parent = note.body;
                 self.context = self.parent.context;
-                self.addInterest(self.parent, m.Notifications.DID_UPDATE_CONTEXT, self.onParentUpdatedContext);
+                self.addInterest(self.parent, m.Notifications.View.DID_UPDATE_CONTEXT, self.onParentUpdatedContext);
                 // Notify
-                self.sendNotification(m.Notifications.DID_UPDATE_CONTEXT, self.context);
+                self.sendNotification(m.Notifications.View.DID_UPDATE_CONTEXT, self.context);
             });
-            self.addInterest(self, m.Notifications.WAS_ADDED_TO_VIEWCONTAINER, self.onAddedToViewContainer);
+            self.addInterest(self, m.Notifications.View.WAS_ADDED_TO_VIEWCONTAINER, self.onAddedToViewContainer);
             
             return self;
         };

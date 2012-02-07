@@ -45,8 +45,8 @@ mod({
             m.safeAddin(self, 'addSubview', function ViewContainer_addSubview(subview) {
                 _subviews.push(subview);
                 // Let everyone know that this added a view...
-                subview.sendNotification(m.Notifications.WAS_ADDED_TO_VIEWCONTAINER, self);
-                self.sendNotification(m.Notifications.DID_ADD_SUBVIEW, subview);
+                subview.sendNotification(m.Notifications.View.WAS_ADDED_TO_VIEWCONTAINER, self);
+                self.sendNotification(m.Notifications.ViewContainer.DID_ADD_SUBVIEW, subview);
             });
             
             m.safeAddin(self, 'treeString', function ViewContainer_treeString(n) {

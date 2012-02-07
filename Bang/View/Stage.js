@@ -47,7 +47,7 @@ mod({
             
             m.safeOverride(self, 'draw', 'viewContainer_draw', function Stage_draw() {
                 // Send out a global hitArea tick notification...
-                self.sendNotification(m.Notifications.FRAME_TICK);
+                self.sendNotification(m.Notifications.Stage.FRAME_TICK);
                 // Clear the stage...
                 if (self.clearCanvasOnFrameTick) {
                     self.context.clearRect(0, 0, self.canvas.width, self.canvas.height);    

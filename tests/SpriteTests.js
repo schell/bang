@@ -40,6 +40,10 @@ mod({
             sprite.load(sheet);
             
             stage.addSubview(sprite);
+            
+            setTimeout(function() {
+                callback();
+            }, 1000);
         };
     }
 });
