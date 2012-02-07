@@ -103,7 +103,7 @@ mod({
                 return function () {
                     view.context.save();
                     view.context.fillStyle = color;
-                    view.context.fillRect(view.hitArea.left(), view.hitArea.top(), view.hitArea.size().width(), view.hitArea.size().height());
+                    view.context.fillRect(view.hitArea.left(), view.hitArea.top(), view.hitArea.width(), view.hitArea.height());
                     view.context.restore();
                 };
             }

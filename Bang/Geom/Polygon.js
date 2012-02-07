@@ -23,21 +23,8 @@ mod({
              */
             self = m.Object(self); 
             
-            m.safeAddin(self, 'points', []);
-            
-            m.safeAddin(self, 'copy', function Polygon_copy() {
-                /** * *
-                * Returns a copy of this polygon.
-                * @returns - Polygon
-                * * **/
-                var copy = addin();
-                for (var i=0; i < self.points.length; i++) {
-                    var point = self.points[i];
-                    var cp = point.copy();
-                    copy.points.push(cp);
-                }
-                return copy;
-            });
+            // Addin Vector
+            self = m.Vector(self);
             
             m.safeAddin(self, 'containsPoint', function Polygon_containsPoint(point) {
                 /** * *
@@ -48,12 +35,12 @@ mod({
                 var y = point.y();
                 var xp = [];
                 var yp = [];
-                var npol = self.points.length;
+                var ncomp = self.elements.length;
+                var npol = ncomp/2;
                 
-                for (var i = 0; i < npol; i++) {
-                    var vertex = self.points[i];
-                    xp.push(vertex.x());
-                    yp.push(vertex.y());
+                for (var i = 0; i < ncomp; i+=2) {
+                    xp.push(self.elements[i]);
+                    yp.push(self.elements[i+1]);
                 }
     
                 var j = npol - 1;

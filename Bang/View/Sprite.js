@@ -78,10 +78,10 @@ mod({
                     
                     frame = self.frames[self.currentFrame(Date.now())];
 					
-                    var fx = frame.origin().x();
-					var fy = frame.origin().y();
-					var dw = frame.size().width();
-					var dh = frame.size().height();
+                    var fx = frame.x();
+					var fy = frame.y();
+					var dw = frame.width();
+					var dh = frame.height();
                     
                     self.context.drawImage(self.image, fx, fy, dw, dh, 0, 0, dw, dh);
                     

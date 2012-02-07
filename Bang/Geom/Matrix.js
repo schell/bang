@@ -4,12 +4,11 @@
 * /---------------------------------------\
 * | indices     | elements   | meaning    |
 * |---------------------------------------| 
-* | 0  1  2  3  | a  c  0  0 | s  0  0  0 |
-* | 4  5  6  7  | b  d  0  0 | 0  s  0  0 |
-* | 8  9  10 11 | 0  0  1  0 | 0  0  s  0 |
-* | 12 13 14 15 | x  y  z  1 | x  y  z  1 |
+* | 0  1  2     | a  c  0    | s  0  0    |
+* | 3  4  5     | b  d  0    | 0  s  0    |
+* | 6  7  8     | 0  0  1    | x  y  s    |
+* |             |            |            |
 * \---------------------------------------/ 
-* (http://math.stackexchange.com/questions/336/why-are-3d-transformation-matrices-4x4-instead-of-3x3#343)
 *
 * Copyright (c) 2012 Schell Scivally. All rights reserved.
 * 
@@ -18,7 +17,7 @@
 * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * **/
 mod({
     name : 'Matrix',
-    dependencies : [ 'Bang/Geometry.js', 'Bang/Notifications.js' ],
+    dependencies : [ 'Bang/Geometry.js' ],
     init : function initMatrix (m) {
         /**
          * Initializes the Matrix Addin
@@ -41,12 +40,18 @@ mod({
             // Addin Vector
             m.Vector(self);
             
-            // Addin Dispatcher
-            m.Dispatcher(self);
-            
             //--------------------------------------
             //  METHODS
             //--------------------------------------
+            m.safeOverride(self, 'copy', 'vector_copy', function Matrix_copy() {
+                /** * *
+                * Returns a copy of this matrix.
+                * @return - Matrix
+                * * **/
+                var vector = self.vector_copy();
+                addin(vector);
+                return vector;
+            });
             m.safeAddin(self, 'toPrettyString', function Matrix_toPrettyString() {
                 /** * *
                 * Returns a pretty string value.
@@ -59,10 +64,9 @@ mod({
                     }
                     return s;
                 }
-                var s = '\n' + fixed(self.elements[0]) + ' ' + fixed(self.elements[1]) + ' ' + fixed(self.elements[2]) + ' ' + fixed(self.elements[3]) + '\n';
-                s += fixed(self.elements[4]) + ' ' + fixed(self.elements[5]) + ' ' + fixed(self.elements[6]) + ' ' + fixed(self.elements[7]) + '\n';
-                s += fixed(self.elements[8]) + ' ' + fixed(self.elements[9]) + ' ' + fixed(self.elements[10]) + ' ' + fixed(self.elements[11]) + '\n';
-                s += fixed(self.elements[12]) + ' ' + fixed(self.elements[13]) + ' ' + fixed(self.elements[14]) + ' ' + fixed(self.elements[15]);
+                var s = '\n' + fixed(self.elements[0]) + ' ' + fixed(self.elements[1]) + ' ' + fixed(self.elements[2]) + '\n';
+                s += fixed(self.elements[3]) + ' ' + fixed(self.elements[4]) + ' ' + fixed(self.elements[5]) + '\n';
+                s += fixed(self.elements[6]) + ' ' + fixed(self.elements[7]) + ' ' + fixed(self.elements[8]);
                 return s;
             });
             m.safeAddin(self, 'a', function Matrix_a() {
@@ -77,7 +81,7 @@ mod({
                 * Returns the 'b' matrix component.
                 * @returns - Number
                 * * **/
-                return self.elements[4];
+                return self.elements[3];
             });
             m.safeAddin(self, 'c', function Matrix_c() {
                 /** * *
@@ -91,125 +95,70 @@ mod({
                 * Returns the 'd' matrix component.
                 * @returns - Number
                 * * **/
-                return self.elements[5];
-            });
-            m.safeOverride(self, 'x', 'vector_x', function Matrix_x(x) {
-                /** * *
-                * Returns the 'x' matrix component. Optionally sets the x component
-                * if *x* is supplied.
-                * @param - x Number
-                * @returns - Number
-                * * **/
-                self.elements[12] = m.ifndefInitNum(x, self.elements[12]);
-                return self.elements[12];
-            });
-            m.safeOverride(self, 'y', 'vector_y', function Matrix_y(y) {
-                /** * *
-                * Returns the 'y' matrix component. Optionally sets the y component
-                * if *y* is supplied.
-                * @param - y Number
-                * @returns - Number
-                * * **/
-                self.elements[13] = m.ifndefInitNum(y, self.elements[13]);
-                return self.elements[13];
-            });
-            m.safeOverride(self, 'z', 'vector_z', function Matrix_z(z) {
-                /** * *
-                * Returns the 'z' matrix component. Optionally sets the z component
-                * if *z* is supplied.
-                * @param - z Number
-                * @returns - Number
-                * * **/
-                self.elements[14] = m.ifndefInitNum(z, self.elements[14]);
-                return self.elements[14];
-            });
-            m.safeAddin(self, 'scaleX', function Matrix_scaleX(x) {
-                /** * *
-                * Getter/setter for the x scale component.
-                * @param - x Number
-                * @returns - Number
-                * * **/
-                self.elements[0] = m.ifndefInitNum(x, self.elements[0]);
-                return self.elements[0];
-            });
-            m.safeAddin(self, 'scaleY', function Matrix_scaleY(y) {
-                /** * *
-                * Getter/setter for the x scale component.
-                * @param - x Number
-                * @returns - Number
-                * * **/
-                self.elements[5] = m.ifndefInitNum(y, self.elements[5]);
-                return self.elements[5];
-            });
-            m.safeAddin(self, 'scaleZ', function Matrix_scaleZ(z) {
-                /** * *
-                * Getter/setter for the z scale component.
-                * @param - z Number
-                * @returns - Number
-                * * **/
-                self.elements[10] = m.ifndefInitNum(z, self.elements[10]);
-                return self.elements[10];
+                return self.elements[4];
             });
             m.safeAddin(self, 'loadIdentity', function Matrix_loadIdentity() {
                 /** * *
                 * Loads the identity projection/transformation matrix.
                 * * **/
                 self.elements = [
-                    1.0, 0.0, 0.0, 0.0,
-                    0.0, 1.0, 0.0, 0.0,
-                    0.0, 0.0, 1.0, 0.0,
-                    0.0, 0.0, 0.0, 1.0
+                    1.0, 0.0, 0.0, 
+                    0.0, 1.0, 0.0, 
+                    0.0, 0.0, 1.0 
                 ];
                 return self;
             });
-            m.safeAddin(self, 'loadOrtho', function Matrix_name(left, right, top, bottom, far, near) {
+            m.safeAddin(self, 'column', function Matrix_column(n) {
                 /** * *
-                * Loads a parallel projection matrix.
+                * Returns column *n* in this matrix.
+                * @return - Array
                 * * **/
-                var a,b,c,x,y,z;
-                a = 2.0/(right-left);
-                b = 2.0/(top-bottom);
-                c = -2.0/(far-near);
-                x = -(right+left)/(right-left);
-                y = -(top+bottom)/(top-bottom);
-                z = -(far+near)/(far-near);
-                
-                self.elements = [
-                    a  , 0.0, 0.0,   x,
-                    0.0,   b, 0.0,   y,
-                    0.0, 0.0,   c,   z,
-                    0.0, 0.0, 0.0, 1.0
-                ];
-                return self;
+                var elementsInColumn = 3;
+                var start = n;
+                var column = [];
+                for (var i=0; i < elementsInColumn; i++) {
+                    column.push(self.elements[start+3*i]);
+                }
+                return column;
+            });
+            m.safeAddin(self, 'row', function Matrix_row(n) {
+                /** * *
+                * Returns row *n* in this matrix.
+                * @return - Array
+                * * **/
+                var elementsInRow = 3;
+                var start = n*elementsInRow;
+                var row = [];
+                for (var i=0; i < elementsInRow; i++) {
+                    row.push(self.elements[start+i]);
+                }
+                return row;
             });
             m.safeOverride(self, 'multiply', 'vector_multiply', function Matrix_multiply(matrix) {
                 /** * *
-                * Multiplies this matrix by *matrix*.
+                * Multiplies this matrix by another.
                 * @param - matrix Matrix
                 * * **/
-                var elements = [];
-                for (var i = 0; i < 4; i++) {
-                    elements[i*4+0] = (self.elements[i*4+0] * matrix.elements[0*4+0]) +
-                    (self.elements[i*4+1] * matrix.elements[1*4+0]) +
-                    (self.elements[i*4+2] * matrix.elements[2*4+0]) +
-                    (self.elements[i*4+3] * matrix.elements[3*4+0]);
-                                    
-                    elements[i*4+1] = (self.elements[i*4+0 ] * matrix.elements[0*4+1]) + 
-                    (self.elements[i*4+1] * matrix.elements[1*4+1]) +
-                    (self.elements[i*4+2] * matrix.elements[2*4+1]) +
-                    (self.elements[i*4+3] * matrix.elements[3*4+1]);
-                                    
-                    elements[i*4+2] = (self.elements[i*4+0 ] * matrix.elements[0*4+2]) + 
-                    (self.elements[i*4+1] * matrix.elements[1*4+2]) +
-                    (self.elements[i*4+2] * matrix.elements[2*4+2]) +
-                    (self.elements[i*4+3] * matrix.elements[3*4+2]);
-                                    
-                    elements[i*4+3] = (self.elements[i*4+0 ] * matrix.elements[0*4+3]) + 
-                    (self.elements[i*4+1] * matrix.elements[1*4+3]) +
-                    (self.elements[i*4+2] * matrix.elements[2*4+3]) +
-                    (self.elements[i*4+3] * matrix.elements[3*4+3]);
+                function addRowAndColumn(row, column) {
+                    var combo = 0;
+                    for (var i=0; i < row.length && i < column.length; i++) {
+                        combo += row[i]*column[i];
+                    }
+                    return combo;
                 }
+                
+                var elements = [];
+                
+                for (var i=0; i < 3; i++) {
+                    for (var j=0; j < 3; j++) {
+                        var row = self.row(i);
+                        var column = matrix.column(j);
+                        elements.push(addRowAndColumn(row, column));
+                    }
+                }
+                
                 self.elements = elements;
+                
                 return self;
             });
             m.safeAddin(self, 'scale', function Matrix_scale(sx, sy, sz) {

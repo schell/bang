@@ -135,7 +135,9 @@ mod({
                 * @param - x Number
                 * @returns - x Number
                 * * **/
-                self.elements[0] = m.ifndefInitNum(x, self.elements[0]);
+                if (arguments.length) {
+                    self.elements[0] = x;
+                }
                 return self.elements[0];
             });
             m.safeAddin(self, 'y', function Vector_y(y) {
@@ -145,7 +147,9 @@ mod({
                 * @param - y Number
                 * @returns - y Number
                 * * **/
-                self.elements[1] = m.ifndefInitNum(y, self.elements[1]);
+                if (arguments.length) {
+                    self.elements[1] = y;
+                }
                 return self.elements[1];
             });
             m.safeAddin(self, 'z', function Vector_z(z) {
@@ -155,7 +159,9 @@ mod({
                 * @param - z Number
                 * @returns - z Number
                 * * **/
-                self.elements[2] = m.ifndefInitNum(z, self.elements[2]);
+                if (arguments.length) {
+                    self.elements[2] = z;
+                }
                 return self.elements[2];
             });
             //--------------------------------------
