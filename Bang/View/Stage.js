@@ -38,8 +38,8 @@ mod({
             
             m.safeAddin(self, 'canvas', function Stage_initCanvas() {
                 var canvas = document.createElement('canvas');
-                canvas.width = self.hitArea.size().width();
-                canvas.height = self.hitArea.size().height();
+                canvas.width = self.hitArea.width();
+                canvas.height = self.hitArea.height();
                 canvas.id = 'Bang_'+Math.random().toString().substr(2);
                 self.context = canvas.getContext('2d');
                 return canvas;

@@ -26,8 +26,62 @@
          
     		assert.suite = 'Geom Tests';
         
-            var mat = m.Matrix();
-            mat.translate(1, 2, 3);
+            var mat = m.Matrix({
+                elements : [
+                    0, 1, 2,
+                    3, 4, 5, 
+                    6, 7, 8
+                ]
+            });
+            
+            var r0 = mat.row(0);
+            var r2 = mat.row(2);
+            assert.eq(r0.toString(), '0,1,2', 'Can get matrix row.');
+            assert.eq(r2.toString(), '6,7,8', 'Can get matrix row.');
+            
+            var c0 = mat.column(0);
+            var c2 = mat.column(2);
+            assert.eq(c0.toString(), '0,3,6', 'Can get matrix column.');
+            assert.eq(c2.toString(), '2,5,8', 'Can get matrix column.');
+            
+            var A = m.Matrix({
+                elements : [
+                    5, 9, 2, 
+                    1, 7, 6,
+                    3, 4, 8
+                ]
+            });
+            
+            var B = m.Matrix({
+                elements : [
+                    9, 1, 6, 
+                    7, 2, 4,
+                    8, 10, 3
+                ]
+            });
+            
+            var AB = m.Matrix({
+                elements : [
+                    124, 43, 72,
+                    106, 75, 52,
+                    119, 91, 58
+                ]
+            });
+            
+            var BA = m.Matrix({
+                elements : [
+                    64, 112, 72,
+                    49, 93, 58,
+                    59, 154, 100
+                ]
+            });
+            
+            var resultAB = A.copy().multiply(B);
+            var resultBA = B.copy().multiply(A);
+            
+            assert.eq(resultAB.elements.toString(), AB.elements.toString(), 'Matrix can multiply');
+
+            mat.translate(1, 2);
             assert.eq(mat.x(), 1, 'Matrix can translate x');
             assert.eq(mat.y(), 2, 'Matrix can translate y');
             assert.eq(mat.z(), 3, 'Matrix can translate z');
@@ -86,11 +140,11 @@
             assert.eq(pnt1.closer(pnt2, pnt3), pnt2, 'Point can determine closest point');
         
             var unitSquare = m.Polygon({
-                points : [
-                    m.Point.from(-1,  1),
-                    m.Point.from( 1,  1),
-                    m.Point.from( 1, -1),
-                    m.Point.from(-1, -1)
+                elements : [
+                    -1,  1,
+                     1,  1,
+                     1, -1,
+                    -1, -1
                 ]
             });
             assert.eq(unitSquare.containsPoint(m.Point()), true, 'Polygon unit square contains origin');
@@ -113,16 +167,16 @@
     		assert.eq(r1.origin().distanceTo(p1), 0, 'First rectangle '+r1.toString()+' has origin 0,0');
     		assert.eq(r2.origin().distanceTo(p3), 0, 'Second rectangle '+r2.toString()+' has origin -10,-10');
     		assert.eq(r3.origin().distanceTo(p3), 0, 'Third rectangle '+r3.toString()+' has origin -10,-10');
-    		assert.eq(r3.size().width(), 20, 'Third rectangle '+r3.toString()+' has width 20');
-    		assert.eq(r3.size().height(), 20, 'Third rectangle '+r3.toString()+' has height 20');
+    		assert.eq(r3.width(), 20, 'Third rectangle '+r3.toString()+' has width 20');
+    		assert.eq(r3.height(), 20, 'Third rectangle '+r3.toString()+' has height 20');
     		assert.eq(r3.containsPoint(Point.from(0, 0)), true, 'Third rectangle contains point 0,0');
     		assert.eq(sectioned.length, 6, 'Third rectangle sections into 6 sub-rectangles');
     		assert.eq(sectioned[0].origin().distanceTo(Point.from(-10, -10)), 0, '1 section origin is correct');
-    		assert.eq(sectioned[0].size().width(), 10, '1 section width is correct');
-    		assert.eq(sectioned[0].size(). height(), 10, '1 section height is correct');
+    		assert.eq(sectioned[0].width(), 10, '1 section width is correct');
+    		assert.eq(sectioned[0].height(), 10, '1 section height is correct');
     		assert.eq(sectioned[1].origin().distanceTo(Point.from(0, -10)), 0, '2 section origin is correct');
     		assert.eq(sectioned[2].origin().distanceTo(Point.from(5, -10)), 0, '3 section origin is correct');
-    		assert.eq(sectioned[2].size().width(), 5, '2 section width is correct');
+    		assert.eq(sectioned[2].width(), 5, '2 section width is correct');
     		assert.eq(sectioned[3].origin().distanceTo(Point.from(-10, 0)), 0, '4 section origin is correct');
     		assert.eq(sectioned[4].origin().distanceTo(Point.from(0, 0)), 0, '5 section origin is correct');
     		assert.eq(sectioned[5].origin().distanceTo(Point.from(5, 0)), 0, '6 section origin is correct');

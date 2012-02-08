@@ -28,38 +28,12 @@ mod({
             // Addin Polygon
             self = m.Polygon(self); 
             
-            if (self.points.length === 0) {
-                self.points = addin.from(0, 0, 0, 0).points;
+            if (self.elements.length === 0) {
+                self.elements = addin.from(0, 0, 0, 0).elements;
             }
             //--------------------------------------
             //  FUNCTIONS
             //--------------------------------------
-            m.safeAddin(self, 'origin', function Rectangle_origin() {
-                /** * *
-                * Returns the origin of the Rectangle.
-                * @returns - Point
-                * * **/
-                return self.points[0].copy();
-            });
-            m.safeAddin(self, 'size', function Rectangle_size() {
-                /** * *
-                * Returns the size of the Rectangle.
-                * @returns - Size
-                * * **/
-                var tl = self.origin();
-                var br = self.points[2];
-                var w = br.x() - tl.x();
-                var h = br.y() - tl.y();
-                return m.Size.from(w, h);
-            });
-            m.safeAddin(self, 'isEqualTo', function Rectangle_isEqualTo (rectangle) {
-                /**
-                 * Returns whether or not *rectangle* is equal to self.
-                 * @param - rectangle Rectangle
-                 * @return - Boolean
-                 */
-                return self.origin().isEqualTo(rectangle.origin()) && self.size().isEqualTo(rectangle.size());
-            });
             m.safeOverride(self, 'copy', 'polygon_copy', function Rectangle_copy() {
                 /**
                  * Returns a copy of self.
@@ -69,13 +43,12 @@ mod({
                 addin(r);
                 return r;
             });
-
             m.safeAddin(self, 'left', function Rectangle_left () {
                 /**
                  * Returns the left edge x value.
                  * @return - Number
                  */
-                return self.origin().x();
+                return self.elements[0];
             });
 
             m.safeAddin(self, 'top', function Rectangle_top () {
@@ -83,11 +56,31 @@ mod({
                  * Returns the top edge y value.
                  * @return - Number
                  */
-                return self.origin().y();
+                return self.elements[1];
             });
-            
+            m.safeAddin(self, 'origin', function Rectangle_origin() {
+                /** * *
+                * Returns a Point at the upper left of the rectangle.
+                * @return - Point
+                * * **/
+                return m.Point.from(self.left(), self.top());
+            });
+            m.safeAddin(self, 'width', function Rectangle_width() {
+                /** * *
+                * Returns the width of this Rectangle
+                * @return - Number
+                * * **/
+                return self.elements[2] - self.elements[0];
+            });
+            m.safeAddin(self, 'height', function Rectangle_height() {
+                /** * *
+                * Returns the height of this Rectangle
+                * @return - Number
+                * * **/
+                return self.elements[5] - self.elements[1];
+            });
             self.addToString(function Rectangle_toString () {
-                return '[Rectangle(x:'+self.left()+' y:'+self.top()+' w:'+self.size().width()+' h:'+self.size().height()+')]';
+                return '[Rectangle(x:'+self.left()+' y:'+self.top()+' w:'+self.width()+' h:'+self.height()+')]';
             });
 
             m.safeAddin(self, 'right', function Rectangle_right () {
@@ -95,7 +88,7 @@ mod({
                  * Returns the right edge x value.
                  * @return - Number
                  */
-                return self.points[1].x();
+                return self.left() + self.width();
             });
 
             m.safeAddin(self, 'bottom', function Rectangle_bottom () {
@@ -103,7 +96,7 @@ mod({
                  * Returns the bottom edge y value.
                  * @return - Number
                  */
-                return self.points[2].y();
+                return self.top() + self.height();
             });
             
             m.safeAddin(self, 'area', function Rectangle_area () {
@@ -111,7 +104,7 @@ mod({
                  * Returns the area (in pixels^2) of this rectangle
                  * @return - Number
                  */
-                return self.size().width() * self.size().height();
+                return self.width() * self.height();
             });
 
             m.safeAddin(self, 'union', function Rectangle_union (rectangle) {
@@ -145,9 +138,9 @@ mod({
                     horizontallyAt : []
                 });
                 cutObj.verticallyAt.unshift(0);
-                cutObj.verticallyAt.push(self.size().width());
+                cutObj.verticallyAt.push(self.width());
                 cutObj.horizontallyAt.unshift(0);
-                cutObj.horizontallyAt.push(self.size().height());
+                cutObj.horizontallyAt.push(self.height());
                 var verticals = (cutObj.verticallyAt.length - 1);
                 var horizontals = (cutObj.horizontallyAt.length - 1);
                 var sections = [];
@@ -183,11 +176,11 @@ mod({
             h = m.ifndefInitNum(h, 0);
              
             return addin({
-                points : [
-                    m.Point.from(x, y),
-                    m.Point.from(x+w, y),
-                    m.Point.from(x+w, y+h),
-                    m.Point.from(x, y+h)
+                elements : [
+                    x,   y,
+                    x+w, y,
+                    x+w, y+h,
+                    x,   y+h
                 ]
             });
         };
@@ -224,8 +217,6 @@ mod({
             
             return addin.from(x, y, w, h);
         };
-        
         return addin;
-        
     }
 });
