@@ -3,4 +3,4 @@
 	url = git://github.com/schell/mod.git
 [submodule "submodules/go"]
 	path = submodules/go
-	url = git@github.com:schell/go.git
+	url = git://github.com/schell/go.git

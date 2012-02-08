@@ -80,11 +80,13 @@
             var resultBA = B.copy().multiply(A);
             
             assert.eq(resultAB.elements.toString(), AB.elements.toString(), 'Matrix can multiply');
-
+            
+            mat.loadIdentity();
+            
             mat.translate(1, 2);
             assert.eq(mat.x(), 1, 'Matrix can translate x');
             assert.eq(mat.y(), 2, 'Matrix can translate y');
-            assert.eq(mat.z(), 3, 'Matrix can translate z');
+            
             mat.scale(0.5, 0.3, 0.1);
             assert.eq(mat.a(), 0.5, 'Matrix can scale x');
             assert.eq(mat.d(), 0.3, 'Matrix can scale y');
@@ -94,36 +96,25 @@
             var vec = m.Vector({
                 elements : [
                     2,
-                    4,
-                    6
+                    4
                 ]
             });
         
-            mat.translate(1, 1, 1);
+            mat.translate(1, 1);
         
-            var tVec = mat.transformVector(vec);
+            var tVec = mat.transform2DVector(vec);
             assert.eq(tVec.x(), 3, 'Matrix can translate Vector in x');
             assert.eq(tVec.y(), 5, 'Matrix can translate Vector in y');
-            assert.eq(tVec.z(), 7, 'Matrix can translate Vector in z');
         
-            tVec = mat.transformVector(tVec);
+            tVec = mat.transform2DVector(tVec);
             assert.eq(tVec.x(), 4, 'Matrix can translate Vector in x');
             assert.eq(tVec.y(), 6, 'Matrix can translate Vector in y');
-            assert.eq(tVec.z(), 8, 'Matrix can translate Vector in z');
         
             mat.loadIdentity();
             mat.scale(0.5, 0.5, 0.5);
-            tVec = mat.transformVector(tVec);
+            tVec = mat.transform2DVector(tVec);
             assert.eq(tVec.x(), 2, 'Matrix can scale Vector in x');
             assert.eq(tVec.y(), 3, 'Matrix can scale Vector in y');
-            assert.eq(tVec.z(), 4, 'Matrix can scale Vector in z');
-        
-            mat.loadIdentity();
-            mat.rotate(90,m.Vector.Z());
-            tVec = mat.transformVector(tVec);
-            assert.eq(Math.round(tVec.x()), -3, 'Matrix can rotate Vector in about Z (x)');
-            assert.eq(Math.round(tVec.y()), 2, 'Matrix can rotate Vector in about Z (y)');
-            assert.eq(Math.round(tVec.z()), 4, 'Matrix can rotate Vector in about Z (z)');
         
             // Point tests
     		var pnt1 = Point.from(1, 1);
@@ -148,6 +139,16 @@
                 ]
             });
             assert.eq(unitSquare.containsPoint(m.Point()), true, 'Polygon unit square contains origin');
+            
+            var squareDiamond = m.Polygon({
+                 0,  Math.SQRT2,
+                 Math.SQRT2,  0,
+                 0, -Math.SQRT2,
+                -Math.SQRT2,  0
+            });
+            var transform = m.Matrix();
+            transform.rotote(45);
+            transform.transformPolygon(squareDiamond);
         
     		var p1 = Point.from(0, 0);
     		var p2 = Point.from(10, 10);

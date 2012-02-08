@@ -49,7 +49,6 @@ mod({
                 }
                 return true;
             });
-            
             m.safeAddin(self, 'copy', function Vector_copy() {
                 /** * *
                 * Returns a copy of this vector.
@@ -70,7 +69,6 @@ mod({
                     self.elements[i] += vec[i];
                 }
             });
-            
             m.safeAddin(self, 'subtract', function Vector_subtract(vec) {
                 /** * *
                 * Subtracts *vec* from this vector.
@@ -81,7 +79,6 @@ mod({
                     self.elements[i] -= vec.elements[i];
                 }
             });
-            
             m.safeAddin(self, 'multiply', function Vector_multiply(vec) {
                 /** * *
                 * Multiplies this vector by *vec*.
@@ -151,18 +148,6 @@ mod({
                     self.elements[1] = y;
                 }
                 return self.elements[1];
-            });
-            m.safeAddin(self, 'z', function Vector_z(z) {
-                /** * *
-                * Returns the z element.
-                * If *z* is supplied as a parameter, will set the z element before returning.
-                * @param - z Number
-                * @returns - z Number
-                * * **/
-                if (arguments.length) {
-                    self.elements[2] = z;
-                }
-                return self.elements[2];
             });
             //--------------------------------------
             //  HELPERS
