@@ -45,8 +45,8 @@ mod({
             // A reference to this view's parent container...
             m.safeAddin(self, 'parent', undefined);
             
-            // A transformation matrix...
-            m.safeAddin(self, 'transform', m.Matrix().loadIdentity());
+            // A reference to this view's stage (the root of the display tree)
+            m.safeAddin(self, 'stage', undefined);
             
             m.safeAddin(self, 'alpha', 1.0);
             
@@ -113,6 +113,7 @@ mod({
                 }
                 // Update...
                 self.parent = note.body;
+                self.stage = self.parent.stage;
                 self.context = self.parent.context;
                 self.addInterest(self.parent, m.Notifications.View.DID_UPDATE_CONTEXT, self.onParentUpdatedContext);
                 // Notify

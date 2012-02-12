@@ -32,7 +32,7 @@ mod({
             }
             
             self.addToString(function Point_toString() {
-                 return '[Point('+self.x()+','+self.y()+','+self.z()+')]';
+                 return '[Point('+self.x()+','+self.y()+')]';
              });
             
             //--------------------------------------

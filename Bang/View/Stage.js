@@ -8,7 +8,7 @@
 * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * **/
 mod({
     name : 'Stage',
-    dependencies : [ 'Bang/View/ViewContainer.js' ],
+    dependencies : [ 'Bang/View/ViewContainer.js', 'Bang/Geom/Matrix.js' ],
     init : function initStage (m) {
         /**
          * Initializes the Stage Addin
@@ -35,6 +35,12 @@ mod({
             
             // Whether or not we clear the canvas before redrawing...
             m.safeAddin(self, 'clearCanvasOnFrameTick', true);
+            
+            // A transformation matrix to keep track of the aggregate transform...
+            m.safeAddin(self, 'transform', m.Matrix());
+            
+            // Set this view's stage reference to itself, so other views can grab it...
+            self.stage = self;
             
             m.safeAddin(self, 'canvas', function Stage_initCanvas() {
                 var canvas = document.createElement('canvas');

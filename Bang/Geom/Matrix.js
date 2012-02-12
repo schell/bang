@@ -238,13 +238,15 @@ mod({
                 * @param - angleDegrees Number
                 * @return - self Matrix
                 * * **/
-                angleDegrees = angleDegrees || 0;
-                angleDegrees *= -1;
+                // Invert theta (matrix rotation is counter-clockwise)...
+                angleDegrees = -angleDegrees || 0;
+                // Convert to radians
+                var radians = angleDegrees*m.Geometry.ONE_DEGREE;    
                 
                 var rot = m.Matrix({
                     elements : [
-                        Math.cos(angleDegrees), -Math.sin(angleDegrees), 0,
-                        Math.sin(angleDegrees), Math.cos(angleDegrees), 0,
+                        Math.cos(radians), -Math.sin(radians), 0,
+                        Math.sin(radians), Math.cos(radians), 0,
                         0, 0, 1
                     ]
                 });
@@ -269,7 +271,16 @@ mod({
                 * @param - poly Polygon
                 * @return - poly Polygon
                 * * **/
-                
+                var elements = [];
+                for (var i=0; i < poly.elements.length; i+=2) {
+                    var x = poly.elements[i];
+                    var y = poly.elements[i+1];
+                    var shim = {elements:[x,y]};
+                    var tvec = self.transform2DVector(shim);
+                    elements = elements.concat(tvec.elements);
+                }
+                poly.elements = elements;
+                return poly;
             });
             
             

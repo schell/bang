@@ -140,15 +140,27 @@
             });
             assert.eq(unitSquare.containsPoint(m.Point()), true, 'Polygon unit square contains origin');
             
-            var squareDiamond = m.Polygon({
-                 0,  Math.SQRT2,
-                 Math.SQRT2,  0,
-                 0, -Math.SQRT2,
-                -Math.SQRT2,  0
+            var rect = m.Polygon({
+                elements : [
+                    10, 5,
+                    10, -5,
+                    -10, -5,
+                    -10, 5
+                ]
             });
             var transform = m.Matrix();
-            transform.rotote(45);
-            transform.transformPolygon(squareDiamond);
+            transform.rotate(90).scale(2, 2);
+            transform.transformPolygon(rect);
+            var cleanElements = rect.elements.map(function(el,ndx,a) {
+                return Math.round(el);
+            });
+            var resultPoly = m.Polygon({
+                elements : cleanElements
+            });
+            var comparePoly = m.Polygon({
+                elements : [10, -20, -10, -20, -10, 20, 10, 20]
+            })
+            assert.eq(resultPoly.isEqualTo(comparePoly), true, 'Matrix can transform polygons.');
         
     		var p1 = Point.from(0, 0);
     		var p2 = Point.from(10, 10);

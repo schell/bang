@@ -92,7 +92,13 @@ mod({
         
             stage.addSubview(view);
             assert.eq(m.defined(view.context) && view.context === stage.context, true, 'Subviews inherit parent\'s context.');
-        
+            assert.eq(m.defined(view.stage) && view.stage === stage, true, 'Subviews inherit parent\'s stage.');
+            
+            var hitView = m.View({
+                
+            });
+            
+            
             var rsTest = m.View();
             rsTest.scaleX = 0.5;
             rsTest.rotation = 45;
