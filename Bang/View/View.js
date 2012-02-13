@@ -83,7 +83,29 @@ mod({
                     self.context.restore();
                 }
             });
-            
+            m.safeAddin(self, 'getCompoundTransform', function View_getCompoundTransform() {
+                /** * *
+                * Returns a transformation matrix that represents this view's complete transform,
+                * with the transformations of its parent views applied.
+                * @returns - Matrix
+                * * **/
+                // Get this view's transformation matrix...
+                var matrix = m.Matrix();
+                matrix.translate(self.x, self.y);
+                matrix.rotate(m.Geometry.ONE_DEGREE*self.rotation);
+                matrix.scale(self.scaleX, self.scaleY);
+
+                if (!m.defined(self.parent)) {
+                    // There is no parent reference, so this view does not
+                    // belong to a display list, return only this matrix...
+                    return  matrix;
+                }
+                // Recurse up the display tree and get the compound transform...
+                var compoundTransform = self.parent.getCompoundTransform();
+                
+                compoundTransform.multiply(matrix);
+                return compoundTransform;
+            });
             m.safeAddin(self, 'draw', function View_draw() {
                 /** * *
                 * Draws this view into the 2d context.

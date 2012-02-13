@@ -98,7 +98,6 @@ mod({
                 
             });
             
-            
             var rsTest = m.View();
             rsTest.scaleX = 0.5;
             rsTest.rotation = 45;
@@ -150,6 +149,17 @@ mod({
             green.addToString(function(){return '[redAndBlue]';});
             stage.addSubview(green);
             
+            // Add a hitArea test draw function...
+            var hitDraw = function () {
+                var hitArea = red.getCompoundTransform().transformPolygon(red.hitArea.copy());
+                stage.context.save();
+                stage.context.fillStyle = 'rgba(0,0,0,0.5)';
+                stage.context.fillRect(hitArea.left(), hitArea.top(), hitArea.width(), hitArea.height());
+                stage.context.restore()
+            };
+            
+            stage.drawQueue.push(hitDraw);
+            
             function testGreenEasing(cb) {
                 console.log('green easing test');
                 var ease = m.Ease({
@@ -160,7 +170,7 @@ mod({
                     target : green,
                     equation : 'easeInOutExpo'
                 });
-                ease.onComplete = cb;
+                //ease.onComplete = cb;
                 ease.interpolate();
             }
             function testScaledEasing(cb) {

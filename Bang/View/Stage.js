@@ -36,9 +36,6 @@ mod({
             // Whether or not we clear the canvas before redrawing...
             m.safeAddin(self, 'clearCanvasOnFrameTick', true);
             
-            // A transformation matrix to keep track of the aggregate transform...
-            m.safeAddin(self, 'transform', m.Matrix());
-            
             // Set this view's stage reference to itself, so other views can grab it...
             self.stage = self;
             
@@ -62,6 +59,7 @@ mod({
                 self.viewContainer_draw();
             });
             
+            // A reference to the 2D canvas rendering context...
             m.safeAddin(self, 'context', undefined);
             
             // A private reference to the canvas's containing element...
