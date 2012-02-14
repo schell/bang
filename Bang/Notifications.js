@@ -22,8 +22,13 @@ mod({
                  WAS_ADDED_TO_VIEWCONTAINER : 'wasAddedToViewContainer',
                  // Sent from a View after being removed from a ViewContainer...
                  WAS_REMOVED_FROM_VIEWCONTAINER : 'wasRemovedFromViewContainer',
-                 // Sent from a View just after the user mouses down on said View...
-                 MOUSE_DOWN : 'mouseDown'
+                 // Sent from a View just after the user mouses on said View...
+                 MOUSE_DOWN : 'mouseDown',
+                 MOUSE_UP : 'mouseUp',
+                 MOUSE_CLICK : 'mouseClick',
+                 MOUSE_MOVE : 'mouseMove',
+                 MOUSE_OVER : 'mouseOver',
+                 MOUSE_OUT : 'mouseOut'
              },
              ViewContainer : {
                  // Sent from a ViewContainer after adding a subview, just after said subview sends WAS_ADDED_TO_VIEWCONTAINER

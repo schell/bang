@@ -53,6 +53,10 @@ mod({
             m.safeAddin(self, 'scaleX', 1.0);
             m.safeAddin(self, 'scaleY', 1.0);
             m.safeAddin(self, 'rotation', 0.0);
+            // A special cache of mouse settings (used by Stage.js during mouse events...)
+            m.safeAddin(self, '$mouseSettings', {
+                mousedOver : false
+            });
             //--------------------------------------
             //  COORDINATE TRANSFORMATIONS
             //--------------------------------------
@@ -84,6 +88,24 @@ mod({
                     self.context.restore();
                 }
             });
+            m.safeAddin(self, 'getTransformationMatrix', function View_getTransformationMatrix(invert) {
+                /** * *
+                * Returns the local transformation matrix.
+                * @param - invert Boolean
+                * @return - Matrix
+                * * **/
+                var matrix = m.Matrix();
+                if (invert) {
+                    matrix.scale(1/self.scaleX, 1/self.scaleY);
+                    matrix.rotate(-self.rotation);
+                    matrix.translate(-self.x, -self.y);
+                } else {
+                    matrix.translate(self.x, self.y);
+                    matrix.rotate(self.rotation);
+                    matrix.scale(self.scaleX, self.scaleY);
+                }
+                return matrix;
+            });
             m.safeAddin(self, 'getCompoundTransform', function View_getCompoundTransform(invert) {
                 /** * *
                 * Returns a transformation matrix that represents this view's complete transform,
@@ -97,16 +119,7 @@ mod({
                 var i = invert ? -1 : 1;
                 
                 // Get this view's transformation matrix...
-                var matrix = m.Matrix();
-                if (invert) {
-                    matrix.scale(1/self.scaleX, 1/self.scaleY);
-                    matrix.rotate(-self.rotation);
-                    matrix.translate(-self.x, -self.y);
-                } else {
-                    matrix.translate(self.x, self.y);
-                    matrix.rotate(self.rotation);
-                    matrix.scale(self.scaleX, self.scaleY);
-                }
+                var matrix = self.getTransformationMatrix(invert);
 
                 if (!m.defined(self.parent)) {
                     // There is no parent reference, so this view does not
@@ -200,6 +213,21 @@ mod({
                     self.context.restore();
                 };
                 self.drawQueue.push(drawFunc);
+            });
+            //--------------------------------------
+            //  EVENT/NOTIFICATION
+            //--------------------------------------
+            m.safeAddin(self, 'bubbleMouseEvent', function View_bubbleMouseEvent(eventNotification) {
+                /** * *
+                * Bubbles a mouse event up to the parent view.
+                * @param - Notification
+                * * **/
+                if (m.defined(self.parent)) {
+                    var matrix = self.getTransformationMatrix();
+                    matrix.transformPolygon(eventNotification.localPoint);
+                    eventNotification.target = self.parent;
+                    self.parent.dispatch(eventNotification);
+                }
             });
             //--------------------------------------
             //  INTERESTS

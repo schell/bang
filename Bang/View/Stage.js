@@ -131,8 +131,7 @@ mod({
                 var bndx = _displayList.indexOf(b);
                 return andx - bndx;
             }   
-            
-            m.safeAddin(self, 'fireMouseDownEvent', function Stage_fireMouseDownEvent(nativeEvent) {
+            function createMouseEvent(eventName, nativeEvent) {
                 /** * *
                 * Fires a mouse down event into the display list. This function is meant to be attached
                 * to a canvas's onmousedown callback.
@@ -141,12 +140,12 @@ mod({
                 var x = nativeEvent.offsetX;
                 var y = nativeEvent.offsetY;
                 // Get all the dispatchers that could potentially send this notification (because something is listening)...
-                var dispatchersOfMouseDown = self.noteCenter.dispatchersOfNoteWithName(m.Notifications.View.MOUSE_DOWN);
+                var dispatchersOfMouseEvent = self.noteCenter.dispatchersOfNoteWithName(eventName);
                 // Sort them so the top views are last...
-                dispatchersOfMouseDown.sort(sortByNdxInDisplayList);
+                dispatchersOfMouseEvent.sort(sortByNdxInDisplayList);
                 // Run backward through the list...
-                for (var i = dispatchersOfMouseDown.length - 1; i >= 0; i--){
-                    var potentialDispatcher = dispatchersOfMouseDown[i];
+                for (var i = dispatchersOfMouseEvent.length - 1; i >= 0; i--){
+                    var potentialDispatcher = dispatchersOfMouseEvent[i];
                     if (m.defined(potentialDispatcher.hitArea)) {
                         // Get the dispatcher's hitArea in global coords...
                         var poly = potentialDispatcher.hitArea.copy();
@@ -159,19 +158,97 @@ mod({
                         var hit = poly.containsPoint(localPoint);
                         if (hit) {
                             var note = m.MouseEventNote({
+                                name : eventName,
                                 localPoint : localPoint,
                                 globalPoint : globalPoint,
                                 target : potentialDispatcher,
                                 body : nativeEvent
                             });
-                            potentialDispatcher.dispatch(note);
-                            //TODO: possibly bubble the event up the display list - here or in the View...
-                            return;
+                            return note;
                         }
                     }
                 }
+                // If nothing was found, return false...
+                return false;
+            }
+            m.safeAddin(self, 'fireMouseDownEvent', function Stage_mouseDown(nativeEvent) {
+                /** * *
+                * Dispatches a mouse down event.
+                * * **/
+                var mouseEventNote = createMouseEvent(m.Notifications.View.MOUSE_DOWN, nativeEvent);
+                if (mouseEventNote) {
+                    mouseEventNote.target.dispatch(mouseEventNote);
+                }
             });
-            self.canvas.onmouseup = self.fireMouseDownEvent;
+            m.safeAddin(self, 'fireMouseUpEvent', function Stage_mouseUp(nativeEvent) {
+                /** * *
+                * Dispatches a mouse up event.
+                * * **/
+                var mouseEventNote = createMouseEvent(m.Notifications.View.MOUSE_UP, nativeEvent);
+                if (mouseEventNote) {
+                    mouseEventNote.target.dispatch(mouseEventNote);
+                }
+            });
+            m.safeAddin(self, 'fireMouseClickEvent', function Stage_mouseUp(nativeEvent) {
+                /** * *
+                * Dispatches a mouse up event.
+                * * **/
+                var mouseEventNote = createMouseEvent(m.Notifications.View.MOUSE_CLICK, nativeEvent);
+                if (mouseEventNote) {
+                    mouseEventNote.target.dispatch(mouseEventNote);
+                }
+            });
+            // A private boolean to hold whether or not ANY views have been moused over...
+            var _mousedOver = false;
+            m.safeAddin(self, 'fireMouseMoveEvent', function Stage_mouseMove(nativeEvent) {
+                /** * *
+                * Dispatches a mouse move event or a mouse over.
+                * * **/
+                var mouseEventNote = createMouseEvent(m.Notifications.View.MOUSE_MOVE, nativeEvent);
+                var view;
+                if (mouseEventNote) {
+                    view = mouseEventNote.target;
+                    if (view.$mouseSettings.mousedOver === false) {
+                        // Intercept this mouseMove and change it into a mouseOver...
+                        view.$mouseSettings.mousedOver = true;
+                        mouseEventNote.name = m.Notifications.View.MOUSE_OVER;
+                        // Update _mousedOver so Stage knows to check for mouseOut events...
+                        _mousedOver = true;
+                    }
+                    mouseEventNote.target.dispatch(mouseEventNote);
+                } else if (_mousedOver) {
+                    // Either the mouse isn't over anything or the views it is over
+                    // don't care, so fire mouseOver events for previously moused over
+                    // views, as long as there are some...
+                    for (var i = _displayList.length - 1; i >= 0; i--){
+                        view = _displayList[i];
+                        if (view.$mouseSettings.mousedOver === true) {
+                            view.$mouseSettings.mousedOver = false;
+                            var mouseOutEvent = m.MouseEventNote({
+                                name : m.Notifications.View.MOUSE_OUT,
+                                globalPoint : m.Point({
+                                    elements : [
+                                        nativeEvent.offsetX,
+                                        nativeEvent.offsetY
+                                    ]
+                                }),
+                                localPoint : undefined,
+                                target : view,
+                                body : nativeEvent
+                            });
+                            view.dispatch(mouseOutEvent);
+                            return;
+                        }
+                    }
+                    // There are no moused over views...
+                    _mousedOver = false;
+                }
+            });
+            self.canvas.onmousedown = self.fireMouseDownEvent;
+            self.canvas.onmouseup = self.fireMouseUpEvent;
+            self.canvas.onclick = self.fireMouseClickEvent;
+            self.canvas.onmousemove = self.fireMouseMoveEvent;
+            
             return self;
         };
         

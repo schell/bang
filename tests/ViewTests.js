@@ -409,7 +409,16 @@ mod({
                     el.removeInterest(el, m.Notifications.View.MOUSE_DOWN, onMouseEvent);
                 });
                 
-                cb();
+                function anyEvent(note) {
+                    console.log(note.name,note.globalPoint.toString(),(m.defined(note.localPoint) ? note.localPoint.toString() : 'undefined'));
+                }
+                stage.addInterest(rightrightleaf, m.Notifications.View.MOUSE_DOWN, anyEvent);
+                stage.addInterest(rightrightleaf, m.Notifications.View.MOUSE_MOVE, anyEvent);
+                stage.addInterest(rightrightleaf, m.Notifications.View.MOUSE_UP, anyEvent);
+                stage.addInterest(rightrightleaf, m.Notifications.View.MOUSE_OVER, anyEvent);
+                stage.addInterest(rightrightleaf, m.Notifications.View.MOUSE_OUT, anyEvent);
+                stage.addInterest(rightrightleaf, m.Notifications.View.MOUSE_CLICK, anyEvent);
+                //cb();
             }
             
             function testGreenEasing(cb) {
