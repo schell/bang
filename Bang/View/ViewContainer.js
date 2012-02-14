@@ -23,12 +23,12 @@ mod({
              */
             self = m.Object(self); 
             
-            self.addToString(function ViewContainer_toString() {
-                return '[ViewContainer]';
-            });
-            
             // Addin View
             m.View(self);
+            
+            self.toString = function() {
+                return '[ViewContainer]';
+            };
             
             // A private array to hold this container's subviews...
             var _subviews = [];
@@ -41,14 +41,22 @@ mod({
                     return el;
                 });
             });
-            
             m.safeAddin(self, 'addSubview', function ViewContainer_addSubview(subview) {
                 _subviews.push(subview);
                 // Let everyone know that this added a view...
                 subview.sendNotification(m.Notifications.View.WAS_ADDED_TO_VIEWCONTAINER, self);
                 self.sendNotification(m.Notifications.ViewContainer.DID_ADD_SUBVIEW, subview);
             });
-            
+            m.safeAddin(self, 'removeSubview', function ViewContainer_removeSubview(subview) {
+                /** * *
+                * Removes *subview* from this view's display list.
+                * @param - subview View
+                * * **/
+                var ndx = _subviews.indexOf(subview);
+                if (ndx !== -1) {
+                    _subviews.splice(ndx, 1);
+                }
+            });
             m.safeAddin(self, 'treeString', function ViewContainer_treeString(n) {
                 n = n || 0;
                 var s = '';

@@ -89,7 +89,7 @@
             
             mat.scale(0.5, 0.3, 0.1);
             assert.eq(mat.a(), 0.5, 'Matrix can scale x');
-            assert.eq(mat.d(), 0.3, 'Matrix can scale y');
+            assert.eq(mat.e(), 0.3, 'Matrix can scale y');
         
             mat.loadIdentity();
         
@@ -158,9 +158,18 @@
                 elements : cleanElements
             });
             var comparePoly = m.Polygon({
-                elements : [10, -20, -10, -20, -10, 20, 10, 20]
+                elements : [-10,20,10,20,10,-20,-10,-20]
             })
             assert.eq(resultPoly.isEqualTo(comparePoly), true, 'Matrix can transform polygons.');
+            assert.eq(resultPoly.elements.toString(), comparePoly.elements.toString(), 'Matrix can transform polygons.');
+            
+            var D = m.Matrix().translate(100, 50).scale(0.5).rotate(45);
+            var invD = D.inverse();
+            var I = D.copy().multiply(invD);
+            I.elements = I.elements.map(function(el,ndx,a) {
+                return Math.round(el);
+            });
+            assert.eq(I.isEqualTo(m.Matrix()), true, 'Matrix can return inverse.');
         
     		var p1 = Point.from(0, 0);
     		var p2 = Point.from(10, 10);

@@ -54,6 +54,9 @@ mod({
             assert.eq(view.parent === container, true, 'ViewContainers set their subview\'s parent property to itself.');
             assert.eq(view.context, 1000, 'Views update their context when added to parent.');
             assert.eq(calledUpdateContext, true, 'View sends notification when context is updated.');
+            container.removeSubview(view);
+            assert.eq(container.subviews().length, 0, 'ViewContainer can remove subviews.');
+            assert.eq(container.subviews().indexOf(view), -1, 'ViewContainer can remove subviews.');
         
             var topOfTree = m.ViewContainer({
                 tag : 'tree_0'
@@ -147,21 +150,119 @@ mod({
                 green.rotation -= 2;
             });
             green.addToString(function(){return '[redAndBlue]';});
-            stage.addSubview(green);
             
-            // Add a hitArea test draw function...
-            var hitDraw = function () {
-                var hitArea = red.getCompoundTransform().transformPolygon(red.hitArea.copy());
-                stage.context.save();
-                stage.context.fillStyle = 'rgba(0,0,0,0.5)';
-                stage.context.fillRect(hitArea.left(), hitArea.top(), hitArea.width(), hitArea.height());
-                stage.context.restore()
-            };
-            
-            stage.drawQueue.push(hitDraw);
+            function testHitAreaConversion(cb) {
+                console.log('hitArea conversion test');
+                
+                function drawPolygon(context, fill, stroke, poly) {
+                    if (!m.defined(context) || !m.defined(poly)) {
+                        return;
+                    }
+                        
+                    fill = m.ifndefInit(fill, 'rgba(0,0,0,0.5)');
+                    stroke = m.ifndefInit(stroke, 'rgba(0,0,0,0.8)');
+                        
+                    context.save();
+                    context.fillStyle = fill;
+                    context.strokeStyle = stroke;
+                    context.beginPath();
+                    context.moveTo(poly.elements[0], poly.elements[1]);
+                    for (var i=2; i <= poly.elements.length; i+=2) {
+                        var x = poly.elements[i];
+                        var y = poly.elements[i+1];
+                        context.lineTo(x, y);
+                    }
+                    context.closePath();
+                    context.fill();
+                    context.stroke();
+                    context.restore();
+                }
+                
+                var trunk = m.ViewContainer({
+                    x : 150,
+                    hitArea : m.Rectangle.from(0, 0, 100, 100)
+                });
+                var branch = m.ViewContainer({
+                    x : 50,
+                    y : 50,
+                    scaleY : 0.5,
+                    rotation : 45,
+                    hitArea : m.Rectangle.from(0, 0, 100, 100)
+                });
+                var branchArm = m.ViewContainer({
+                    x : 100,
+                    y : 100,
+                    scaleX : 0.5,
+                    hitArea : m.Rectangle.from(0, 0, 100, 100)
+                });
+                var leftLeaf = m.View({
+                    x : 50,
+                    y : 100,
+                    scaleX : 0.5,
+                    scaleY : 0.5,
+                    hitArea : m.Rectangle.from(0, 0, 100, 100)
+                });
+                var rightLeaf = m.ViewContainer({
+                    x : 100, 
+                    y : 0,
+                    hitArea : m.Rectangle.from(0, 0, 100, 100)
+                });
+                
+                trunk.addHitAreaDrawFunction('rgb(50,50,50)');
+                branch.addHitAreaDrawFunction('gray');
+                branchArm.addHitAreaDrawFunction('silver');
+                leftLeaf.addHitAreaDrawFunction('rgba(0,0,0,0.5)');
+                rightLeaf.addHitAreaDrawFunction('rgba(0,0,0,0.5)');
+                
+                stage.addSubview(trunk);
+                trunk.addSubview(branch);
+                branch.addSubview(branchArm);
+                branchArm.addSubview(leftLeaf);
+                branchArm.addSubview(rightLeaf);
+
+                var leftLeafHitArea = leftLeaf.getCompoundTransform().transformPolygon(leftLeaf.hitArea.copy());
+                var rightLeafHitArea = rightLeaf.getCompoundTransform().transformPolygon(rightLeaf.hitArea.copy());
+                var branchArmHitArea = branchArm.getCompoundTransform().transformPolygon(branchArm.hitArea.copy());
+                var inverseRightMatrix = rightLeaf.getCompoundTransform(true);
+                var leftHitInRightCoords = inverseRightMatrix.transformPolygon(leftLeafHitArea.copy());
+                
+                var leftInRight = m.View({
+                    x : leftHitInRightCoords.left(),
+                    y : leftHitInRightCoords.top(),
+                    alpha : 0.5,
+                    hitArea : m.Rectangle.from(0, 0, leftHitInRightCoords.width(), leftHitInRightCoords.height())
+                });
+                leftInRight.drawQueue.push(function() {
+                    drawPolygon(leftInRight.context, 'yellow', 'lime', leftInRight.hitArea);
+                });
+                rightLeaf.addSubview(leftInRight);
+                
+                // Get the points that all should be rather similar (exactly the same in a perfect world...)
+                var leftPoint = leftLeafHitArea.pointAt(1);
+                var rightPoint = rightLeafHitArea.pointAt(3);
+                var branchPoint = branchArmHitArea.pointAt(2);
+                var xsPrettyEqual = leftPoint.x().toFixed(2) == rightPoint.x().toFixed(2) && rightPoint.x().toFixed(2) == branchPoint.x().toFixed(2);
+                var ysPrettyEqual = leftPoint.y().toFixed(2) == rightPoint.y().toFixed(2) && rightPoint.y().toFixed(2) == branchPoint.y().toFixed(2);
+                assert.eq(xsPrettyEqual && ysPrettyEqual, true, 'Matrix can get compound transform and apply to hitArea.');
+                
+                var convertedLeftToRight = leftLeaf.convertPolygonToView(leftLeaf.hitArea.copy(), rightLeaf);
+                var convertedLeftFromRight = rightLeaf.convertPolygonFromView(leftLeaf.hitArea.copy(), leftLeaf);
+                assert.eq(convertedLeftToRight.isEqualTo(convertedLeftFromRight), true, 'View.convertPolygonToView converts the same as View.convertPolygonFromView.');
+                
+                stage.drawQueue.push(function () {
+                    drawPolygon(stage.context, 'red', 'yellow', leftLeafHitArea);
+                    drawPolygon(stage.context, 'blue', 'yellow', rightLeafHitArea);
+                });
+                
+                //stage.removeSubview(trunk);
+                //cb();
+            }
             
             function testGreenEasing(cb) {
                 console.log('green easing test');
+
+                stage.addSubview(green);
+                
                 var ease = m.Ease({
                     properties : {
                         alpha : 0.1
@@ -170,7 +271,7 @@ mod({
                     target : green,
                     equation : 'easeInOutExpo'
                 });
-                //ease.onComplete = cb;
+                ease.onComplete = cb;
                 ease.interpolate();
             }
             function testScaledEasing(cb) {
@@ -219,7 +320,7 @@ mod({
                 bar.drawQueue.push(makeDrawFunction(bar, 'rgb(0, 255, 255)'));
                 stage.addSubview(bar);
             }
-            go(testGreenEasing, testScaledEasing, callback).start();
+            go(testHitAreaConversion, testGreenEasing, testScaledEasing, callback).start();
         };
     }
 });

@@ -55,6 +55,9 @@ mod({
             m.safeAddin(self, 'scaleX', 1.0);
             m.safeAddin(self, 'scaleY', 1.0);
             m.safeAddin(self, 'rotation', 0.0);
+            //--------------------------------------
+            //  COORDINATE TRANSFORMATIONS
+            //--------------------------------------
             // Whether or not this view's transformations have been applied...
             var _transformApplied = false;
             m.safeAddin(self, 'applyTransform', function View_applyTransform() {
@@ -83,29 +86,85 @@ mod({
                     self.context.restore();
                 }
             });
-            m.safeAddin(self, 'getCompoundTransform', function View_getCompoundTransform() {
+            m.safeAddin(self, 'getCompoundTransform', function View_getCompoundTransform(invert) {
                 /** * *
                 * Returns a transformation matrix that represents this view's complete transform,
-                * with the transformations of its parent views applied.
+                * with the transformations of its parent views applied (in global space).
                 * @returns - Matrix
                 * * **/
+                // Using this inverse method is kind of a hack...the cleaner way to do this is to 
+                // get the regular compound transform and then invert it, but that takes longer
+                // as we have to get the compound transform first anyway, so this saves time...
+                invert = invert || false;
+                var i = invert ? -1 : 1;
+                
                 // Get this view's transformation matrix...
                 var matrix = m.Matrix();
-                matrix.translate(self.x, self.y);
-                matrix.rotate(m.Geometry.ONE_DEGREE*self.rotation);
-                matrix.scale(self.scaleX, self.scaleY);
+                if (invert) {
+                    matrix.scale(1/self.scaleX, 1/self.scaleY);
+                    matrix.rotate(-self.rotation);
+                    matrix.translate(-self.x, -self.y);
+                } else {
+                    matrix.translate(self.x, self.y);
+                    matrix.rotate(self.rotation);
+                    matrix.scale(self.scaleX, self.scaleY);
+                }
 
                 if (!m.defined(self.parent)) {
                     // There is no parent reference, so this view does not
                     // belong to a display list, return only this matrix...
                     return  matrix;
                 }
-                // Recurse up the display tree and get the compound transform...
-                var compoundTransform = self.parent.getCompoundTransform();
                 
-                compoundTransform.multiply(matrix);
-                return compoundTransform;
+                // Recurse up the display tree and get the compound transform...
+                var compoundTransform = self.parent.getCompoundTransform(invert);
+                
+                if (invert) {
+                    return matrix.multiply(compoundTransform);
+                }
+                return compoundTransform.multiply(matrix);
             });
+            m.safeAddin(self, 'convertPolygonToGlobal', function View_convertPolygonToGlobal(poly) {
+                /** * *
+                * Converts *poly* from this view's coordinate space to the stage's coordinate space.
+                * @param - poly Polygon
+                * @return - Polygon
+                * * **/
+                return self.getCompoundTransform().transformPolygon(poly);
+            });
+            m.safeAddin(self, 'convertPolygonToLocal', function View_convertPolygonToLocal(poly) {
+                /** * *
+                * Converts *poly* from global coordinate space to this view's coordinate space.
+                * @param - poly Polygon
+                * @return - Polygon
+                * * **/
+                return self.getCompoundTransform(true).transformPolygon(poly);
+            });
+            m.safeAddin(self, 'convertPolygonToView', function View_convertPolygonToView(poly, view) {
+                /** * *
+                * Converts a polygon in this view's coordinate space to *view*'s coordinate space.
+                * @param - view View
+                * @param - poly Polygon
+                * @return - polygon
+                * * **/
+                var toGlobalTransform = self.getCompoundTransform();
+                var toLocalTransform = view.getCompoundTransform(true);
+                return toLocalTransform.transformPolygon(toGlobalTransform.transformPolygon(poly));
+            });
+            m.safeAddin(self, 'convertPolygonFromView', function View_convertPolygonFromView(poly, view) {
+                /** * *
+                * Converts a polygon in this view's coordinate space to *view*'s coordinate space.
+                * @param - view View
+                * @param - poly Polygon
+                * @return - polygon
+                * * **/
+                var toGlobalTransform = view.getCompoundTransform();
+                var toLocalTransform = self.getCompoundTransform(true);
+                return toLocalTransform.transformPolygon(toGlobalTransform.transformPolygon(poly));
+            });
+            //--------------------------------------
+            //  DRAWING
+            //--------------------------------------
             m.safeAddin(self, 'draw', function View_draw() {
                 /** * *
                 * Draws this view into the 2d context.
@@ -119,9 +178,33 @@ mod({
                 
                 self.restoreTransform();
             });
-            
+            m.safeAddin(self, 'addHitAreaDrawFunction', function View_addHitAreaDrawFunction(fill, stroke) {
+                /** * *
+                * Adds a draw function to the drawQueue that draws this view's hitArea.
+                * @param - color String - something like 'rgba(0, 0, 0, 0.5)'
+                * * **/
+                fill = m.ifndefInit(fill, 'rgba(0,0,0,0.5)');
+                stroke = m.ifndefInit(stroke, 'rgba(0,0,0,0.8)');
+                var drawFunc = function () {
+                    self.context.save();
+                    self.context.fillStyle = fill;
+                    self.context.strokeStyle = stroke;
+                    self.context.beginPath();
+                    self.context.moveTo(self.hitArea.elements[0], self.hitArea.elements[1]);
+                    for (var i=2; i <= self.hitArea.elements.length; i+=2) {
+                        var x = self.hitArea.elements[i];
+                        var y = self.hitArea.elements[i+1];
+                        self.context.lineTo(x, y);
+                    }
+                    self.context.closePath();
+                    self.context.fill();
+                    self.context.stroke();
+                    self.context.restore();
+                };
+                self.drawQueue.push(drawFunc);
+            });
             //--------------------------------------
-            //  Interests
+            //  INTERESTS
             //--------------------------------------
             m.safeAddin(self, 'onParentUpdatedContext', function View_onParentUpdatedContext(note) {
                 self.context = note.body;

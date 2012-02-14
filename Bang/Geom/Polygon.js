@@ -54,6 +54,19 @@ mod({
                 }
                 return c;
             });
+            m.safeAddin(self, 'pointAt', function Polygon_getPoint(n) {
+                /** * *
+                * Returns the nth (zero indexed) point in this polygon.
+                * @param - n Number
+                * @return - Point
+                * * **/
+                return m.Point({
+                    elements : [
+                        self.elements[n*2],
+                        self.elements[n*2+1]
+                    ]
+                });
+            });
             
             return self;
         };

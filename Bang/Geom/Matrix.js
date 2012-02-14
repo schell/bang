@@ -4,9 +4,9 @@
 * /---------------------------------------\
 * | indices     | elements   | meaning    |
 * |---------------------------------------| 
-* | 0  1  2     | a  b  0    | s  0  x    |
-* | 3  4  5     | c  d  0    | 0  s  y    |
-* | 6  7  8     | 0  0  1    | 0  0  s    |
+* | 0  1  2     | a  d  g    | s  0  x    |
+* | 3  4  5     | b  e  h    | 0  s  y    |
+* | 6  7  8     | c  f  i    | 0  0  s    |
 * |             |            |            |
 * \---------------------------------------/ 
 *
@@ -81,23 +81,57 @@ mod({
                 * Returns the 'b' matrix component.
                 * @returns - Number
                 * * **/
-                return self.elements[1];
+                return self.elements[3];
             });
             m.safeAddin(self, 'c', function Matrix_c() {
                 /** * *
                 * Returns the 'c' matrix component.
                 * @returns - Number
                 * * **/
-                return self.elements[3];
+                return self.elements[6];
             });
             m.safeAddin(self, 'd', function Matrix_d() {
                 /** * *
                 * Returns the 'd' matrix component.
                 * @returns - Number
                 * * **/
+                return self.elements[1];
+            });
+            m.safeAddin(self, 'e', function Matrix_e() {
+                /** * *
+                * Returns the 'e' matrix component.
+                * @returns - Number
+                * * **/
                 return self.elements[4];
             });
-
+            m.safeAddin(self, 'f', function Matrix_f() {
+                /** * *
+                * Returns the 'f' matrix component.
+                * @returns - Number
+                * * **/
+                return self.elements[7];
+            });
+            m.safeAddin(self, 'g', function Matrix_g() {
+                /** * *
+                * Returns the 'g' matrix component.
+                * @returns - Number
+                * * **/
+                return self.elements[2];
+            });
+            m.safeAddin(self, 'h', function Matrix_h() {
+                /** * *
+                * Returns the 'h' matrix component.
+                * @returns - Number
+                * * **/
+                return self.elements[5];
+            });
+            m.safeAddin(self, 'i', function Matrix_i() {
+                /** * *
+                * Returns the 'i' matrix component.
+                * @returns - Number
+                * * **/
+                return self.elements[8];
+            });
             m.safeOverride(self, 'x', 'vector_x', function Vector_x(x) {
                 /** * *
                 * Returns the x element. 
@@ -132,6 +166,54 @@ mod({
                     0.0, 0.0, 1.0 
                 ];
                 return self;
+            });
+            m.safeAddin(self, 'determinant', function Matrix_determinate() {
+                /** * *
+                * Returns the determinate of this matrix.
+                * @return - Number
+                * * **/
+                var a = self.a();
+                var b = self.b();
+                var c = self.c();
+                var d = self.d();
+                var e = self.e();
+                var f = self.f();
+                var g = self.g();
+                var h = self.h();
+                var i = self.i();
+                return a*(e*i - f*h) - b*(d*i - f*g) + c*(d*h - e*g);
+            });
+            m.safeAddin(self, 'inverse', function Matrix_inverse() {
+                /** * *
+                * Returns the inverse of this matrix or false if no inverse exists.
+                * @return - Matrix
+                * * **/
+                var detM = self.determinant();
+                if (detM === 0) {
+                    // This matrix is singular and has no inverse...
+                    return false;
+                }
+                var oneOverDet = 1 / detM;
+
+                var a = self.a();
+                var b = self.b();
+                var c = self.c();
+                var d = self.d();
+                var e = self.e();
+                var f = self.f();
+                var g = self.g();
+                var h = self.h();
+                var i = self.i();
+                
+                return m.Matrix({
+                    elements : [
+                        e*i - f*h, f*g - d*i, d*h - e*g,
+                        c*h - b*i, a*i - c*g, b*g - a*h,
+                        b*f - c*e, c*d - a*f, a*e - b*d
+                    ].map(function(el,ndx,a) {
+                        return el*oneOverDet;
+                    })
+                });
             });
             m.safeAddin(self, 'column', function Matrix_column(n) {
                 /** * *
@@ -239,7 +321,7 @@ mod({
                 * @return - self Matrix
                 * * **/
                 // Invert theta (matrix rotation is counter-clockwise)...
-                angleDegrees = -angleDegrees || 0;
+                angleDegrees = angleDegrees || 0;
                 // Convert to radians
                 var radians = angleDegrees*m.Geometry.ONE_DEGREE;    
                 

@@ -23,22 +23,25 @@ mod({
              */
             self = m.Object(self); 
             
-            self.addToString(function Stage_toString() {
-                return '[Stage]';
-            });
             
             // Addin ViewContainer...
             m.ViewContainer(self);
             
+            self.toString = function() {
+                return '[Stage]';
+            };
+            
             // Some default values...
             self.hitArea = m.Rectangle.from(0, 0, 500, 500);
-            
             // Whether or not we clear the canvas before redrawing...
             m.safeAddin(self, 'clearCanvasOnFrameTick', true);
-            
             // Set this view's stage reference to itself, so other views can grab it...
             self.stage = self;
-            
+            // A reference to the 2D canvas rendering context...
+            m.safeAddin(self, 'context', undefined);
+            //--------------------------------------
+            //  INITILIZATION WITH DOM
+            //--------------------------------------
             m.safeAddin(self, 'canvas', function Stage_initCanvas() {
                 var canvas = document.createElement('canvas');
                 canvas.width = self.hitArea.width();
@@ -47,21 +50,6 @@ mod({
                 self.context = canvas.getContext('2d');
                 return canvas;
             }());
-            
-            m.safeOverride(self, 'draw', 'viewContainer_draw', function Stage_draw() {
-                // Send out a global hitArea tick notification...
-                self.sendNotification(m.Notifications.Stage.FRAME_TICK);
-                // Clear the stage...
-                if (self.clearCanvasOnFrameTick) {
-                    self.context.clearRect(0, 0, self.canvas.width, self.canvas.height);    
-                }
-                // Draw the stage...
-                self.viewContainer_draw();
-            });
-            
-            // A reference to the 2D canvas rendering context...
-            m.safeAddin(self, 'context', undefined);
-            
             // A private reference to the canvas's containing element...
             var _parentElement;
             // A private reference to the stage's animation...
@@ -84,7 +72,19 @@ mod({
                 m.cancelAllAnimations();
                 _parentElement.removeChild(self.canvas);
             });
-
+            //--------------------------------------
+            //  DRAWING
+            //--------------------------------------
+            m.safeOverride(self, 'draw', 'viewContainer_draw', function Stage_draw() {
+                // Send out a global hitArea tick notification...
+                self.sendNotification(m.Notifications.Stage.FRAME_TICK);
+                // Clear the stage...
+                if (self.clearCanvasOnFrameTick) {
+                    self.context.clearRect(0, 0, self.canvas.width, self.canvas.height);    
+                }
+                // Draw the stage...
+                self.viewContainer_draw();
+            });
             // set up drawing
             _animation = m.requestAnimation(self.draw);
             
