@@ -19,7 +19,7 @@ mod({
             assert.eq(('super_key' in object) && object.super_key === 6 && ('key' in object) && object.key === 666, true, 'safeOverride can override property.');
         
             var initObject = m.Object();
-            assert.eq(initObject.toString(), '['+initObject.tag+']', 'Initial objects have tag as toString.');
+            assert.eq(initObject.toString(), '['+initObject.uniqueId()+']', 'Initial objects have uniqueId as toString.');
         
             var taggedObject = {
                 tag : 'tagged'

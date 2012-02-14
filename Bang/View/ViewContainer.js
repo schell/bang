@@ -23,12 +23,10 @@ mod({
              */
             self = m.Object(self); 
             
+            m.safeAddin(self, 'tag', 'ViewContainer');
+            
             // Addin View
             m.View(self);
-            
-            self.toString = function() {
-                return '[ViewContainer]';
-            };
             
             // A private array to hold this container's subviews...
             var _subviews = [];
@@ -42,6 +40,9 @@ mod({
                 });
             });
             m.safeAddin(self, 'addSubview', function ViewContainer_addSubview(subview) {
+                if (m.defined(subview.parent)) {
+                    subview.parent.removeSubview(subview);
+                }
                 _subviews.push(subview);
                 // Let everyone know that this added a view...
                 subview.sendNotification(m.Notifications.View.WAS_ADDED_TO_VIEWCONTAINER, self);
@@ -54,7 +55,10 @@ mod({
                 * * **/
                 var ndx = _subviews.indexOf(subview);
                 if (ndx !== -1) {
+                    subview.parent = undefined;
                     _subviews.splice(ndx, 1);
+                    self.sendNotification(m.Notifications.ViewContainer.DID_REMOVE_SUBVIEW, subview);
+                    subview.sendNotification(m.Notifications.View.WAS_REMOVED_FROM_VIEWCONTAINER, self);
                 }
             });
             m.safeAddin(self, 'treeString', function ViewContainer_treeString(n) {

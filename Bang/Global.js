@@ -254,28 +254,15 @@ mod({
                 self = {};
             }
             
-            if (!m.defined(self.tag)) {
-                self.tag = (_uniqueId++).toString();
-            }
-            m.safeAddin(self, 'addToString', function Global_addToString(newToString) {
-                /** * *
-                * Adds another toString function to the object.
-                * @param - newToString Function
-                * * **/
-                if (self.toString().indexOf(newToString()) === -1) {
-                    if ('toString' in self) {
-                        var oldToString = self.toString;
-                        self.toString = function () {
-                            return newToString()+'+'+oldToString();
-                        };
-                    } else {
-                        self.toString = newToString;
-                    }
-                }
-            });
+            var uniqueId = _uniqueId++;
             
             self.toString = function () {
-                return '['+self.tag.toString()+']';
+                var tag = self.tag || uniqueId;
+                return '['+tag.toString()+']';
+            };
+            
+            self.uniqueId = function () {
+                return uniqueId;
             };
             
             return self;

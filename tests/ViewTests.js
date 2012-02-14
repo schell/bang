@@ -117,15 +117,16 @@ mod({
             }
         
             var red = m.View({
+                tag : 'red',
                 hitArea : m.Rectangle.from(-50, -50, 100, 100),
                 scaleX : 0.5,
                 scaleY : 0.5
             });
             red.alpha = 0.5;
-            red.addToString(function(){return '[red]';});
             red.drawQueue.push(makeDrawFunction(red, 'rgb(255, 0, 0)'));
         
             var blue = m.View({
+                tag : 'blue',
                 hitArea : m.Rectangle.from(0, 0, 100, 100),
                 x : 100,
                 y : 100,
@@ -133,9 +134,9 @@ mod({
                 scaleY : 0.5
             });
             red.alpha = 0.5;
-            blue.addToString(function(){return '[blue]';});
             blue.drawQueue.push(makeDrawFunction(blue, 'rgb(0, 0, 255)'));
             var green = m.ViewContainer({
+                tag : 'redAndBlue',
                 hitArea : m.Rectangle.from(0, 0, 100, 100),
                 x : 200,
                 y : 200,
@@ -149,7 +150,6 @@ mod({
                 blue.rotation += 2;
                 green.rotation -= 2;
             });
-            green.addToString(function(){return '[redAndBlue]';});
             
             function testHitAreaConversion(cb) {
                 console.log('hitArea conversion test');
@@ -254,12 +254,170 @@ mod({
                     drawPolygon(stage.context, 'blue', 'yellow', rightLeafHitArea);
                 });
                 
-                //stage.removeSubview(trunk);
-                //cb();
+                stage.removeSubview(trunk);
+                stage.drawQueue = [];
+                cb();
+            }
+            
+            function testMouseInput(cb) {
+                // Reset the stage...
+                stage.remove();
+                stage = m.Stage();
+                stage.setParentElement('bang');
+                
+                var currentTestFunc;
+                function updateCurrentTestFuncWithView(view) {
+                    currentTestFunc = function(note) {
+                        assert.eq(note.target.toString(), view.toString(), 'Mouse can hit '+view.toString());
+                    };
+                }
+                function onMouseEvent(note) {
+                    console.log(note.target.toString(), note.globalPoint.toString());
+                    currentTestFunc(note);
+                }
+                
+                stage.tag = 'stage';
+                stage.alpha = 0.5;
+                stage.addHitAreaDrawFunction('green', 'black');
+                stage.addInterest(stage, m.Notifications.View.MOUSE_DOWN, onMouseEvent);
+                
+                var root = m.ViewContainer({
+                    tag : 'root',
+                    x : stage.hitArea.width()/2 - 50,
+                    hitArea : m.Rectangle.from(0, 0, 100, 100)
+                });
+                root.addInterest(root, m.Notifications.View.MOUSE_DOWN, onMouseEvent);
+                root.addHitAreaDrawFunction('red', 'red');
+                stage.addSubview(root);
+                
+                var leftbranch = m.ViewContainer({
+                    tag : 'leftbranch',
+                    x : -50,
+                    y : 50,
+                    hitArea : m.Rectangle.from(0, 0, 100, 100)
+                });
+                leftbranch.addInterest(leftbranch, m.Notifications.View.MOUSE_DOWN, onMouseEvent);
+                leftbranch.addHitAreaDrawFunction('yellow', 'fuchsia');
+                root.addSubview(leftbranch);
+                
+                var leftleftleaf = m.View({
+                    tag : 'leftleftleaf',
+                    y : 100,
+                    hitArea : m.Rectangle.from(0, 0, 50, 50)
+                });
+                leftleftleaf.addInterest(leftleftleaf, m.Notifications.View.MOUSE_DOWN, onMouseEvent);
+                leftleftleaf.addHitAreaDrawFunction('gray', 'fuchsia');
+                leftbranch.addSubview(leftleftleaf);
+                
+                var leftrightleaf = m.View({
+                    tag : 'leftrightleaf',
+                    x : 50,
+                    y : 100,
+                    hitArea : m.Rectangle.from(0, 0, 50, 50)
+                });
+                leftrightleaf.addInterest(leftrightleaf, m.Notifications.View.MOUSE_DOWN, onMouseEvent);
+                leftrightleaf.addHitAreaDrawFunction('gray', 'teal');
+                leftbranch.addSubview(leftrightleaf);
+                
+                var rightbranch = m.ViewContainer({
+                    tag : 'rightbranch',
+                    x : 50,
+                    y : 50,
+                    hitArea : m.Rectangle.from(0, 0, 100, 100)
+                });
+                rightbranch.addInterest(rightbranch, m.Notifications.View.MOUSE_DOWN, onMouseEvent);
+                rightbranch.addHitAreaDrawFunction('yellow', 'teal');
+                root.addSubview(rightbranch);
+                
+                var rightleftleaf = m.View({
+                    tag : 'rightleftleaf',
+                    y : 100,
+                    hitArea : m.Rectangle.from(0, 0, 50, 50)
+                });
+                rightleftleaf.addInterest(rightleftleaf, m.Notifications.View.MOUSE_DOWN, onMouseEvent);
+                rightleftleaf.addHitAreaDrawFunction('gray', 'fuchsia');
+                rightbranch.addSubview(rightleftleaf);
+                
+                var rightrightleaf = m.ViewContainer({
+                    tag : 'rightrightleaf',
+                    x : 50,
+                    y : 100,
+                    hitArea : m.Rectangle.from(0, 0, 50, 50)
+                });
+                rightrightleaf.addInterest(rightrightleaf, m.Notifications.View.MOUSE_DOWN, onMouseEvent);
+                rightrightleaf.addHitAreaDrawFunction('gray', 'teal');
+                rightbranch.addSubview(rightrightleaf);
+                
+                var rightrightrightleaf = m.View({
+                    tag : 'rightrightrightleaf',
+                    x : 50,
+                    y : 50,
+                    hitArea : m.Rectangle.from(0, 0, 50, 50)
+                });
+                rightrightrightleaf.addInterest(rightrightrightleaf, m.Notifications.View.MOUSE_DOWN, onMouseEvent);
+                rightrightrightleaf.addHitAreaDrawFunction('gray', 'teal');
+                rightrightleaf.addSubview(rightrightrightleaf);
+                
+                var compareList = [
+                    stage,
+                    root,
+                    leftbranch,
+                    leftleftleaf,
+                    leftrightleaf,
+                    rightbranch,
+                    rightleftleaf,
+                    rightrightleaf,
+                    rightrightrightleaf
+                ];
+                
+                assert.eq(compareList.toString(), stage.displayList().toString(), 'Stage builds accurate display list.');
+                
+                var newroot = m.ViewContainer({
+                    tag : 'newroot'
+                });
+                newroot.addSubview(root);
+                stage.addSubview(newroot);
+                compareList.splice(0, 1, stage, newroot);
+                assert.eq(compareList.toString(), stage.displayList().toString(), 'Stage updates accurate display list after addSubview.');
+                // Pop off rightrightrightleaf...
+                compareList.pop();
+                rightrightleaf.removeSubview(rightrightrightleaf);
+                assert.eq(compareList.toString(), stage.displayList().toString(), 'Stage updates accurate display list after removeSubview.');
+                
+                // Test mouse points
+                updateCurrentTestFuncWithView(root);
+                stage.fireMouseDownEvent({offsetX:260,offsetY:26});
+                updateCurrentTestFuncWithView(rightbranch);
+                stage.fireMouseDownEvent({offsetX:271,offsetY:75});
+                updateCurrentTestFuncWithView(leftbranch);
+                stage.fireMouseDownEvent({offsetX:195,offsetY:86});
+                updateCurrentTestFuncWithView(leftrightleaf);
+                stage.fireMouseDownEvent({offsetX:232,offsetY:176});
+                
+                [
+                    stage,
+                    newroot,
+                    root,
+                    leftbranch,
+                    leftleftleaf,
+                    leftrightleaf,
+                    rightbranch,
+                    rightleftleaf,
+                    rightrightleaf,
+                    rightrightrightleaf
+                ].map(function(el,ndx,a){
+                    el.removeInterest(el, m.Notifications.View.MOUSE_DOWN, onMouseEvent);
+                });
+                
+                cb();
             }
             
             function testGreenEasing(cb) {
                 console.log('green easing test');
+                // Reset the stage...
+                stage.remove();
+                stage = m.Stage();
+                stage.setParentElement('bang');
 
                 stage.addSubview(green);
                 
@@ -320,7 +478,7 @@ mod({
                 bar.drawQueue.push(makeDrawFunction(bar, 'rgb(0, 255, 255)'));
                 stage.addSubview(bar);
             }
-            go(testHitAreaConversion, testGreenEasing, testScaledEasing, callback).start();
+            go(testHitAreaConversion, testMouseInput, testGreenEasing, testScaledEasing, callback).start();
         };
     }
 });

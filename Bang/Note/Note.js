@@ -23,12 +23,12 @@ mod({
              */
             self = m.Object(self); 
             
-            self.addToString(function () {
+            self.toString = function() {
                 var dispatcher = (self.dispatcher || 'undefined').toString();
                 var name = (self.name || 'undefined').toString();
                 var body = (self.body || 'undefined').toString();
                 return '[Note(dispatcher:'+dispatcher+' name:'+name+' body:'+body+')]';
-            });
+            };
 
             m.safeAddin(self, 'dispatcher', undefined);
             m.safeAddin(self, 'name', undefined);

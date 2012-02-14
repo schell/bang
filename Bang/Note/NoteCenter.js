@@ -23,9 +23,7 @@ mod({
              */
             self = m.Object(self); 
             
-            self.addToString(function NoteCenter_toString() {
-                return '[NoteCenter]';
-            });
+            m.safeAddin(self, 'tag', 'NoteCenter');
             
             // protected observers array
             var _observers = [];
@@ -49,6 +47,19 @@ mod({
                  * @return - Number
                  */
                 return _observers.length;
+            });
+            m.safeAddin(self, 'dispatchersOfNoteWithName', function NoteCenter_getDispatchersWithName(name) {
+                /** * *
+                * Returns an array of dispatchers associated with notifications of *name*
+                * * **/
+                var list = [];
+                for (var i=0; i < _observers.length; i++) {
+                    var observer = _observers[i];
+                    if (m.defined(observer.name) && observer.name === name && m.defined(observer.dispatcher)) {
+                        list.push(observer.dispatcher);
+                    }
+                }
+                return list;
             });
             
             m.safeAddin(self, 'addInterest', function NoteCenter_addInterest(listener, dispatcher, name, callback) {

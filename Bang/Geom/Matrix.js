@@ -33,9 +33,7 @@ mod({
             var defined = m.defined(self);
             self = m.Object(self); 
             
-            self.addToString(function () {
-                return '[Matrix]';
-            });
+            m.safeAddin(self, 'tag', 'Matrix');
             
             // Addin Vector
             m.Vector(self);

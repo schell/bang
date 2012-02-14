@@ -8,7 +8,7 @@
 * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * **/
 mod({
     name : 'Stage',
-    dependencies : [ 'Bang/View/ViewContainer.js', 'Bang/Geom/Matrix.js' ],
+    dependencies : [ 'Bang/View/ViewContainer.js', 'Bang/Geom/Matrix.js', 'Bang/Note/MouseEventNote.js' ],
     init : function initStage (m) {
         /**
          * Initializes the Stage Addin
@@ -87,7 +87,91 @@ mod({
             });
             // set up drawing
             _animation = m.requestAnimation(self.draw);
+            //--------------------------------------
+            //  INTERESTS
+            //--------------------------------------
+            // A private, up-to-date, flattened version of the entire display list...
+            var _displayList = [];
+            function compileDisplayList() {
+                /** * *
+                * Compiles a flattened display list.
+                * * **/
+                function flattenChildrenOf(view) {
+                    var list = [view];
+                    if ('subviews' in view && (typeof view.subviews === 'function')) {
+                        // This view has children, add them...
+                        var subviews = view.subviews();
+                        for (var i=0; i < subviews.length; i++) {
+                            list = list.concat(flattenChildrenOf(subviews[i]));
+                        }
+                    } 
+                    return list;
+                }
+                _displayList = flattenChildrenOf(self, _displayList);
+            }
+            m.safeAddin(self, 'displayList', function Stage_displayList() {
+                /** * *
+                * Returns a copy of the flattened display list.
+                * @return - Array
+                * * **/
+                return _displayList.map(function(el,ndx,a) {
+                    return el;
+                });
+            });
+            self.addInterest(undefined, m.Notifications.ViewContainer.DID_ADD_SUBVIEW, compileDisplayList);
+            self.addInterest(undefined, m.Notifications.ViewContainer.DID_REMOVE_SUBVIEW, compileDisplayList);
+            //--------------------------------------
+            //  MOUSE INPUT HANDLING
+            //--------------------------------------
+            function sortByNdxInDisplayList(a, b) {
+                /** * *
+                * A mouse event helper that sorts dispatchers (most important last)
+                * * **/
+                var andx = _displayList.indexOf(a);
+                var bndx = _displayList.indexOf(b);
+                return andx - bndx;
+            }   
             
+            m.safeAddin(self, 'fireMouseDownEvent', function Stage_fireMouseDownEvent(nativeEvent) {
+                /** * *
+                * Fires a mouse down event into the display list. This function is meant to be attached
+                * to a canvas's onmousedown callback.
+                * @param - nativeEvent MouseEvent
+                * * **/
+                var x = nativeEvent.offsetX;
+                var y = nativeEvent.offsetY;
+                // Get all the dispatchers that could potentially send this notification (because something is listening)...
+                var dispatchersOfMouseDown = self.noteCenter.dispatchersOfNoteWithName(m.Notifications.View.MOUSE_DOWN);
+                // Sort them so the top views are last...
+                dispatchersOfMouseDown.sort(sortByNdxInDisplayList);
+                // Run backward through the list...
+                for (var i = dispatchersOfMouseDown.length - 1; i >= 0; i--){
+                    var potentialDispatcher = dispatchersOfMouseDown[i];
+                    if (m.defined(potentialDispatcher.hitArea)) {
+                        // Get the dispatcher's hitArea in global coords...
+                        var poly = potentialDispatcher.hitArea.copy();
+                        var globalPoint = m.Point({
+                            elements : [
+                                x, y
+                            ]
+                        });
+                        var localPoint = potentialDispatcher.convertPolygonToLocal(globalPoint.copy());
+                        var hit = poly.containsPoint(localPoint);
+                        if (hit) {
+                            var note = m.MouseEventNote({
+                                localPoint : localPoint,
+                                globalPoint : globalPoint,
+                                target : potentialDispatcher,
+                                body : nativeEvent
+                            });
+                            potentialDispatcher.dispatch(note);
+                            //TODO: possibly bubble the event up the display list - here or in the View...
+                            return;
+                        }
+                    }
+                }
+            });
+            self.canvas.onmouseup = self.fireMouseDownEvent;
             return self;
         };
         

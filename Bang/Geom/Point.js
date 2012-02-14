@@ -25,15 +25,18 @@ mod({
              */
             
             // Initialize self (adding in Vector)...
-            self = m.Vector(self);
+            self = m.Object(self);
+            
+            // Addin Vector
+            m.Vector(self);
 
             if (self.elements.length === 0) {
                 self.elements = m.Vector.Origin().elements;
             }
             
-            self.addToString(function Point_toString() {
-                 return '[Point('+self.x()+','+self.y()+')]';
-             });
+            self.toString = function() {
+                return '[Point('+self.x()+','+self.y()+')]';
+            };
             
             //--------------------------------------
             //  Addins

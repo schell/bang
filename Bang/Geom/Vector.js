@@ -161,7 +161,7 @@ mod({
             //--------------------------------------
             //  STRING
             //--------------------------------------
-            self.addToString(function() {
+            self.toString = function() {
                 var s = '[Vector(';
                 for (var i=0; i < self.elements.length; i++) {
                     s += self.elements[i].toFixed(3);
@@ -171,7 +171,7 @@ mod({
                 }
                 s+=')]';
                 return s;
-            });
+            };
             return self;
         };
         addin.from = function Vector_from(x, y, z) {

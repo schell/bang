@@ -23,9 +23,7 @@ mod({
              */
             self = m.Object(self); 
             
-            self.addToString(function Listener_toString() {
-                return '[Listener]';
-            });
+            m.safeAddin(self, 'tag', 'Listener');
             
             // Add in NotePasser properties...
             m.NotePasser(self);

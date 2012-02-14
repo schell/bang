@@ -26,9 +26,7 @@ mod({
              */
             self = m.Object(self); 
             
-            self.addToString(function NotePassert_toString() {
-                return '[NotePasser]';
-            });
+            m.safeAddin(self, 'tag', 'NotePasser');
             
             defaultNoteCenter = defaultNoteCenter || m.NoteCenter();
             

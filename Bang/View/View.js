@@ -23,9 +23,7 @@ mod({
              */
             self = m.Object(self); 
             
-            self.addToString(function View_toString() {
-                return '[View]';
-            });
+            m.safeAddin(self, 'tag', 'View');
             
             // Addin properties of Listener...
             m.Listener(self);

@@ -82,8 +82,12 @@ mod({
             (function Listener_Dispatcher_tests() {
                 assert.testSuite = 'Listener/Dispatcher Tests';
             
-                var listener = Listener();
-                var dispatcher = Dispatcher();
+                var listener = Listener({
+                    tag : 'listener'
+                });
+                var dispatcher = Dispatcher({
+                    tag : 'dispatcher'
+                });
                 var payload = false;
                 var callback = function(note) {
                     payload = note.body;
@@ -96,7 +100,9 @@ mod({
                 dispatcher.sendNotification('a note name', 777);
                 assert.eq(payload, 666, 'Listeners can remove interests.');
             
-                var itself = m.Object();
+                var itself = m.Object({
+                    tag : 'itself'
+                });
                 Listener(itself);
                 Dispatcher(itself);
                 var listensToItself = false;
@@ -105,6 +111,11 @@ mod({
                 });
                 itself.sendNotification('asdf', 666);
                 assert.eq(listensToItself, true, 'Listeners can listen to themselves.');
+                
+                listener.addInterest(dispatcher, 'asdf', function(){});
+                var listForASDF = listener.noteCenter.dispatchersOfNoteWithName('asdf');
+                var compareList = [itself,dispatcher];
+                assert.eq(listForASDF.toString(), compareList.toString(), 'NoteCenter can return list of dispatchers of note name.');
             })();
             
             callback();

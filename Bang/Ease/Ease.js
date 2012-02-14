@@ -23,9 +23,7 @@ mod({
             * * **/
             self = m.Object(self); 
             
-            self.addToString(function Ease_toString() {
-                return '[Ease]';
-            });
+            m.safeAddin(self, 'tag', 'Ease');
             //--------------------------------------
             //  EASING EQUATIONS
             //  by Robert Penner (http://www.gizma.com/easing/)

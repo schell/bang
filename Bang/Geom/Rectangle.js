@@ -79,9 +79,10 @@ mod({
                 * * **/
                 return self.elements[5] - self.elements[1];
             });
-            self.addToString(function Rectangle_toString () {
+            
+            self.toString = function Rectangle_toString () {
                 return '[Rectangle(x:'+self.left()+' y:'+self.top()+' w:'+self.width()+' h:'+self.height()+')]';
-            });
+            };
 
             m.safeAddin(self, 'right', function Rectangle_right () {
                 /**

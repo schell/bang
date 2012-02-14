@@ -23,9 +23,7 @@ mod({
              */
             self = m.Object(self); 
             
-            self.addToString(function Dispatcher_toString() {
-                return '[Dispatcher]';
-            });
+            m.safeAddin(self, 'tag', 'Dispatcher');
             
             // Add in NotePasser properties
             m.NotePasser(self);
