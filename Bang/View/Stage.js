@@ -205,43 +205,49 @@ mod({
                 * Dispatches a mouse move event or a mouse over.
                 * * **/
                 var mouseEventNote = createMouseEvent(m.Notifications.View.MOUSE_MOVE, nativeEvent);
-                var view;
+                var overView = false;
                 if (mouseEventNote) {
-                    view = mouseEventNote.target;
-                    if (view.$mouseSettings.mousedOver === false) {
+                    overView = mouseEventNote.target;
+                    if (overView.$mouseSettings.mousedOver === false) {
                         // Intercept this mouseMove and change it into a mouseOver...
-                        view.$mouseSettings.mousedOver = true;
+                        overView.$mouseSettings.mousedOver = true;
                         mouseEventNote.name = m.Notifications.View.MOUSE_OVER;
                         // Update _mousedOver so Stage knows to check for mouseOut events...
                         _mousedOver = true;
                     }
                     mouseEventNote.target.dispatch(mouseEventNote);
-                } else if (_mousedOver) {
-                    // Either the mouse isn't over anything or the views it is over
-                    // don't care, so fire mouseOver events for previously moused over
+                } 
+                if (_mousedOver) {
+                    // Fire mouseOut events for previously moused over
                     // views, as long as there are some...
                     for (var i = _displayList.length - 1; i >= 0; i--){
-                        view = _displayList[i];
+                        var view = _displayList[i];
+                        if (view === overView) {
+                            continue;
+                        }
                         if (view.$mouseSettings.mousedOver === true) {
-                            view.$mouseSettings.mousedOver = false;
-                            var mouseOutEvent = m.MouseEventNote({
-                                name : m.Notifications.View.MOUSE_OUT,
-                                globalPoint : m.Point({
-                                    elements : [
-                                        nativeEvent.offsetX,
-                                        nativeEvent.offsetY
-                                    ]
-                                }),
-                                localPoint : undefined,
-                                target : view,
-                                body : nativeEvent
+                            var globalPoint = m.Point({
+                                elements : [
+                                    nativeEvent.offsetX,
+                                    nativeEvent.offsetY
+                                ]
                             });
-                            view.dispatch(mouseOutEvent);
-                            return;
+                            var localPoint = view.convertPolygonToLocal(globalPoint.copy());
+                            if (view.hitArea.containsPoint(localPoint)) {
+                                continue;
+                            } else {
+                                view.$mouseSettings.mousedOver = false;
+                                var mouseOutEvent = m.MouseEventNote({
+                                    name : m.Notifications.View.MOUSE_OUT,
+                                    globalPoint : globalPoint,
+                                    localPoint : undefined,
+                                    target : view,
+                                    body : nativeEvent
+                                });
+                                view.dispatch(mouseOutEvent);
+                            }
                         }
                     }
-                    // There are no moused over views...
-                    _mousedOver = false;
                 }
             });
             self.canvas.onmousedown = self.fireMouseDownEvent;

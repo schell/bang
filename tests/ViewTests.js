@@ -403,21 +403,94 @@ mod({
                     leftrightleaf,
                     rightbranch,
                     rightleftleaf,
-                    rightrightleaf,
-                    rightrightrightleaf
+                    rightrightleaf
                 ].map(function(el,ndx,a){
-                    el.removeInterest(el, m.Notifications.View.MOUSE_DOWN, onMouseEvent);
+                    // Copy the old drawQueue...
+                    var oldQueue = el.drawQueue.slice();
+                    el.drawQueue = [];
+                    // Mouse down drawQueue
+                    el.addHitAreaDrawFunction('gray','black');
+                    var downQueue = el.drawQueue.slice();
+                    el.drawQueue = [];
+                    // mouse up drawQueue
+                    el.addHitAreaDrawFunction('grey','white');
+                    var upQueue = el.drawQueue.slice();
+                    el.drawQueue = [];
+                    // Mouse over
+                    el.addHitAreaDrawFunction('grey','red');
+                    var overQueue = el.drawQueue.slice();
+                    // Reset the drawQueue to the old one...
+                    el.drawQueue = oldQueue.slice();
+                    
+                    el.addInterest(el, m.Notifications.View.MOUSE_DOWN, function(mouseNote) {
+                        console.log(el.toString(),'mouse down');
+                        el.drawQueue = downQueue.slice();
+                    });
+                    el.addInterest(el, m.Notifications.View.MOUSE_UP, function(mouseNote) {
+                        console.log(el.toString(),'mouse up');
+                        el.drawQueue = upQueue.slice();
+                    });
+                    el.addInterest(el, m.Notifications.View.MOUSE_MOVE, function(mouseNote) {
+                        var x = mouseNote.localPoint.x();
+                        var y = mouseNote.localPoint.y();
+                        el.drawQueue = [
+                            oldQueue.slice().shift(),
+                            function() {
+                                el.context.save();
+                                el.context.strokeStyle = 'rgba(0,0,0,0.5)';
+                                // Draw a horizontal line...
+                                el.context.beginPath();
+                                el.context.moveTo(0, y);
+                                el.context.lineTo(el.hitArea.width(), y);
+                                el.context.closePath();
+                                el.context.stroke();
+                                // Draw a vertical line...
+                                el.context.beginPath();
+                                el.context.moveTo(x, 0);
+                                el.context.lineTo(x, el.hitArea.height());
+                                el.context.closePath();
+                                el.context.stroke();
+                                el.context.restore();
+                            }
+                        ];
+                    });
+                    el.addInterest(el, m.Notifications.View.MOUSE_OVER, function(mouseNote) {
+                        console.log(el.toString(),'mouse over');
+                        el.drawQueue = overQueue.slice();
+                    });
+                    el.addInterest(el, m.Notifications.View.MOUSE_OUT, function(mouseNote) {
+                        console.log(el.toString(),'mouse out');
+                        el.drawQueue = oldQueue.slice();
+                    });
+                    el.addInterest(el, m.Notifications.View.MOUSE_CLICK, function(mouseNote) {
+                        console.log(el.toString(),'mouse click');
+                        var x = mouseNote.globalPoint.x();
+                        var y = mouseNote.globalPoint.y();
+                        var block = m.View({
+                            x : x-1,
+                            y : y-1,
+                            hitArea : m.Rectangle.from(-1,-1,2,2)
+                        });
+                        block.addHitAreaDrawFunction('fuchsia','fuchsia');
+                        block.tween = m.Ease({
+                            target : block,
+                            duration : 500,
+                            equation : 'easeIn',
+                            onComplete : function() {
+                                delete block.tween;
+                                stage.removeSubview(block);
+                            },
+                            properties : {
+                                scaleX : 100,
+                                scaleY : 100,
+                                rotation : 360,
+                                alpha : 0
+                            }
+                        });
+                        stage.addSubview(block);
+                        block.tween.interpolate();
+                    });
                 });
-                
-                function anyEvent(note) {
-                    console.log(note.name,note.globalPoint.toString(),(m.defined(note.localPoint) ? note.localPoint.toString() : 'undefined'));
-                }
-                stage.addInterest(rightrightleaf, m.Notifications.View.MOUSE_DOWN, anyEvent);
-                stage.addInterest(rightrightleaf, m.Notifications.View.MOUSE_MOVE, anyEvent);
-                stage.addInterest(rightrightleaf, m.Notifications.View.MOUSE_UP, anyEvent);
-                stage.addInterest(rightrightleaf, m.Notifications.View.MOUSE_OVER, anyEvent);
-                stage.addInterest(rightrightleaf, m.Notifications.View.MOUSE_OUT, anyEvent);
-                stage.addInterest(rightrightleaf, m.Notifications.View.MOUSE_CLICK, anyEvent);
                 //cb();
             }
             
