@@ -455,15 +455,12 @@ mod({
                         ];
                     });
                     el.addInterest(el, m.Notifications.View.MOUSE_OVER, function(mouseNote) {
-                        console.log(el.toString(),'mouse over');
                         el.drawQueue = overQueue.slice();
                     });
                     el.addInterest(el, m.Notifications.View.MOUSE_OUT, function(mouseNote) {
-                        console.log(el.toString(),'mouse out');
                         el.drawQueue = oldQueue.slice();
                     });
                     el.addInterest(el, m.Notifications.View.MOUSE_CLICK, function(mouseNote) {
-                        console.log(el.toString(),'mouse click');
                         var x = mouseNote.globalPoint.x();
                         var y = mouseNote.globalPoint.y();
                         var block = m.View({

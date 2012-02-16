@@ -199,7 +199,6 @@ mod({
                 }
             });
             // A private boolean to hold whether or not ANY views have been moused over...
-            var _mousedOver = false;
             m.safeAddin(self, 'fireMouseMoveEvent', function Stage_mouseMove(nativeEvent) {
                 /** * *
                 * Dispatches a mouse move event or a mouse over.
@@ -212,8 +211,6 @@ mod({
                         // Intercept this mouseMove and change it into a mouseOver...
                         overView.$mouseSettings.mousedOver = true;
                         mouseEventNote.name = m.Notifications.View.MOUSE_OVER;
-                        // Update _mousedOver so Stage knows to check for mouseOut events...
-                        _mousedOver = true;
                     }
                     mouseEventNote.target.dispatch(mouseEventNote);
                 } 
@@ -254,7 +251,22 @@ mod({
             self.canvas.onmouseup = self.fireMouseUpEvent;
             self.canvas.onclick = self.fireMouseClickEvent;
             self.canvas.onmousemove = self.fireMouseMoveEvent;
-            
+            self.canvas.onmouseout = function mouseOutAll(nativeEvent) {
+                for (var i = _displayList.length - 1; i >= 0; i--){
+                    var view = _displayList[i];
+                    if (view.$mouseSettings.mousedOver === true) {
+                        view.$mouseSettings.mousedOver = false;
+                        var mouseOutEvent = m.MouseEventNote({
+                            name : m.Notifications.View.MOUSE_OUT,
+                            globalPoint : globalPoint,
+                            localPoint : undefined,
+                            target : view,
+                            body : nativeEvent
+                        });
+                        view.dispatch(mouseOutEvent);
+                    }
+                }
+            }
             return self;
         };
         
