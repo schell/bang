@@ -214,35 +214,34 @@ mod({
                     }
                     mouseEventNote.target.dispatch(mouseEventNote);
                 } 
-                if (_mousedOver) {
-                    // Fire mouseOut events for previously moused over
-                    // views, as long as there are some...
-                    for (var i = _displayList.length - 1; i >= 0; i--){
-                        var view = _displayList[i];
-                        if (view === overView) {
+                
+                // Fire mouseOut events for previously moused over
+                // views, as long as there are some...
+                for (var i = _displayList.length - 1; i >= 0; i--){
+                    var view = _displayList[i];
+                    if (view === overView) {
+                        continue;
+                    }
+                    if (view.$mouseSettings.mousedOver === true) {
+                        var globalPoint = m.Point({
+                            elements : [
+                                nativeEvent.offsetX,
+                                nativeEvent.offsetY
+                            ]
+                        });
+                        var localPoint = view.convertPolygonToLocal(globalPoint.copy());
+                        if (view.hitArea.containsPoint(localPoint)) {
                             continue;
-                        }
-                        if (view.$mouseSettings.mousedOver === true) {
-                            var globalPoint = m.Point({
-                                elements : [
-                                    nativeEvent.offsetX,
-                                    nativeEvent.offsetY
-                                ]
+                        } else {
+                            view.$mouseSettings.mousedOver = false;
+                            var mouseOutEvent = m.MouseEventNote({
+                                name : m.Notifications.View.MOUSE_OUT,
+                                globalPoint : globalPoint,
+                                localPoint : undefined,
+                                target : view,
+                                body : nativeEvent
                             });
-                            var localPoint = view.convertPolygonToLocal(globalPoint.copy());
-                            if (view.hitArea.containsPoint(localPoint)) {
-                                continue;
-                            } else {
-                                view.$mouseSettings.mousedOver = false;
-                                var mouseOutEvent = m.MouseEventNote({
-                                    name : m.Notifications.View.MOUSE_OUT,
-                                    globalPoint : globalPoint,
-                                    localPoint : undefined,
-                                    target : view,
-                                    body : nativeEvent
-                                });
-                                view.dispatch(mouseOutEvent);
-                            }
+                            view.dispatch(mouseOutEvent);
                         }
                     }
                 }
@@ -252,6 +251,13 @@ mod({
             self.canvas.onclick = self.fireMouseClickEvent;
             self.canvas.onmousemove = self.fireMouseMoveEvent;
             self.canvas.onmouseout = function mouseOutAll(nativeEvent) {
+                var globalPoint = m.Point({
+                    elements : [
+                        nativeEvent.offsetX,
+                        nativeEvent.offsetY
+                    ]
+                });
+                
                 for (var i = _displayList.length - 1; i >= 0; i--){
                     var view = _displayList[i];
                     if (view.$mouseSettings.mousedOver === true) {
@@ -266,7 +272,7 @@ mod({
                         view.dispatch(mouseOutEvent);
                     }
                 }
-            }
+            };
             return self;
         };
         

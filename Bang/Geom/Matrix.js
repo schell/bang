@@ -4,9 +4,9 @@
 * /---------------------------------------\
 * | indices     | elements   | meaning    |
 * |---------------------------------------| 
-* | 0  1  2     | a  d  g    | s  0  x    |
-* | 3  4  5     | b  e  h    | 0  s  y    |
-* | 6  7  8     | c  f  i    | 0  0  s    |
+* | 0  1  2     | a  d  g    | s/r  r   x |
+* | 3  4  5     | b  e  h    |  r  s/r  y |
+* | 6  7  8     | c  f  i    |  0   0   s |
 * |             |            |            |
 * \---------------------------------------/ 
 *
@@ -23,7 +23,6 @@ mod({
          * Initializes the Matrix Addin
          * @param - m Object - The mod modules object.
          */
-        
         var addin = function addinMatrix (self) {
             /**
              * Adds Matrix properties to *self*.
@@ -218,59 +217,21 @@ mod({
                 * Returns column *n* in this matrix.
                 * @return - Array
                 * * **/
-                var elementsInColumn = 3;
-                var start = n;
-                var column = [];
-                for (var i=0; i < elementsInColumn; i++) {
-                    column.push(self.elements[start+3*i]);
-                }
-                return column;
+                return addin.getColumn(self, n);
             });
             m.safeAddin(self, 'row', function Matrix_row(n) {
                 /** * *
                 * Returns row *n* in this matrix.
                 * @return - Array
                 * * **/
-                var elementsInRow = 3;
-                var start = n*elementsInRow;
-                var row = [];
-                for (var i=0; i < elementsInRow; i++) {
-                    row.push(self.elements[start+i]);
-                }
-                return row;
+                return addin.getRow(self, n);
             });
             m.safeOverride(self, 'multiply', 'vector_multiply', function Matrix_multiply(matrix) {
                 /** * *
                 * Multiplies this matrix by another.
                 * @param - matrix Matrix
                 * * **/
-                function addRowAndColumn(row, column) {
-                    var combo = 0;
-                    for (var i=0; i < row.length && i < column.length; i++) {
-                        combo += row[i]*column[i];
-                    }
-                    return combo;
-                }
-                
-                var elements = [];
-                
-                var resultRows = self.elements.length/3;
-                var resultCols = matrix.elements.length/3;
-                for (var i=0; i < resultRows; i++) {
-                    for (var j=0; j < resultCols; j++) {
-                        var row = self.row(i);
-                        var column;
-                        if (resultCols === 1) {
-                            // This is a vector we are multiplying...
-                            column = matrix.elements;
-                        } else {
-                            column = matrix.column(j);
-                        }
-                        elements.push(addRowAndColumn(row, column));
-                    }
-                }
-                
-                self.elements = elements;
+                self.elements = addin.multiplyElements(self.elements, matrix.elements);
                 
                 return self;
             });
@@ -281,16 +242,7 @@ mod({
                 * @param - y Number
                 * @return - self Matrix
                 * * **/
-                x = m.ifndefInitNum(x, 0);
-                y = m.ifndefInitNum(y, 0);
-                var mat = m.Matrix({
-                    elements : [
-                        1, 0, x,
-                        0, 1, y,
-                        0, 0, 1
-                    ]
-                });
-                self.multiply(mat);
+               self.elements = addin.translateElements(self.elements, x, y);
                 return self;
             });
             m.safeAddin(self, 'scale', function Matrix_scale(x, y) {
@@ -300,16 +252,7 @@ mod({
                 * @param - y Number
                 * @return - self Matrix
                 * * **/
-                x = x || 1;
-                y = y || 1;
-                var mat = m.Matrix({
-                    elements : [
-                        x, 0, 0,
-                        0, y, 0,
-                        0, 0, 1
-                    ]
-                });
-                self.multiply(mat);
+                self.elements = addin.scaleElements(self.elements, x, y);
                 return self;
             });
             m.safeAddin(self, 'rotate', function Matrix_rotate(angleDegrees) {
@@ -318,19 +261,7 @@ mod({
                 * @param - angleDegrees Number
                 * @return - self Matrix
                 * * **/
-                // Invert theta (matrix rotation is counter-clockwise)...
-                angleDegrees = angleDegrees || 0;
-                // Convert to radians
-                var radians = angleDegrees*m.Geometry.ONE_DEGREE;    
-                
-                var rot = m.Matrix({
-                    elements : [
-                        Math.cos(radians), -Math.sin(radians), 0,
-                        Math.sin(radians), Math.cos(radians), 0,
-                        0, 0, 1
-                    ]
-                });
-                self.multiply(rot);
+                self.elements = addin.rotateElements(self.elements, angleDegrees);
                 return self;
             });
             m.safeAddin(self, 'transform2DVector', function Matrix_transform2DVector(vec) {
@@ -368,6 +299,128 @@ mod({
                 self.loadIdentity();
             }
             return self;
+        };
+        
+        addin.getRow = function Matrix_row(a, n) {
+            /** * *
+            * Returns row *n* matrix elements *a*.
+            * @param - Array
+            * @return - Array
+            * * **/
+            var elementsInRow = 3;
+            var start = n*elementsInRow;
+            var row = [];
+            for (var i=0; i < elementsInRow; i++) {
+                row.push(a[start+i]);
+            }
+            return row;
+        };
+        
+        addin.getColumn = function Matrix_column(a, n) {
+            /** * *
+            * Returns column *n* of matrix *a*.
+            * @return - Array
+            * * **/
+            var elementsInColumn = 3;
+            var start = n;
+            var column = [];
+            for (var i=0; i < elementsInColumn; i++) {
+                column.push(a[start+3*i]);
+            }
+            return column;
+        };
+        
+        addin.addRowAndColumn = function Matrix_addRowAndColumn(row, column) {
+            /** * *
+            * Adds a matrix element *row* and *column*.
+            * @param row Array
+            * @param column Array
+            * @return Array
+            * * **/
+            var combo = 0;
+            for (var i=0; i < row.length && i < column.length; i++) {
+                combo += row[i]*column[i];
+            }
+            return combo;
+        };
+        
+        addin.multiplyElements = function multiplyMatrixElements(a, b) {
+            /** * *
+            * Multiplies matrix elements *a* by *b*.
+            * @param a Array
+            * @param b Array
+            * @return Array
+            * * **/
+            var elements = [];
+                
+            var resultRows = a.length/3;
+            var resultCols = b.length/3;
+            for (var i=0; i < resultRows; i++) {
+                for (var j=0; j < resultCols; j++) {
+                    var row = addin.getRow(a, i);
+                    var column;
+                    if (resultCols === 1) {
+                        // This is a vector we are multiplying...
+                        column = b;
+                    } else {
+                        column = addin.getColumn(b, j); // bj - haha
+                    }
+                    elements.push(addin.addRowAndColumn(row, column));
+                }
+            }
+            return elements;
+        };
+        
+        addin.translateElements = function translateMatrixElements(elements, x, y) {
+            /** * *
+            * Translate this matrix by x, y.
+            * @param - x Number
+            * @param - y Number
+            * @return - self Matrix
+            * * **/
+            x = m.ifndefInitNum(x, 0);
+            y = m.ifndefInitNum(y, 0);
+            var transElements = [
+                1, 0, x,
+                0, 1, y,
+                0, 0, 1
+            ];
+            return addin.multiplyElements(elements, transElements);
+        };
+        
+        addin.scaleElements = function scaleMatrixElements(elements, x, y) {
+            /** * *
+            * Scale this matrix by x, y.
+            * @param - x Number
+            * @param - y Number
+            * @return - self Matrix
+            * * **/
+            x = x || 1;
+            y = y || 1;
+            var scaleElements = [
+                x, 0, 0,
+                0, y, 0,
+                0, 0, 1
+            ];
+            return addin.multiplyElements(elements, scaleElements);
+        };
+        addin.rotateElements = function rotateMatrixElements(elements, angleDegrees) {
+            /** * *
+            * Rotates this matrix *angleDegrees* about z.
+            * @param - angleDegrees Number
+            * @return - self Matrix
+            * * **/
+            // Invert theta (matrix rotation is counter-clockwise)...
+            angleDegrees = angleDegrees || 0;
+            // Convert to radians
+            var radians = angleDegrees*m.Geometry.ONE_DEGREE;    
+                
+            var rotationElements = [
+                Math.cos(radians), -Math.sin(radians), 0,
+                Math.sin(radians), Math.cos(radians), 0,
+                0, 0, 1
+            ];
+            return addin.multiplyElements(elements, rotationElements);
         };
         
         return addin;
