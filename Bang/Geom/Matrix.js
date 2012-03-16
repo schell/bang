@@ -213,14 +213,14 @@ mod({
                 * Returns column *n* in this matrix.
                 * @return - Array
                 * * **/
-                return addin.getColumn(self, n);
+                return addin.getColumn(self.elements, n);
             });
             m.safeAddin(self, 'row', function Matrix_row(n) {
                 /** * *
                 * Returns row *n* in this matrix.
                 * @return - Array
                 * * **/
-                return addin.getRow(self, n);
+                return addin.getRow(self.elements, n);
             });
             m.safeOverride(self, 'multiply', 'vector_multiply', function Matrix_multiply(matrix) {
                 /** * *
