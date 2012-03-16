@@ -1,4 +1,5 @@
-### bang ###
+bang
+====
 
 What do you get after the Flash? The bang!
 `bang` is a display list and event system that supplants Adobe's 
