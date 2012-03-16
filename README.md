@@ -15,6 +15,9 @@ modern browsers, with API features you've come to expect from Flash.
 ### Views ###
 The display list is much like Flash's hierarchical views with some tweaks and updates for ease of use (yeah, what's easier than Flash?).
 
+### Tweening ###
+Use the Ease addin for built in tweening!
+
 ### Notifications ###
 The event listening and dispatching system is a mixture of Flash events and Cocoa Notifications, combined into an easy to use MVC like structure. You can listen to all events of a certain name, all events from one object, or specific events from specific objects.
 
