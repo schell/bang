@@ -8,7 +8,7 @@
  * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * **/
 mod({
     name : 'View',
-    dependencies : [ 'Bang/Global.js', 'Bang/Notifications.js', 'Bang/Geometry.js' ],
+    dependencies : [ 'Bang/Global.js', 'Bang/Notifications.js', 'Bang/Geom/Matrix.js' ],
     init : function initView(m) {
         /**
          * Initializes the View Addin
@@ -88,29 +88,38 @@ mod({
                     self.context.restore();
                 }
             });
-            m.safeAddin(self, 'getTransformationMatrix', function View_getTransformationMatrix(invert) {
+            m.safeAddin(self, 'getTransformationElements', function View_getTransformationMatrixElements(invert) {
+                /** * *
+                * Returns the local transformation matrix elements.
+                * @param - invert Boolean
+                * @return - Array
+                * * **/
+                var elements = m.Matrix.identityElements();
+                
+                if (invert) {
+                    elements = m.Matrix.scaleElements(elements, 1/self.scaleX, 1/self.scaleY);
+                    elements = m.Matrix.rotateElements(elements, -self.rotation);
+                    elements = m.Matrix.translateElements(elements, -self.x, -self.y);
+                } else {
+                    elements = m.Matrix.translateElements(elements, self.x, self.y);
+                    elements = m.Matrix.rotateElements(elements, self.rotation);
+                    elements = m.Matrix.scaleElements(elements, self.scaleX, self.scaleY);
+                }
+                return elements;
+            });
+            m.safeAddin(self, 'getTransformation', function View_getTransformationMatrix(invert) {
                 /** * *
                 * Returns the local transformation matrix.
                 * @param - invert Boolean
                 * @return - Matrix
                 * * **/
-                var matrix = m.Matrix();
-                if (invert) {
-                    matrix.scale(1/self.scaleX, 1/self.scaleY);
-                    matrix.rotate(-self.rotation);
-                    matrix.translate(-self.x, -self.y);
-                } else {
-                    matrix.translate(self.x, self.y);
-                    matrix.rotate(self.rotation);
-                    matrix.scale(self.scaleX, self.scaleY);
-                }
-                return matrix;
+                return m.Matrix({elements : self.getTransformationElements(invert)});
             });
-            m.safeAddin(self, 'getCompoundTransform', function View_getCompoundTransform(invert) {
+            m.safeAddin(self, 'getCompoundTransformElements', function View_getCompoundTransformElements(invert) {
                 /** * *
-                * Returns a transformation matrix that represents this view's complete transform,
+                * Returns transformation matrix elements that represent this view's complete transform,
                 * with the transformations of its parent views applied (in global space).
-                * @returns - Matrix
+                * @returns - Array
                 * * **/
                 // Using this inverse method is kind of a hack...the cleaner way to do this is to 
                 // get the regular compound transform and then invert it, but that takes longer
@@ -119,21 +128,29 @@ mod({
                 var i = invert ? -1 : 1;
                 
                 // Get this view's transformation matrix...
-                var matrix = self.getTransformationMatrix(invert);
+                var transform = self.getTransformationElements(invert);
 
                 if (!m.defined(self.parent)) {
                     // There is no parent reference, so this view does not
                     // belong to a display list, return only this matrix...
-                    return  matrix;
+                    return transform;
                 }
                 
                 // Recurse up the display tree and get the compound transform...
-                var compoundTransform = self.parent.getCompoundTransform(invert);
+                var compoundTransform = self.parent.getCompoundTransformElements(invert);
                 
                 if (invert) {
-                    return matrix.multiply(compoundTransform);
+                    return m.Matrix.multiplyElements(transform, compoundTransform);
                 }
-                return compoundTransform.multiply(matrix);
+                return m.Matrix.multiplyElements(compoundTransform, transform);
+            });
+            m.safeAddin(self, 'getCompoundTransform', function View_getCompoundTransformMatrix(invert) {
+                /** * *
+                * Returns a transformation matrix that represents this view's complete transform,
+                * with the transformations of its parent views applied (in global space).
+                * @returns - Matrix
+                * * **/
+                return m.Matrix({elements : self.getCompoundTransformElements(invert)});
             });
             m.safeAddin(self, 'convertPolygonToGlobal', function View_convertPolygonToGlobal(poly) {
                 /** * *
@@ -141,7 +158,9 @@ mod({
                 * @param - poly Polygon
                 * @return - Polygon
                 * * **/
-                return self.getCompoundTransform().transformPolygon(poly);
+                return m.Matrix({
+                    elements : self.getCompoundTransformElements()
+                }).transformPolygon(poly);
             });
             m.safeAddin(self, 'convertPolygonToLocal', function View_convertPolygonToLocal(poly) {
                 /** * *
@@ -149,7 +168,9 @@ mod({
                 * @param - poly Polygon
                 * @return - Polygon
                 * * **/
-                return self.getCompoundTransform(true).transformPolygon(poly);
+                return m.Matrix({
+                    elements : self.getCompoundTransformElements(true)
+                }).transformPolygon(poly);
             });
             m.safeAddin(self, 'convertPolygonToView', function View_convertPolygonToView(poly, view) {
                 /** * *
@@ -158,8 +179,8 @@ mod({
                 * @param - poly Polygon
                 * @return - polygon
                 * * **/
-                var toGlobalTransform = self.getCompoundTransform();
-                var toLocalTransform = view.getCompoundTransform(true);
+                var toGlobalTransform = m.Matrix({elements : self.getCompoundTransformElements()});
+                var toLocalTransform = m.Matrix({elements : view.getCompoundTransformElements(true)});
                 return toLocalTransform.transformPolygon(toGlobalTransform.transformPolygon(poly));
             });
             m.safeAddin(self, 'convertPolygonFromView', function View_convertPolygonFromView(poly, view) {
@@ -169,8 +190,8 @@ mod({
                 * @param - poly Polygon
                 * @return - polygon
                 * * **/
-                var toGlobalTransform = view.getCompoundTransform();
-                var toLocalTransform = self.getCompoundTransform(true);
+                var toGlobalTransform = m.Matrix({elements : view.getCompoundTransformElements()});
+                var toLocalTransform = m.Matrix({elements : self.getCompoundTransformElements(true)});
                 return toLocalTransform.transformPolygon(toGlobalTransform.transformPolygon(poly));
             });
             //--------------------------------------

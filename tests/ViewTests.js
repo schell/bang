@@ -488,7 +488,7 @@ mod({
                         block.tween.interpolate();
                     });
                 });
-                //cb();
+                cb();
             }
             
             function testGreenEasing(cb) {

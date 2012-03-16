@@ -157,11 +157,7 @@ mod({
                 /** * *
                 * Loads the identity projection/transformation matrix.
                 * * **/
-                self.elements = [
-                    1.0, 0.0, 0.0, 
-                    0.0, 1.0, 0.0, 
-                    0.0, 0.0, 1.0 
-                ];
+                self.elements = addin.identityElements();
                 return self;
             });
             m.safeAddin(self, 'determinant', function Matrix_determinate() {
@@ -343,6 +339,14 @@ mod({
             }
             return combo;
         };
+        
+        addin.identityElements = function identityMatrixElements() {
+            return [
+                1.0, 0.0, 0.0, 
+                0.0, 1.0, 0.0, 
+                0.0, 0.0, 1.0 
+            ];
+        }
         
         addin.multiplyElements = function multiplyMatrixElements(a, b) {
             /** * *
