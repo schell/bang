@@ -11,7 +11,7 @@ Features
 --------
 +   Modules 
 
-    `bang` is organized using the (mod)[https://github.com/schell/mod] module system and is broken up much like the Flash API you're used to.
+    `bang` is organized using the [mod](https://github.com/schell/mod) module system and is broken up much like the Flash API you're used to.
 
 +   Views 
 
