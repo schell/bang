@@ -12,12 +12,12 @@
 *
 * Copyright (c) 2012 Schell Scivally. All rights reserved.
 * 
-* @author    Schell Scivally
+* @author   Schell Scivally
 * @since    Wed Jan 25 09:59:05 PST 2012
 * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * **/
 mod({
     name : 'Matrix',
-    dependencies : [ 'Bang/Geometry.js' ],
+    dependencies : [ 'Bang/Global.js', 'Bang/Geom/Vector.js' ],
     init : function initMatrix (m) {
         /**
          * Initializes the Matrix Addin
