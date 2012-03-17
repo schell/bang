@@ -42,8 +42,9 @@ mod({
             stage.addSubview(sprite);
             
             setTimeout(function() {
+                stage.remove();
                 callback();
-            }, 1000);
+            }, 2000);
         };
     }
 });
