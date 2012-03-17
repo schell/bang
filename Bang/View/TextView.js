@@ -33,7 +33,15 @@ mod({
             // The initial text alignment...
             m.safeAddin(self, 'textAlign', 'left');
             // The initial text color...
-            m.safeAddin(self, 'textColor', 'rgb(0, 0, 0)');
+            m.safeAddin(self, 'fillStyle', 'rgb(0, 0, 0)');
+            // The initial text outline color...
+            m.safeAddin(self, 'strokeStyle', 'rgba(0, 0, 0, 0)');
+            // Whether or not to fit the text into the hit area rectangle...
+            m.safeAddin(self, 'shouldWrapText', true);
+            // Whether or not to fit the bottom of the hit area to the bottom of the text...
+            m.safeAddin(self, 'shouldAutoSize', true);
+            // The height of each successive line of text in pixels (only used when wrapping)...
+            m.safeAddin(self, 'lineHeight', 12);
             //--------------------------------------
             //  CONTEXT TRANSFORMATION
             //--------------------------------------
@@ -53,7 +61,8 @@ mod({
                 self.context.font = self.font;
                 self.context.textBaseline = self.textBaseline;
                 self.context.textAlign = self.textAlign;
-                self.context.fillStyle = self.textColor;
+                self.context.fillStyle = self.fillStyle;
+                self.context.strokeStyle = self.strokeStyle;
                 self.view_applyTransform();
             });
             m.safeOverride(self, 'restoreTransform', 'view_restoreTransform', function TextView_restoreTransform(params) {
@@ -67,12 +76,49 @@ mod({
                 }
                 self.view_restoreTransform();
             });
+            // The text broken up into lines in order to fit the bounding box...
+            var _lines = [];
             m.safeOverride(self, 'draw', 'view_draw', function TextView_draw() {
                 /** * *
                 * Draws this view into the 2d context.
                 * * **/
                 self.applyTransform();
-                self.context.fillText(self.text, 0, 0);
+                if (self.shouldWrapText) {
+                    // We may have to add newlines to the supplied text...
+                    if (_lines.join(' ') !== self.text.split('\n').join(' ')) {
+                        // Either we have not set _lines or self.text has changed,
+                        // so we need to re-process this text to fit it into the hitArea...
+                        var sections = self.text.split('\n');
+                        for (var i=0; i < sections.length; i++) {
+                            var line = sections[i];
+                            var split = line.split(' ');
+                            var len = split.length;
+                            var n = 0;
+                            var s = '';
+                            while (n < len) {
+                                while ((self.context.measureText(s+split[n]).width < self.hitArea.width()) && (n < len)) {
+                                    // Add a word to the string and increment n...
+                                    s += split[n] + ' ';
+                                    n++;
+                                }
+                                // Pop off that last space...
+                                s = s.substr(0,s.length-1);
+                                _lines.push(s);
+                                s = '';
+                            }
+                        }
+                    }
+                    if (self.shouldAutoSize) {
+                        self.hitArea = m.Rectangle.from(self.hitArea.x(), self.hitArea.y(), self.hitArea.width(), _lines.length*self.lineHeight);
+                    }
+                } else {
+                    _lines = [self.text];
+                }
+                for (var j=0; j < _lines.length; j++) {
+                    var text = _lines[j];
+                    self.context.fillText(text, self.hitArea.x(), self.hitArea.y()+j*self.lineHeight);
+                    self.context.strokeText(text, self.hitArea.x(), self.hitArea.y()+j*self.lineHeight);
+                }                    
                 self.restoreTransform();
                 self.view_draw();
             });
