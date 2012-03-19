@@ -67,8 +67,8 @@ mod({
                             assert.eq(imageData !== false, true, 'Bitmap can retrieve image data.');
                         } 
                         
-                        stage.remove();
-                        cb();
+                        //stage.remove();
+                        //cb();
                     }
                 });
                 bm.tween.interpolate();
