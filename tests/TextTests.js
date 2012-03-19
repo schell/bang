@@ -49,7 +49,12 @@ mod({
                     lineHeight : 27
                 },
                 onComplete : function(){
+                    assert.eq(text.hitArea.isEqualTo(m.Rectangle.from(10, 10, 300, 100)), false, 'TextView resizes hit area.');
                     tween.properties.lineHeight = text.lineHeight == 27 ? 18 : 27;
+                    tween.onComplete = function() {
+                        stage.remove();
+                        callback();
+                    }
                     // Repeat...
                     setTimeout(tween.interpolate,1000);
                 }

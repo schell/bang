@@ -40,13 +40,13 @@
                     return undefined;
                 },
                 callback : function callbackMain (m) {
-                    go( m.GlobalTests,
+                    go( /*m.GlobalTests,
                         m.GeomTests, 
                         m.NoteTests,
-                        m.ViewTests,
+                        m.ViewTests,*/
                         m.BitmapTests,
-                        m.SpriteTests,
-                        m.TextTests,
+                        /*m.SpriteTests,
+                        m.TextTests,*/
                         function() {
                             m.assert.stat();
                         }).start();
