@@ -8,7 +8,7 @@
 * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * **/
 mod({
     name : 'TextTests',
-    dependencies : [ 'Bang/View/TextView.js', 'Bang/Geom/Rectangle.js', 'Bang/Ease/Ease.js' ],
+    dependencies : [ 'Bang/View/Stage.js', 'Bang/View/TextView.js', 'Bang/Geom/Rectangle.js', 'Bang/Ease/Ease.js' ],
     init : function initTextTests (m) {
         /**
          * Initializes the TextTests 

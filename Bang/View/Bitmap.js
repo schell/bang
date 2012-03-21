@@ -44,7 +44,6 @@ mod({
                 };
                 image.src = src;
             });
-            
             m.safeAddin(self, 'getImageData', function Bitmap_bitmapData() {
                 /** * *
                 * Returns the image data of this Bitmap, or false if no image is loaded.
@@ -81,7 +80,9 @@ mod({
                 * Draws this bitmap into the 2d context.
                 * * **/
                 self.applyTransform();
-                self.context.drawImage(self.image, 0, 0);
+                if (self.image) {
+                    self.context.drawImage(self.image, 0, 0);
+                }
                 self.restoreTransform();
                 self.view_draw();
             });

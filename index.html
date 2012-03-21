@@ -33,7 +33,8 @@
                     'tests/GlobalTests.js',
                     'tests/BitmapTests.js',
                     'tests/SpriteTests.js',
-                    'tests/TextTests.js'
+                    'tests/TextTests.js',
+                    'tests/UtilsTests.js'
                 ],
                 init : function initMain (m) {
                     m.interactiveTests = false;
@@ -43,10 +44,12 @@
                     go( /*m.GlobalTests,
                         m.GeomTests, 
                         m.NoteTests,
-                        m.ViewTests,*/
+                        m.ViewTests,
                         m.BitmapTests,
-                        /*m.SpriteTests,
-                        m.TextTests,*/
+                        m.SpriteTests,
+                        m.TextTests,
+                        */
+                        m.UtilsTests,
                         function() {
                             m.assert.stat();
                         }).start();
