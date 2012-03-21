@@ -8,7 +8,7 @@
 * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * **/
 mod({
     name : 'BitmapTests',
-    dependencies : [ 'Bang/Global.js', 'Bang/View/Stage.js', 'Bang/Ease/Ease.js', 'Bang/View/Bitmap.js', 'Bang/Error/BitmapLoadError.js', 'Bang/Utils/PNGEncoder.js', 'submodules/go/go.js' ],
+    dependencies : [ 'Bang/Global.js', 'Bang/View/Stage.js', 'Bang/Ease/Ease.js', 'Bang/View/Bitmap.js', 'Bang/Error/BitmapLoadError.js', 'Bang/Utils/PNGEncoder.js', 'http://schell.github.com/go/go.js' ],
     init : function initBitmapTests (m) {
         /**
          * Initializes the BitmapTests 
