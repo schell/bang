@@ -27,6 +27,12 @@ Animate using sprite sheets with built-in objects like `Sprite` or roll your own
 ### Polygonal Hit Testing  ###
 Mouse events are fired whenever the mouse enters a view's hit area, as long as that view has an interested party.
 
+### Text Boxes ###
+Work with text that autosizes and wraps.
+
+### Compilation ###
+Compile your source tree into one JS file, or compress it as a PNG, from within your project.
+
 ## More to Come ##
 `bang` is in a very early alpha stage and changes all the time. I don't recommend
 using it in any production environment, but be my guest! If you use it, please give 
