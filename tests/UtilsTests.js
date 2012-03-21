@@ -79,12 +79,13 @@ mod({
                         var projectCompilation = mod.compile();
                         pngSrc = m.PNGEncoder.PNGSrcFromString(projectCompilation);
                         document.write('<img alt="bang_and_tests.png" src="'+pngSrc+'">');
+                        cb();
                     });
                     pngBM.load(pngSrc);
                     stage.addSubview(pngBM);
                 },
                 function () {
-                    //stage.remove();
+                    stage.remove();
                 }
             ).start();
         };
