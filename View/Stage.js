@@ -54,7 +54,7 @@ mod({
             var _parentElement;
             // A private reference to the stage's animation...
             var _animation;
-            m.safeAddin(self, 'setParentElement', function Stage_setContainerDiv(id) {
+            m.safeAddin(self, 'setParentElement', function Stage_setParentElement(id) {
                 /** * *
                 * Sets the div id of the Stage's parent container.
                 * @param - id String - The id of the div that will contain the stage.
