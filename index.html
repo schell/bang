@@ -15,8 +15,8 @@
                 background-color:transparent;
             }
         </style>
-        <script src="submodules/mod/mod.js" type="text/javascript" charset="utf-8"></script>
-        <script src="submodules/go/go.js" type="text/javascript" charset="utf-8"></script>
+        <script src="http://schell.github.com/mod/mod.js" type="text/javascript" charset="utf-8"></script>
+        <script src="http://schell.github.com/go/go.js" type="text/javascript" charset="utf-8"></script>
     </head>
     <body id="body">
         
@@ -24,17 +24,18 @@
         
         <script type="text/javascript" charset="utf-8">
             mod.useTagInjection = true;
+            mod.basePath = '../';
             mod({
                 name : "Main",
                 dependencies : [
-                    'tests/ViewTests.js',
-                    'tests/NoteTests.js',
-                    'tests/GeomTests.js',
-                    'tests/GlobalTests.js',
-                    'tests/BitmapTests.js',
-                    'tests/SpriteTests.js',
-                    'tests/TextTests.js',
-                    'tests/UtilsTests.js'
+                    'Bang/tests/ViewTests.js',
+                    'Bang/tests/NoteTests.js',
+                    'Bang/tests/GeomTests.js',
+                    'Bang/tests/GlobalTests.js',
+                    'Bang/tests/BitmapTests.js',
+                    'Bang/tests/SpriteTests.js',
+                    'Bang/tests/TextTests.js',
+                    'Bang/tests/UtilsTests.js'
                 ],
                 init : function initMain (m) {
                     m.interactiveTests = false;

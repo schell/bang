@@ -31,7 +31,7 @@ Mouse events are fired whenever the mouse enters a view's hit area, as long as t
 Work with text that autosizes and wraps.
 
 ### Compilation ###
-Compile your source tree into one JS file, or compress it as a PNG, from within your project.
+Compile your source tree into one JS file, or compress it as a PNG using the JS console.
 
 ## More to Come ##
 `bang` is in a very early alpha stage and changes all the time. I don't recommend
