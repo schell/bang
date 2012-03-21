@@ -32,7 +32,9 @@ mod({
             };
             
             // Some default values...
-            self.hitArea = m.Rectangle.from(0, 0, 500, 500);
+            if (self.hitArea.width() === 0 || self.hitArea.height() === 0) {
+                self.hitArea = m.Rectangle.from(0,0,500,500);
+            }
             // Whether or not we clear the canvas before redrawing...
             m.safeAddin(self, 'clearCanvasOnFrameTick', true);
             // Set this view's stage reference to itself, so other views can grab it...
