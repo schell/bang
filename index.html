@@ -24,18 +24,21 @@
         
         <script type="text/javascript" charset="utf-8">
             mod.useTagInjection = true;
-            mod.basePath = '../';
+            mod.expansions = {
+                bang : 'src/',
+                
+            };
             mod({
                 name : "Main",
                 dependencies : [
-                    'Bang/tests/ViewTests.js',
-                    'Bang/tests/NoteTests.js',
-                    'Bang/tests/GeomTests.js',
-                    'Bang/tests/GlobalTests.js',
-                    'Bang/tests/BitmapTests.js',
-                    'Bang/tests/SpriteTests.js',
-                    'Bang/tests/TextTests.js',
-                    'Bang/tests/UtilsTests.js'
+                    'tests/ViewTests.js',
+                    'tests/NoteTests.js',
+                    'tests/GeomTests.js',
+                    'tests/GlobalTests.js',
+                    'tests/BitmapTests.js',
+                    'tests/SpriteTests.js',
+                    'tests/TextTests.js',
+                    'tests/UtilsTests.js'
                 ],
                 init : function initMain (m) {
                     m.interactiveTests = false;

@@ -8,7 +8,7 @@
 * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * **/
 mod({
     name : 'UtilsTests',
-    dependencies : [ 'Bang/Global.js', 'Bang/View/Bitmap.js', 'Bang/Utils/Utils.js', 'Bang/Utils/PNGEncoder.js' ],
+    dependencies : [ 'bang::Global.js', 'bang::View/Bitmap.js', 'bang::Utils/Utils.js', 'bang::Utils/PNGEncoder.js' ],
     init : function initUtilsTests (m) {
         /** * *
         * Initializes the PNGEncoderTests Addin
@@ -73,6 +73,12 @@ mod({
                     var pngBM = m.Bitmap();
                     pngBM.addInterest(pngBM, m.Notifications.Bitmap.DID_LOAD, function() {
                         var srcString = m.PNGEncoder.StringFromBitmap(pngBM);
+                        if (srcString !== string) {
+                            console.log(string);
+                            console.log('\n');
+                            console.log(srcString);
+                        }
+                        assert.eq(srcString,string, 'Can retrieve source code from png.');
                         eval(srcString);
                         assert.eq(d, 6035.5, 'Can correctly evaluate data stored in PNG format.');
                         

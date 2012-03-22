@@ -8,7 +8,7 @@
 * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * **/
 mod({
     name : 'Stage',
-    dependencies : [ 'Bang/View/ViewContainer.js', 'Bang/Geom/Matrix.js', 'Bang/Note/MouseEventNote.js' ],
+    dependencies : [ 'bang::View/ViewContainer.js', 'bang::Geom/Matrix.js', 'bang::Note/MouseEventNote.js' ],
     init : function initStage (m) {
         /**
          * Initializes the Stage Addin

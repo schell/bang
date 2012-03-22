@@ -8,7 +8,7 @@
 * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * **/
 mod({
     name : 'Error',
-    dependencies : [ 'Bang/Global.js' ],
+    dependencies : [ 'bang::Global.js' ],
     init : function initError (m) {
         /** * *
         * Initializes the Error Addin

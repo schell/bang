@@ -8,7 +8,7 @@
  * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * **/
 mod({
     name : 'Dispatcher',
-    dependencies : [ 'Bang/Note/Note.js', 'Bang/Note/NotePasser.js', 'Bang/Note/NoteCenter.js' ],
+    dependencies : [ 'bang::Note/Note.js', 'bang::Note/NotePasser.js', 'bang::Note/NoteCenter.js' ],
     init : function initDispatcher (m) {
         /**
          * Initializes the Dispatcher Addin

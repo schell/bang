@@ -9,7 +9,7 @@
 * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * **/
 mod({
     name : 'PNGEncoder',
-    dependencies : [ 'Bang/Global.js', 'Bang/Utils/Utils.js', 'Bang/View/Bitmap.js' ],
+    dependencies : [ 'bang::Global.js', 'bang::Utils/Utils.js', 'bang::View/Bitmap.js' ],
     init : function initPNGEncoder (m) {
         /** * *
         * Initializes the PNGEncoder Addin

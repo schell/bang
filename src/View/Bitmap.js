@@ -8,7 +8,7 @@
 * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * **/
 mod({
     name : 'Bitmap',
-    dependencies : [ 'Bang/Global.js', 'Bang/View/View.js', 'Bang/Notifications.js', 'Bang/Error/BitmapLoadError.js', 'Bang/Error/BitmapSecurityError.js' ],
+    dependencies : [ 'bang::Global.js', 'bang::View/View.js', 'bang::Notifications.js', 'bang::Error/BitmapLoadError.js', 'bang::Error/BitmapSecurityError.js' ],
     init : function initBitmap (m) {
         /** * *
         * Initializes the Bitmap Addin

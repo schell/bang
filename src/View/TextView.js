@@ -8,7 +8,7 @@
 * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * **/
 mod({
     name : 'TextView',
-    dependencies : [ 'Bang/View/View.js' ],
+    dependencies : [ 'bang::View/View.js' ],
     init : function initTextView (m) {
         /** * *
         * Initializes the TextView Addin

@@ -8,7 +8,7 @@
 * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * **/
 mod({
     name : 'ViewTests',
-    dependencies : [ 'http://schell.github.com/go/go.js', 'Bang/Ease/Ease.js', 'Bang/View/View.js', 'Bang/View/ViewContainer.js', 'Bang/View/Stage.js' ],
+    dependencies : [ 'http://schell.github.com/go/go.js', 'bang::Ease/Ease.js', 'bang::View/View.js', 'bang::View/ViewContainer.js', 'bang::View/Stage.js' ],
     init : function initViewTests (m) {
         /** * *
         * Initializes the ViewTests

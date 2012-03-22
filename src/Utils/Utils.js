@@ -8,7 +8,7 @@
 * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * **/
 mod({
     name : 'Utils',
-    dependencies : [ 'Bang/Global.js' ],
+    dependencies : [ 'bang::Global.js' ],
     init : function initUtils (m) {
         /** * *
         * Initializes the utilities object.
@@ -32,13 +32,27 @@ mod({
                 }
                 scan++;
             }
-            if (w == 1) {
-                // We couldn't find a factor...
-                w = h = Math.ceil(Math.sqrt(len));
-            }
             return [w,h];
         };
+        
+        utils.squarifyLength = function squarifyLength(len, tolerance) {
+            /** * *
+            * Attempts to 'squarify' a length.
+            * @param len The length of data to squarify.
+            * @param tolerance How many times bigger one dimension can be from the other.
+            * * **/
+            tolerance = tolerance || 5;
             
+            var factors = utils.findFactors(len);
+            var w = factors[0];
+            var h = factors[1];
+            if (w < h/tolerance) {
+                w = Math.ceil(Math.sqrt(len));
+                h = w;
+            }
+            return [w, h];
+        };
+         
         utils.packStringIntoImageData = function packStringIntoImageData(string) {
             /** * *
             * Packs a string message into an ImageData object.
@@ -47,11 +61,11 @@ mod({
             * * **/
             // We can fit 3 chars into each pixel...
             var pixelsNeeded = Math.ceil(string.length/3);
-            var factors = utils.findFactors(pixelsNeeded);
+            var dimensions = utils.squarifyLength(pixelsNeeded, 3);
             var ctx = document.createElement('canvas').getContext('2d');
-            var packed = ctx.createImageData(factors[0], factors[1]);
+            var packed = ctx.createImageData(dimensions[0], dimensions[1]);
             var ndx = 0;
-            Array.prototype.map.call(string, function(el) {
+            Array.prototype.map.call(string, function packChannel(el) {
                 if ((ndx+1)%4 === 0) {
                     // This is alpha channel, push 255 because of canvas's using
                     // pre-multiplied alpha stuffs...
@@ -59,8 +73,8 @@ mod({
                 }
                 packed.data[ndx++] = el.charCodeAt(0);
             });
-            packed.data[packed.data.length-1] = 255;
-            console.log('string.length:',string.length,'pixels:',pixelsNeeded,'factors:',factors,'data:',packed);
+            packed.data[ndx] = 255;
+            console.log('string.length:',string.length,'pixels:',pixelsNeeded,'dimensions:',dimensions,'wasted pixels:',dimensions[0]*dimensions[1] - pixelsNeeded);
             return packed;
         };
             
