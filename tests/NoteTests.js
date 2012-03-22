@@ -8,7 +8,7 @@
  * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * **/
 mod({
     name : 'NoteTests',
-    dependencies : [ 'Bang/Notifications.js' ],
+    dependencies : [ 'bang::Notifications.js' ],
     init : function initNoteCenterTests (m) {
         /**
          * Initializes the NoteCenterTests 

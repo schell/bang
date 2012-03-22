@@ -9,7 +9,7 @@
 * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * **/
 mod({
     name : 'NotePasser',
-    dependencies : [ 'Bang/Global.js', 'Bang/Note/NoteCenter.js' ],
+    dependencies : [ 'bang::Global.js', 'bang::Note/NoteCenter.js' ],
     init : function initNotePasser (m) {
         /** * *
         * Initializes the NotePasser Addin

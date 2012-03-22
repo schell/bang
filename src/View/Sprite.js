@@ -8,7 +8,7 @@
 * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * **/
 mod({
     name : 'Sprite',
-    dependencies : [ 'Bang/Global.js', 'Bang/View/Bitmap.js' ],
+    dependencies : [ 'bang::Global.js', 'bang::View/Bitmap.js' ],
     init : function initSprite (m) {
         /** * *
         * Initializes the Sprite Addin

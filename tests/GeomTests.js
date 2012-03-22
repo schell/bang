@@ -8,7 +8,7 @@
  * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * **/
  mod({
      name : 'GeomTests',
-     dependencies : [ 'Bang/Geometry.js' ],
+     dependencies : [ 'bang::Geometry.js' ],
      init : function initRectangleTests (m) {
          /**
          * Initializes the RectangleTests 

@@ -8,7 +8,7 @@
 * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * **/
 mod({
     name : 'BitmapLoadError',
-    dependencies : [ 'Bang/Error/Error.js' ],
+    dependencies : [ 'bang::Error/Error.js' ],
     init : function initBitmapLoadError (m) {
         /** * *
         * Initializes the BitmapLoadError Addin

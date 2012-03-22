@@ -8,7 +8,7 @@
 * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * **/
 mod({
     name : 'BitmapSecurityError',
-    dependencies : [ 'Bang/Error/Error.js' ],
+    dependencies : [ 'bang::Error/Error.js' ],
     init : function initBitmapSecurityError (m) {
         /** * *
         * Initializes the BitmapSecurityError Addin
