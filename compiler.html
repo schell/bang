@@ -1,0 +1,33 @@
+<html>
+    <head>
+        <meta http-equiv="Content-type" content="text/html; charset=utf-8">
+        <title>bang::compiler</title>
+        <script type="text/javascript" charset="utf-8" src="http://schell.github.com/mod/mod.js"></script>
+    </head>
+    <body id="compiler">
+        <script type="text/javascript" charset="utf-8">
+            mod.useTagInjection = true;
+            mod.expansions = {
+                bang : 'src/'
+            };
+            
+            mod({
+                name : 'Compiler',
+                dependencies : [ 'bang::Utils/PNGEncoder.js' ],
+                init : function initCompiler (m) {
+                    /**
+                     * Initializes the Compiler 
+                     * @param - m Object - The mod modules object.
+                     */
+                    
+                    var textArea = document.createElement('textArea');
+                    document.body.appendChild(textArea);
+                    
+                    
+                    
+                    return {};
+                }
+            });
+        </script>
+    </body>
+</html>
