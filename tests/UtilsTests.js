@@ -33,7 +33,7 @@ mod({
                     var message = "A Troll stood by sadly for hours Near where'd been two shiny bright towers With hot tears in his eye He could not understand why Yet he hurt with the world's greatest powers.   Trolls come from lands far and near Through legends and myth they appear But right now, Today! To the GREAT USA They wish comfort and love without fear!";
                     
                     var msgImageData = m.Utils.packStringIntoImageData(message);
-                    
+                    console.log(msgImageData);
                     c.width = msgImageData.width;
                     c.height = msgImageData.height;
                     
