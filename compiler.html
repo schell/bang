@@ -19,11 +19,20 @@
                      * Initializes the Compiler 
                      * @param - m Object - The mod modules object.
                      */
-                    
+                    var output = document.createElement('div');
+                    var png = false;
                     var textArea = document.createElement('textArea');
+                    textArea.onchange = function() {
+                        var src = textArea.value;
+                        if (png) {
+                            output.removeChild(png);
+                        }
+                        png = m.PNGEncoder.PNGFromString(src);
+                        output.appendChild(png);
+                    };
+                    
                     document.body.appendChild(textArea);
-                    
-                    
+                    document.body.appendChild(output);
                     
                     return {};
                 }

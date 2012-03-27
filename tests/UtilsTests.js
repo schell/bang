@@ -33,7 +33,6 @@ mod({
                     var message = "A Troll stood by sadly for hours Near where'd been two shiny bright towers With hot tears in his eye He could not understand why Yet he hurt with the world's greatest powers.   Trolls come from lands far and near Through legends and myth they appear But right now, Today! To the GREAT USA They wish comfort and love without fear!";
                     
                     var msgImageData = m.Utils.packStringIntoImageData(message);
-                    console.log(msgImageData);
                     c.width = msgImageData.width;
                     c.height = msgImageData.height;
                     
@@ -43,7 +42,17 @@ mod({
                     var msgOut = m.Utils.unpackImageDataToString(dataOut);
                     
                     assert.eq(message, msgOut, 'Can encode data to canvas and back.');
-                    cb();
+                    
+                    var src = mod.compile();
+                    var png = m.PNGEncoder.PNGFromString(src);
+                    document.body.appendChild(png);
+                    var bm = m.Bitmap();
+                    bm.addInterest(bm, m.Notifications.DID_LOAD, function() {
+                        var string = m.PNGEncoder.StringFromBitmap(bm);
+                        assert.eq(src.length, string.length, 'Can encode lots of data to png and back without loosing data.');
+                        cb();
+                    });
+                    bm.load(png.src);
                 },
                 function bitmapEncodeTest(cb) {
                     var block = m.Bitmap();
@@ -84,7 +93,7 @@ mod({
                         
                         var projectCompilation = mod.compile();
                         pngSrc = m.PNGEncoder.PNGSrcFromString(projectCompilation);
-                        document.write('<img alt="bang_and_tests.png" src="'+pngSrc+'">');
+                        document.write('<img title="bang_and_tests.png" src="'+pngSrc+'">');
                         cb();
                     });
                     pngBM.load(pngSrc);

@@ -7,7 +7,7 @@
 * @since    Mon Mar 26 18:56:24 PDT 2012
 * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * **/
 (function initBangUnpacker(window) {
-    var bitStream = function bitStream(array, bitsper) {
+    function bitStream(array, bitsper) {
         /** * *
         * Creates a bitstream object.
         * @param Array The array to treat as a bitstream.
@@ -23,7 +23,7 @@
                 return data[ndx] >> (bitsper-x) & 1;
             }
         };
-    };
+    }
     function unpackImageDataToString(imageData) {
         /** * *
         * Unpacks a message from an ImageData object.
@@ -31,12 +31,15 @@
         * @return String 
         * * **/
         var data = [];
-            
-        for (var i=0; i < imageData.data.length && imageData.data[i]; i++) {
-            if (i%4 !== 3) {
-                data.push(imageData.data[i]);
+        var acc = 0;
+        for (var i=0; i < imageData.data.length; i++) {
+            if (++acc === 4) {
+                acc = 0;
+                continue;
             }
+            data.push(imageData.data[i]);
         }
+            
         function unpackStringFromArray(data) {
             var stream = bitStream(data, 8);
             var string = '';
@@ -46,7 +49,8 @@
                 var bit = stream.at(i);
                 if (acc === 7) {
                     if (code === 0) {
-                        console.log('null terminating string at length',string.length);
+                        // Null terminating...
+                        return string;
                     }
                     string += String.fromCharCode(code);
                     code = 0;
@@ -57,7 +61,6 @@
             }
             return string;
         }
-            
         return unpackStringFromArray(data);
     }
     function initElementWithSrcImage(element, srcImage) {
