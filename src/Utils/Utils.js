@@ -41,12 +41,12 @@ mod({
             * @param len The length of data to squarify.
             * @param tolerance How many times bigger one dimension can be from the other.
             * * **/
-            tolerance = tolerance || 25;
+            tolerance = tolerance || NaN;
             
             var factors = utils.findFactors(len);
             var w = factors[0];
             var h = factors[1];
-            if (h < w/tolerance) {
+            if (!isNaN(tolerance) && h < w/tolerance) {
                 h = Math.ceil(Math.sqrt(len));
                 w = h;
             }
@@ -115,7 +115,7 @@ mod({
                 }
                 packed.data[i] = packedData[ndx++];
             }
-            console.log('string length:',string.length,'compressed length:',packedData.length,'pixels needed:',pixelsNeeded,'dimensions:',dimensions,'wasted:',dimensions[0]*dimensions[1]-pixelsNeeded);
+            console.log('string length:',string.length,'compressed length:',packedData.length,'image data length:',packed.data.length,'pixels needed:',pixelsNeeded,'dimensions:',dimensions,'wasted:',dimensions[0]*dimensions[1]-pixelsNeeded);
             return packed;
         };
             
@@ -126,11 +126,13 @@ mod({
             * @return String 
             * * **/
             var data = [];
-            
-            for (var i=0; i < imageData.data.length && imageData.data[i]; i++) {
-                if (i%4 !== 3) {
-                    data.push(imageData.data[i]);
+            var acc = 0;
+            for (var i=0; i < imageData.data.length; i++) {
+                if (++acc === 4) {
+                    acc = 0;
+                    continue;
                 }
+                data.push(imageData.data[i]);
             }
             
             function unpackStringFromArray(data) {
@@ -141,6 +143,10 @@ mod({
                 for (var i=0; i < stream.length; i++) {
                     var bit = stream.at(i);
                     if (acc === 7) {
+                        if (code === 0) {
+                            // Null terminating...
+                            return string;
+                        }
                         string += String.fromCharCode(code);
                         code = 0;
                         acc = 0;
@@ -150,7 +156,6 @@ mod({
                 }
                 return string;
             }
-            
             return unpackStringFromArray(data);
         };
         
