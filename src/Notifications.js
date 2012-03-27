@@ -28,7 +28,8 @@ mod({
                  MOUSE_CLICK : 'mouseClick',
                  MOUSE_MOVE : 'mouseMove',
                  MOUSE_OVER : 'mouseOver',
-                 MOUSE_OUT : 'mouseOut'
+                 MOUSE_OUT : 'mouseOut',
+                 MOUSE_LEAVE : 'mouseLeave'
              },
              ViewContainer : {
                  // Sent from a ViewContainer after adding a subview, just after said subview sends WAS_ADDED_TO_VIEWCONTAINER
