@@ -485,6 +485,18 @@ mod({
                             }
                         });
                         stage.addSubview(block);
+                        
+                        // Test that the stage issues MOUSE_LEAVE events...
+                        var leaveTarget = false;
+                        stage.addInterest(stage, m.Notifications.Stage.MOUSE_LEAVE, function(note) {
+                            leaveTarget = note.body.target;
+                        });
+                        stage.onmouseout({
+                            offsetX : 0,
+                            offsetY : -1
+                        });
+                        assert.eq(leaveTarget, stage, 'Stage issues MOUSE_LEAVE events.');
+                        
                         block.tween.interpolate();
                     });
                 });

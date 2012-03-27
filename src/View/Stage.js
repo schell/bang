@@ -259,21 +259,27 @@ mod({
                         nativeEvent.offsetY
                     ]
                 });
+                // To save some object creation we create one event...
+                var mouseOutEvent = m.MouseEventNote({
+                    name : m.Notifications.View.MOUSE_OUT,
+                    globalPoint : globalPoint,
+                    localPoint : undefined,
+                    body : nativeEvent
+                });
                 
                 for (var i = _displayList.length - 1; i >= 0; i--){
                     var view = _displayList[i];
                     if (view.$mouseSettings.mousedOver === true) {
                         view.$mouseSettings.mousedOver = false;
-                        var mouseOutEvent = m.MouseEventNote({
-                            name : m.Notifications.View.MOUSE_OUT,
-                            globalPoint : globalPoint,
-                            localPoint : undefined,
-                            target : view,
-                            body : nativeEvent
-                        });
+                        // Use the created mouse event here...
+                        mouseOutEvent.target = view;
                         view.dispatch(mouseOutEvent);
                     }
                 }
+                // And here...
+                mouseOutEvent.name = m.Notifications.View.MOUSE_LEAVE;
+                mouseOutEvent.target = self;
+                self.dispatch(mouseOutEvent);
             };
             return self;
         };
