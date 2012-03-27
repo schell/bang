@@ -92,6 +92,7 @@ mod({
                 },
                 function () {
                     stage.remove();
+                    callback();
                 }
             ).start();
         };
