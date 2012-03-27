@@ -61,7 +61,16 @@ mod({
                 * Sets the div id of the Stage's parent container.
                 * @param - id String - The id of the div that will contain the stage.
                 * * **/
-                _parentElement = document.getElementById(id.toString());
+                switch (typeof id) {
+                    case 'string':
+                        _parentElement = document.getElementById(id);
+                    break;
+                    case 'object':
+                        _parentElement = id;
+                    break;
+                    default:
+                        _parentElement = false;
+                }
                 if (!_parentElement) {
                     throw new Error('Could not find html element '+id.toString());
                 }
