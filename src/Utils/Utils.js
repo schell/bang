@@ -21,14 +21,14 @@ mod({
             * Finds some nice factors for len.
             * @return Array
             * * **/
-            var w = 1;
-            var scan = w;
-            var h = len;
-            while (scan < h) {
-                var ph = len/scan;
-                if (ph%1 === 0) {
-                    h = ph;
-                    w = scan;
+            var h = 1;
+            var scan = h;
+            var w = len;
+            while (scan < w) {
+                var pw = len/scan;
+                if (pw%1 === 0) {
+                    w = pw;
+                    h = scan;
                 }
                 scan++;
             }
