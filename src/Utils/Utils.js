@@ -41,14 +41,14 @@ mod({
             * @param len The length of data to squarify.
             * @param tolerance How many times bigger one dimension can be from the other.
             * * **/
-            tolerance = tolerance || 5;
+            tolerance = tolerance || 25;
             
             var factors = utils.findFactors(len);
             var w = factors[0];
             var h = factors[1];
-            if (w < h/tolerance) {
-                w = Math.ceil(Math.sqrt(len));
-                h = w;
+            if (h < w/tolerance) {
+                h = Math.ceil(Math.sqrt(len));
+                w = h;
             }
             return [w, h];
         };
@@ -99,8 +99,8 @@ mod({
             }
             
             var packedData = packStringIntoArray(string);
-            var pixelsNeeded = packedData.length/3;
-            var dimensions = utils.squarifyLength(pixelsNeeded, 3);
+            var pixelsNeeded = Math.ceil(packedData.length/3);
+            var dimensions = utils.squarifyLength(pixelsNeeded);
             var ctx = document.createElement('canvas').getContext('2d');
             var packed = ctx.createImageData(dimensions[0], dimensions[1]);
             
