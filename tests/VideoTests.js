@@ -21,7 +21,9 @@ mod({
             
             var video = m.Video({
                 width : 340,
-                height : 190
+                height : 190,
+                rotation: 45,
+                x : 150
             });
             
             video.load('videos/earth.mp4');
