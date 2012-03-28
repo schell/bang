@@ -46,7 +46,7 @@ mod({
             var factors = utils.findFactors(len);
             var w = factors[0];
             var h = factors[1];
-            if (!isNaN(tolerance) && h < w/tolerance) {
+            if ((w === 1 && len > 100) || !isNaN(tolerance) && h < w/tolerance) {
                 h = Math.ceil(Math.sqrt(len));
                 w = h;
             }

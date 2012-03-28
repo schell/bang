@@ -145,7 +145,7 @@ mod({
             function createMouseEvent(eventName, nativeEvent) {
                 /** * *
                 * Fires a mouse down event into the display list. This function is meant to be attached
-                * to a canvas's onmousedown callback.
+                * to a canvas's onmouse* callback.
                 * @param - nativeEvent MouseEvent
                 * * **/
                 var x = nativeEvent.offsetX;
@@ -285,9 +285,10 @@ mod({
                         view.dispatch(mouseOutEvent);
                     }
                 }
-                // And here...
-                mouseOutEvent.name = m.Notifications.View.MOUSE_LEAVE;
+                // And use it here...
+                mouseOutEvent.name = m.Notifications.Stage.MOUSE_LEAVE;
                 mouseOutEvent.target = self;
+                self.$mouseSettings.mousedOver = false;
                 self.dispatch(mouseOutEvent);
             };
             return self;

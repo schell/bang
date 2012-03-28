@@ -21,7 +21,7 @@ mod({
         
         return function runTextTests(callback) {
             var assert = m.assert;
-            assert.testSuite = 'Text Tests';
+            assert.suite = 'Text Tests';
             
             var stage = m.Stage();
             stage.setParentElement('bang');

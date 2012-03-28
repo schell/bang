@@ -16,7 +16,7 @@ mod({
         * * **/
         return function runViewTests(callback) {
             var assert = m.assert;
-            assert.testSuite = 'View Tests';
+            assert.suite = 'View Tests';
         
             var view = m.View({
                 tag : 'view'
@@ -39,7 +39,7 @@ mod({
             }));
             assert.eq(payload, 666, 'View can remove interests.');
         
-            assert.testSuite = 'ViewContainer Tests';
+            assert.suite = 'ViewContainer Tests';
         
             var calledUpdateContext = false;
             view.addInterest(view, m.Notifications.View.DID_UPDATE_CONTEXT, function updatedContext(note) {
@@ -75,7 +75,7 @@ mod({
             topOfTree.sendNotification(m.Notifications.View.DID_UPDATE_CONTEXT, topOfTree.context);
             assert.eq(lastBranch.context, 666, 'Branches of displaylist update context when update note sent.');
         
-            assert.testSuite = 'Stage Tests';
+            assert.suite = 'Stage Tests';
         
             var stage = m.Stage();
             assert.eq('canvas' in stage, true, 'Stage has canvas instance.');
@@ -524,6 +524,10 @@ mod({
                 ease.interpolate();
             }
             function testScaledEasing(cb) {
+                console.log('scaled easing test');
+                stage.remove();
+                stage = m.Stage();
+                stage.setParentElement('bang');
                 var scaled = m.View({
                     hitArea : m.Rectangle.from(0, 0, 500, 10)
                 });
@@ -561,7 +565,7 @@ mod({
                         stage.remove();
                         setTimeout(function() {
                             assert.eq(m.animationCount(), 0, 'No registered animations left after removing stage.');
-                            callback();
+                            cb();
                         }, 500);
                     }
                 });
@@ -569,6 +573,7 @@ mod({
                 bar.drawQueue.push(makeDrawFunction(bar, 'rgb(0, 255, 255)'));
                 stage.addSubview(bar);
             }
+            
             go(testHitAreaConversion, testMouseInput, testGreenEasing, testScaledEasing, callback).start();
         };
     }

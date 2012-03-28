@@ -17,7 +17,7 @@ mod({
         
         return function runSpriteTests(callback) {
             var assert = m.assert;
-            assert.testSuite = 'Sprite Tests';
+            assert.suite = 'Sprite Tests';
             
             var stage = m.Stage();
             stage.setParentElement('bang');

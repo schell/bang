@@ -16,7 +16,7 @@ mod({
          */
         return function runBitmapTests(callback) {
             var assert = m.assert;
-            assert.testSuite = 'Bitmap Tests';
+            assert.suite = 'Bitmap Tests';
             
             var stage = m.Stage();
             stage.setParentElement('bang');
