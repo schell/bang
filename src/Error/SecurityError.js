@@ -1,27 +1,27 @@
 /** * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * *
-* BitmapSecurityError.js
-* The BitmapSecurityError Addin.
+* SecurityError.js
+* The SecurityError Addin.
 * Copyright (c) 2012 Schell Scivally. All rights reserved.
 * 
 * @author    Schell Scivally
 * @since    Thu Feb  2 15:37:15 PST 2012
 * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * **/
 mod({
-    name : 'BitmapSecurityError',
+    name : 'SecurityError',
     dependencies : [ 'bang::Error/Error.js' ],
-    init : function initBitmapSecurityError (m) {
+    init : function initSecurityError (m) {
         /** * *
-        * Initializes the BitmapSecurityError Addin
+        * Initializes the SecurityError Addin
         * @param - m Object - The mod modules object.
         * * **/
         // A private reference to this Error's type...
-        var _type = 'BitmapSecurityError';
+        var _type = 'SecurityError';
         
-        var addin = function addinBitmapSecurityError (self) {
+        var addin = function addinSecurityError (self) {
             /** * *
-            * Adds BitmapSecurityError properties to *self*.
-            * @param - self Object - The object to add BitmapSecurityError properties to.
-            * @return self BitmapSecurityError Object 
+            * Adds SecurityError properties to *self*.
+            * @param - self Object - The object to add SecurityError properties to.
+            * @return self SecurityError Object 
             * * **/
             self = m.Object(self); 
             

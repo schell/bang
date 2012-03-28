@@ -8,7 +8,7 @@
 * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * **/
 mod({
     name : 'TextTests',
-    dependencies : [ 'bang::View/Stage.js', 'bang::View/TextView.js', 'bang::Geom/Rectangle.js', 'bang::Ease/Ease.js' ],
+    dependencies : [ 'bang::View/Stage.js', 'bang::View/Text.js', 'bang::Geom/Rectangle.js', 'bang::Ease/Ease.js' ],
     init : function initTextTests (m) {
         /**
          * Initializes the TextTests 
@@ -30,7 +30,7 @@ mod({
             var string = 'Hey, this is a text field. It should wrap and the bounding box will autosize vertically.';
             string += '\n\nIt also supports newlines!\n\nBOOOOOM!\n\nOh, and it has a lineHeight property that defaults to 12px.';
             string += '\nRight now we are tweening between a lineHeight of 18 (font-size) and 27 (1.5x font-size), you can see the bounding box autosizing...';
-            var text = m.TextView({
+            var text = m.Text({
                 text : string,
                 font : 'bold italic 18px serif',
                 lineHeight : 18,
@@ -49,7 +49,7 @@ mod({
                     lineHeight : 27
                 },
                 onComplete : function(){
-                    assert.eq(text.hitArea.isEqualTo(m.Rectangle.from(10, 10, 300, 100)), false, 'TextView resizes hit area.');
+                    assert.eq(text.hitArea.isEqualTo(m.Rectangle.from(10, 10, 300, 100)), false, 'Text resizes hit area.');
                     tween.properties.lineHeight = text.lineHeight == 27 ? 18 : 27;
                     tween.onComplete = function() {
                         stage.remove();

@@ -41,10 +41,10 @@ mod({
                  FRAME_TICK : 'frameTick',
                  MOUSE_LEAVE : 'mouseLeave'
              },
-             Bitmap : {
-                 // Sent from a Bitmap after loading an image...
+             Network : {
+                 // Sent from an object after a successful load...
                  DID_LOAD : 'didLoad',
-                 // Sent from a Bitmap after failing to load an image...
+                 // Sent from an object after failing to load a resource...
                  DID_NOT_LOAD : 'didNotLoad'
              }
          };

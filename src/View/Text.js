@@ -1,24 +1,24 @@
 /** * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * *
-* TextView.js
-* The TextView addin.
+* Text.js
+* The Text addin.
 * Copyright (c) 2012 Schell Scivally. All rights reserved.
 * 
 * @author    Schell Scivally
 * @since    Fri Mar 16 16:14:15 PDT 2012
 * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * **/
 mod({
-    name : 'TextView',
+    name : 'Text',
     dependencies : [ 'bang::View/View.js' ],
-    init : function initTextView (m) {
+    init : function initText (m) {
         /** * *
-        * Initializes the TextView Addin
+        * Initializes the Text Addin
         * @param - m Object - The mod modules object.
         * * **/
-        var addin = function addinTextView (self) {
+        var addin = function addinText (self) {
             /** * *
-            * Adds TextView properties to *self*.
-            * @param - self Object - The object to add TextView properties to.
-            * @return self TextView Object 
+            * Adds Text properties to *self*.
+            * @param - self Object - The object to add Text properties to.
+            * @return self Text Object 
             * * **/
             self = m.Object(self); 
             
@@ -47,7 +47,7 @@ mod({
             //--------------------------------------
             // Whether or not this view's transformations have been applied...
             var _transformApplied = false;
-            m.safeOverride(self, 'applyTransform', 'view_applyTransform', function TextView_applyTransform() {
+            m.safeOverride(self, 'applyTransform', 'view_applyTransform', function Text_applyTransform() {
                 /** * *
                 * Applies this view's transform to its context.
                 * * **/
@@ -65,7 +65,7 @@ mod({
                 self.context.strokeStyle = self.strokeStyle;
                 self.view_applyTransform();
             });
-            m.safeOverride(self, 'restoreTransform', 'view_restoreTransform', function TextView_restoreTransform(params) {
+            m.safeOverride(self, 'restoreTransform', 'view_restoreTransform', function Text_restoreTransform(params) {
                 /** * *
                 * Restores the context to its state before applying the transforming
                 * operations of this view.
@@ -78,7 +78,7 @@ mod({
             });
             // The text broken up into lines in order to fit the bounding box...
             var _lines = [];
-            m.safeOverride(self, 'draw', 'view_draw', function TextView_draw() {
+            m.safeOverride(self, 'draw', 'view_draw', function Text_draw() {
                 /** * *
                 * Draws this view into the 2d context.
                 * * **/

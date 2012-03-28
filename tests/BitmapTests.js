@@ -8,7 +8,7 @@
 * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * **/
 mod({
     name : 'BitmapTests',
-    dependencies : [ 'bang::Global.js', 'bang::View/Stage.js', 'bang::Ease/Ease.js', 'bang::View/Bitmap.js', 'bang::Error/BitmapLoadError.js', 'bang::Utils/PNGEncoder.js', 'http://schell.github.com/go/go.js' ],
+    dependencies : [ 'bang::Global.js', 'bang::View/Stage.js', 'bang::Ease/Ease.js', 'bang::View/Bitmap.js', 'bang::Error/LoadError.js', 'bang::Utils/PNGEncoder.js', 'http://schell.github.com/go/go.js' ],
     init : function initBitmapTests (m) {
         /**
          * Initializes the BitmapTests 
@@ -26,14 +26,14 @@ mod({
             var bm = m.Bitmap();
             
             function loadBitmapTests(cb) {
-                bm.addInterest(bm, m.Notifications.Bitmap.DID_NOT_LOAD, function(note) {
-                    assert.eq(note.body.type, m.BitmapLoadError.type, 'Bitmap notifies of failed image load.');
-                    bm.removeInterest(bm, m.Notifications.Bitmap.DID_NOT_LOAD);
+                bm.addInterest(bm, m.Notifications.Network.DID_NOT_LOAD, function(note) {
+                    assert.eq(note.body.type, m.LoadError.type, 'Bitmap notifies of failed image load.');
+                    bm.removeInterest(bm, m.Notifications.Network.DID_NOT_LOAD);
                 
                 
                     bm.load(local);
                 });
-                bm.addInterest(bm, m.Notifications.Bitmap.DID_LOAD, function(note) {
+                bm.addInterest(bm, m.Notifications.Network.DID_LOAD, function(note) {
                     assert.eq(note.body, local, 'Bitmap notifies of successfull image load.');
                     cb();
                 });

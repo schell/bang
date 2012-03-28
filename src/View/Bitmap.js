@@ -8,7 +8,7 @@
 * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * **/
 mod({
     name : 'Bitmap',
-    dependencies : [ 'bang::Global.js', 'bang::View/View.js', 'bang::Notifications.js', 'bang::Error/BitmapLoadError.js', 'bang::Error/BitmapSecurityError.js' ],
+    dependencies : [ 'bang::Global.js', 'bang::View/View.js', 'bang::Notifications.js', 'bang::Error/LoadError.js', 'bang::Error/SecurityError.js' ],
     init : function initBitmap (m) {
         /** * *
         * Initializes the Bitmap Addin
@@ -26,6 +26,10 @@ mod({
             // Addin View
             m.View(self);
             
+            // A width and height in case someone wants to set a specific w&h...
+            m.safeAddin(self, 'width', false);
+            m.safeAddin(self, 'height', false);
+            
             m.safeAddin(self, 'load', function Bitmap_load(src) {
                 /** * *
                 * Loads a bitmap image.
@@ -34,13 +38,13 @@ mod({
                 var image = new Image();
                 image.onload = function onLoadImage() {
                     self.image = image;
-                    self.sendNotification(m.Notifications.Bitmap.DID_LOAD, src);
+                    self.sendNotification(m.Notifications.Network.DID_LOAD, src);
                 };
                 image.onerror = function onErrorImage() {
-                    var error = m.BitmapLoadError({
+                    var error = m.LoadError({
                         message : 'Bitmap could not load '+src
                     });
-                    self.sendNotification(m.Notifications.Bitmap.DID_NOT_LOAD, error);
+                    self.sendNotification(m.Notifications.Network.DID_NOT_LOAD, error);
                 };
                 image.src = src;
             });
@@ -81,7 +85,11 @@ mod({
                 * * **/
                 self.applyTransform();
                 if (self.image) {
-                    self.context.drawImage(self.image, 0, 0);
+                    if (self.width && self.height) {
+                        self.context.drawImage(self.image, 0, 0, self.width, self.height);
+                    } else {
+                        self.context.drawImage(self.image, 0, 0);
+                    }
                 }
                 self.restoreTransform();
                 self.view_draw();

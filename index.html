@@ -38,21 +38,24 @@
                     'tests/BitmapTests.js',
                     'tests/SpriteTests.js',
                     'tests/TextTests.js',
-                    'tests/UtilsTests.js'
+                    'tests/UtilsTests.js',
+                    'tests/VideoTests.js'
                 ],
                 init : function initMain (m) {
                     m.interactiveTests = false;
                     return undefined;
                 },
                 callback : function callbackMain (m) {
-                    go( m.GlobalTests,
+                    go( /*
+                        m.GlobalTests,
                         m.GeomTests, 
                         m.NoteTests,
                         m.ViewTests,
                         m.BitmapTests,
                         m.SpriteTests,
                         m.TextTests,
-                        m.UtilsTests,
+                        */m.VideoTests,
+                        //m.UtilsTests,
                         function() {
                             m.assert.stat();
                         }).start();
