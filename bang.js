@@ -64,7 +64,6 @@
         return unpackStringFromArray(data);
     }
     function initElementWithSrcImage(element, srcImage) {
-        console.log(element, srcImage);
         var img = new Image();
         img.onload = function loadedImageSrc() {
             var canvas = document.createElement('canvas');
@@ -75,9 +74,10 @@
             var imageData = ctx.getImageData(0, 0, img.width, img.height);
             if (imageData) {
                 var src = unpackImageDataToString(imageData);
-                console.log(src.length, img.width, img.height);
                 // Inside the devil's den there is evil...
-                eval(src);
+                var modules = eval(src);
+                // Give the program its entry point...
+                modules.main.setParentElement(element);
             } else {
                 throw new Error('Could not get image data.');
             }
