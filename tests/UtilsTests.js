@@ -16,7 +16,7 @@ mod({
         * * **/ 
         return function runUtilsTests(callback) {
             var assert = m.assert;
-            assert.testSuite = 'Utilities Tests';
+            assert.suite = 'Utilities Tests';
                 
             var stage = m.Stage();
             stage.setParentElement('bang');

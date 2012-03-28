@@ -44,9 +44,18 @@ mod({
             m.safeAddin(self, 'totalInterests', function NoteCenter_totalInterests() {
                 /**
                  * Returns the total number of stored interests.
-                 * @return - Number
+                 * @return Number
                  */
                 return _observers.length;
+            });
+            m.safeAddin(self, 'observers', function NoteCenter_observers() {
+                /** * *
+                * Returns an array of all the observers.
+                * @return Array
+                * * **/
+                return _observers.map(function(el) {
+                    return el;
+                });
             });
             m.safeAddin(self, 'dispatchersOfNoteWithName', function NoteCenter_getDispatchersWithName(name) {
                 /** * *

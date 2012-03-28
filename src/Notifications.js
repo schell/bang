@@ -28,8 +28,7 @@ mod({
                  MOUSE_CLICK : 'mouseClick',
                  MOUSE_MOVE : 'mouseMove',
                  MOUSE_OVER : 'mouseOver',
-                 MOUSE_OUT : 'mouseOut',
-                 MOUSE_LEAVE : 'mouseLeave'
+                 MOUSE_OUT : 'mouseOut'
              },
              ViewContainer : {
                  // Sent from a ViewContainer after adding a subview, just after said subview sends WAS_ADDED_TO_VIEWCONTAINER
@@ -39,7 +38,8 @@ mod({
              },
              Stage : {
                  // Sent from the Stage every frame just before rendering...
-                 FRAME_TICK : 'frameTick'
+                 FRAME_TICK : 'frameTick',
+                 MOUSE_LEAVE : 'mouseLeave'
              },
              Bitmap : {
                  // Sent from a Bitmap after loading an image...

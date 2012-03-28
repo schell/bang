@@ -1,0 +1,90 @@
+<html>
+    <head>
+        <meta http-equiv="Content-type" content="text/html; charset=utf-8">
+        <title>tests</title>
+        <script src="http://schell.github.com/mod/mod.js" type="text/javascript" charset="utf-8"></script>
+        <script src="http://schell.github.com/go/go.js" type="text/javascript" charset="utf-8"></script>
+    </head>
+    <body id="tests">
+        <script type="text/javascript" charset="utf-8">
+            mod.useTagInjection = true;
+            mod.expansions = {
+                bang : 'src/'
+            };
+            mod({
+                name : 'main',
+                dependencies : [ 
+                    'bang::Global.js',
+                    'bang::View/Stage.js',
+                    'bang::Notifications.js'
+                ],
+                init : function initMain(m) {
+                    var stage = m.Stage({
+                        hitArea : m.Rectangle.from(0, 0, 250, 250),
+                        tag : 'main'
+                    });
+                    stage.addHitAreaDrawFunction();
+                    return stage;
+                }
+            }).onload(function afterload(m) {
+                var src = mod.compile();
+                var modules = eval(src);
+                m.assert.eq('main' in modules, true, 'Can get new bang eval.');
+                
+                var modules2 = eval(src);
+                m.assert.eq('main' in modules2, true, 'Can get another bang eval.');
+                
+                modules.main.addInterest(modules.main, m.Notifications.Stage.FRAME_TICK, function(note) {});
+                
+                m.assert.eq(modules.main.noteCenter.observers().length-1, modules2.main.noteCenter.observers().length, 'Can add observers to bang context and contexts are seperate.');
+                
+                function createNewContext() {
+                    
+                }
+                
+                function canGetMouseOverAfterMouseLeave(cb) {
+                    console.log('canGetMouseOverAfterMouseLeave test');
+                    
+                    var mm = eval(src);
+                    var stage = mm.main;
+                    var assert = m.assert;
+                    var div = document.createElement('div');
+                    document.body.appendChild(div);
+                    stage.setParentElement(div);
+                    
+                    var over = false;
+                    var moved = false;
+                    // Add an interest in mouseLeave and mouseOver...
+                    stage.addInterest(stage, m.Notifications.Stage.MOUSE_LEAVE, function() {
+                        over = false;
+                    });
+                    stage.addInterest(stage, m.Notifications.View.MOUSE_MOVE, function() {
+                        moved = true;
+                    });
+                    stage.addInterest(stage, m.Notifications.View.MOUSE_OVER, function() {
+                        over = true;
+                    });
+                    // Send a fake mouse event...
+                    stage.canvas.onmousemove({offsetX:1,offsetY:1});
+                    assert.eq(over, true, 'Can get mouse over event.');
+                    stage.canvas.onmousemove({offsetX:1,offsetY:1});
+                    assert.eq(moved, true, 'Can get mouse move event.');
+                    stage.canvas.onmouseout({offsetX:-100,offsetY:1});
+                    assert.eq(over, false, 'Can get mouse leave event.');
+                    stage.canvas.onmousemove({offsetX:1,offsetY:1});
+                    assert.eq(over, true, 'Can get mouse over event again.');
+                    
+                    stage.remove();
+                    document.body.removeChild(div);
+                    cb();
+                }
+                
+                go(
+                    canGetMouseOverAfterMouseLeave,
+                    m.assert.stat
+                ).start();
+                
+            });
+            
+        </script>
+    </body>

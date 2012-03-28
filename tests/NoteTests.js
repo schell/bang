@@ -26,7 +26,7 @@ mod({
             var Dispatcher = m.Dispatcher;
         
             (function NoteCenter_tests() {
-                assert.testSuite = 'NoteCenter tests';
+                assert.suite = 'NoteCenter tests';
         
                 var ec = NoteCenter();
                 var dispatcher = {hi:'hi there, im a dispatcher...'};
@@ -80,7 +80,7 @@ mod({
             })();
         
             (function Listener_Dispatcher_tests() {
-                assert.testSuite = 'Listener/Dispatcher Tests';
+                assert.suite = 'Listener/Dispatcher Tests';
             
                 var listener = Listener({
                     tag : 'listener'
