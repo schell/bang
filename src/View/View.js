@@ -8,7 +8,7 @@
  * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * **/
 mod({
     name : 'View',
-    dependencies : [ 'bang::Global.js', 'bang::Geom/Matrix.js', 'bang::Geometry.js' ],
+    dependencies : [ 'bang::Global.js', 'bang::Geom/Matrix.js', 'bang::Geometry.js', 'bang::Note/Listener.js', 'bang::Note/Dispatcher.js' ],
     init : function initView(m) {
         /** * *
         * Initializes the View Addin

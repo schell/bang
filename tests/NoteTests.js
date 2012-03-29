@@ -8,7 +8,7 @@
  * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * **/
 mod({
     name : 'NoteTests',
-    dependencies : [ 'bang::Notifications.js' ],
+    dependencies : [ 'bang::Global.js', 'bang::Note/NoteCenter.js', 'bang::Note/Listener.js', 'bang::Note/Dispatcher.js' ],
     init : function initNoteCenterTests (m) {
         /**
          * Initializes the NoteCenterTests 

@@ -47,7 +47,7 @@ mod({
                     var png = m.PNGEncoder.PNGFromString(src);
                     document.body.appendChild(png);
                     var bm = m.Bitmap();
-                    bm.addInterest(bm, m.Notifications.DID_LOAD, function() {
+                    bm.addInterest(bm, m.Bitmap.DID_LOAD, function() {
                         var string = m.PNGEncoder.StringFromBitmap(bm);
                         assert.eq(src.length, string.length, 'Can encode lots of data to png and back without loosing data.');
                         cb();

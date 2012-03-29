@@ -8,7 +8,7 @@
 * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * **/
 mod({
     name : 'MouseEventNote',
-    dependencies : [ 'bang::Notifications.js' ],
+    dependencies : [ ],
     init : function initMouseEventNote (m) {
         /** * *
         * Initializes the MouseEventNote Addin
