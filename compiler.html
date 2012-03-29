@@ -12,13 +12,14 @@
             };
             
             mod({
-                name : 'Compiler',
+                name : 'main',
                 dependencies : [ 'bang::Utils/PNGEncoder.js' ],
                 init : function initCompiler (m) {
-                    /**
-                     * Initializes the Compiler 
-                     * @param - m Object - The mod modules object.
-                     */
+                    /** * *
+                    * Initializes the Compiler 
+                    * @param - m Object - The mod modules object.
+                    * * **/
+                    var compiler = document.createElement('div');
                     var header = document.createElement('h2');
                     header.innerHTML = 'Enter your code into and click outside the textarea to compile...';
                     var output = document.createElement('div');
@@ -34,12 +35,18 @@
                         png = m.PNGEncoder.PNGFromString(src);
                         output.appendChild(png);
                     };
-                    document.body.appendChild(header);
-                    document.body.appendChild(textArea);
-                    document.body.appendChild(output);
+                    compiler.appendChild(header);
+                    compiler.appendChild(textArea);
+                    compiler.appendChild(output);
+                    // Setup setParentElement so bang.js can unpack this...
+                    compiler.setParentElement = function (element) {
+                        element.appendChild(m.main);
+                    };
                     
-                    return {};
+                    return compiler;
                 }
+            }).onload(function(m) {
+                m.main.setParentElement(document.body);
             });
         </script>
     </body>
