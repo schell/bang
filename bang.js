@@ -75,9 +75,11 @@
             if (imageData) {
                 var src = unpackImageDataToString(imageData);
                 // Inside the devil's den there is evil...
-                var modules = eval(src);
-                // Give the program its entry point...
-                modules.main.setParentElement(element);
+                var main = eval(src);
+                if (typeof main === 'function') {
+                    // Give the program its entry point...
+                    main(element);
+                }
             } else {
                 throw new Error('Could not get image data.');
             }

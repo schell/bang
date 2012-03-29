@@ -39,14 +39,14 @@
                     compiler.appendChild(textArea);
                     compiler.appendChild(output);
                     // Setup setParentElement so bang.js can unpack this...
-                    compiler.setParentElement = function (element) {
-                        element.appendChild(m.main);
+                    var main = function (element) {
+                        element.appendChild(compiler);
                     };
                     
-                    return compiler;
+                    return main;
                 }
             }).onload(function(m) {
-                m.main.setParentElement(document.body);
+                m.main(document.body);
             });
         </script>
     </body>
