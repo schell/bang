@@ -8,21 +8,27 @@
  * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * **/
 mod({
     name : 'View',
-    dependencies : [ 'bang::Global.js', 'bang::Notifications.js', 'bang::Geom/Matrix.js', 'bang::Geometry.js' ],
+    dependencies : [ 'bang::Global.js', 'bang::Geom/Matrix.js', 'bang::Geometry.js' ],
     init : function initView(m) {
-        /**
-         * Initializes the View Addin
-         * @param - m Object - The mod modules object.
-         */     
-        
+        /** * *
+        * Initializes the View Addin
+        * @param - m Object - The mod modules object.
+        * * **/     
+        //--------------------------------------
+        //  THE ADDIN
+        //--------------------------------------
         var addin = function addinView(self) {
-            /**
-             * Adds View properties to *self*.
-             * @param - self Object - The object to add View properties to.
-             * @return self View Object 
-             */
+            /** * *
+            * Adds View properties to *self*.
+            * @param - self Object - The object to add View properties to.
+            * @return self View Object  
+            * * **/
             self = m.Object(self); 
+            //--------------------------------------
+            //  PROPERTIES
+            //--------------------------------------
             
+            // A tag...
             m.safeAddin(self, 'tag', 'View');
             
             // Addin properties of Listener...
@@ -255,7 +261,7 @@ mod({
             //--------------------------------------
             m.safeAddin(self, 'onParentUpdatedContext', function View_onParentUpdatedContext(note) {
                 self.context = note.body;
-                self.sendNotification(m.Notifications.View.DID_UPDATE_CONTEXT, self.context);
+                self.sendNotification(addin.DID_UPDATE_CONTEXT, self.context);
             });
             
             m.safeAddin(self, 'onAddedToViewContainer', function View_onAddedToViewContainer(note) {
@@ -267,14 +273,34 @@ mod({
                 self.parent = note.body;
                 self.stage = self.parent.stage;
                 self.context = self.parent.context;
-                self.addInterest(self.parent, m.Notifications.View.DID_UPDATE_CONTEXT, self.onParentUpdatedContext);
+                self.addInterest(self.parent, addin.DID_UPDATE_CONTEXT, self.onParentUpdatedContext);
                 // Notify
-                self.sendNotification(m.Notifications.View.DID_UPDATE_CONTEXT, self.context);
+                self.sendNotification(addin.DID_UPDATE_CONTEXT, self.context);
             });
-            self.addInterest(self, m.Notifications.View.WAS_ADDED_TO_VIEWCONTAINER, self.onAddedToViewContainer);
+            self.addInterest(self, addin.WAS_ADDED_TO_VIEWCONTAINER, self.onAddedToViewContainer);
             
             return self;
         };
+        //--------------------------------------
+        //  NOTIFICATIONS SENT BY THIS ADDIN
+        //--------------------------------------
+        // All events sent by this addin...
+        var events = {
+            // Sent from a View after being added to a ViewContainer...
+            WAS_ADDED_TO_VIEWCONTAINER : 'wasAddedToViewContainer',
+            // Sent from a View after being removed from a ViewContainer...
+            WAS_REMOVED_FROM_VIEWCONTAINER : 'wasRemovedFromViewContainer',
+            // Sent from a View just after that view updates its drawing context...
+            DID_UPDATE_CONTEXT : 'didUpdateContext',
+            // Sent from a View just after the user mouses on said View...
+            MOUSE_DOWN : 'mouseDown',
+            MOUSE_UP : 'mouseUp',
+            MOUSE_CLICK : 'mouseClick',
+            MOUSE_MOVE : 'mouseMove',
+            MOUSE_OVER : 'mouseOver',
+            MOUSE_OUT : 'mouseOut'
+        };
+        m.safeAddinAllPropertiesOf(addin, events);
         
         return addin;
         

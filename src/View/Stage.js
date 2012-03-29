@@ -88,7 +88,7 @@ mod({
             //--------------------------------------
             m.safeOverride(self, 'draw', 'viewContainer_draw', function Stage_draw() {
                 // Send out a global hitArea tick notification...
-                self.sendNotification(m.Notifications.Stage.FRAME_TICK);
+                self.sendNotification(m.Stage.FRAME_TICK);
                 // Clear the stage...
                 if (self.clearCanvasOnFrameTick) {
                     self.context.clearRect(0, 0, self.canvas.width, self.canvas.height);    
@@ -129,8 +129,8 @@ mod({
                     return el;
                 });
             });
-            self.addInterest(undefined, m.Notifications.ViewContainer.DID_ADD_SUBVIEW, compileDisplayList);
-            self.addInterest(undefined, m.Notifications.ViewContainer.DID_REMOVE_SUBVIEW, compileDisplayList);
+            self.addInterest(undefined, m.ViewContainer.DID_ADD_SUBVIEW, compileDisplayList);
+            self.addInterest(undefined, m.ViewContainer.DID_REMOVE_SUBVIEW, compileDisplayList);
             //--------------------------------------
             //  MOUSE INPUT HANDLING
             //--------------------------------------
@@ -186,7 +186,7 @@ mod({
                 /** * *
                 * Dispatches a mouse down event.
                 * * **/
-                var mouseEventNote = createMouseEvent(m.Notifications.View.MOUSE_DOWN, nativeEvent);
+                var mouseEventNote = createMouseEvent(m.View.MOUSE_DOWN, nativeEvent);
                 if (mouseEventNote) {
                     mouseEventNote.target.dispatch(mouseEventNote);
                 }
@@ -195,7 +195,7 @@ mod({
                 /** * *
                 * Dispatches a mouse up event.
                 * * **/
-                var mouseEventNote = createMouseEvent(m.Notifications.View.MOUSE_UP, nativeEvent);
+                var mouseEventNote = createMouseEvent(m.View.MOUSE_UP, nativeEvent);
                 if (mouseEventNote) {
                     mouseEventNote.target.dispatch(mouseEventNote);
                 }
@@ -204,7 +204,7 @@ mod({
                 /** * *
                 * Dispatches a mouse up event.
                 * * **/
-                var mouseEventNote = createMouseEvent(m.Notifications.View.MOUSE_CLICK, nativeEvent);
+                var mouseEventNote = createMouseEvent(m.View.MOUSE_CLICK, nativeEvent);
                 if (mouseEventNote) {
                     mouseEventNote.target.dispatch(mouseEventNote);
                 }
@@ -214,14 +214,14 @@ mod({
                 /** * *
                 * Dispatches a mouse move event or a mouse over.
                 * * **/
-                var mouseEventNote = createMouseEvent(m.Notifications.View.MOUSE_MOVE, nativeEvent);
+                var mouseEventNote = createMouseEvent(m.View.MOUSE_MOVE, nativeEvent);
                 var overView = false;
                 if (mouseEventNote) {
                     overView = mouseEventNote.target;
                     if (overView.$mouseSettings.mousedOver === false) {
                         // Intercept this mouseMove and change it into a mouseOver...
                         overView.$mouseSettings.mousedOver = true;
-                        mouseEventNote.name = m.Notifications.View.MOUSE_OVER;
+                        mouseEventNote.name = m.View.MOUSE_OVER;
                     }
                     mouseEventNote.target.dispatch(mouseEventNote);
                 } 
@@ -246,7 +246,7 @@ mod({
                         } else {
                             view.$mouseSettings.mousedOver = false;
                             var mouseOutEvent = m.MouseEventNote({
-                                name : m.Notifications.View.MOUSE_OUT,
+                                name : m.View.MOUSE_OUT,
                                 globalPoint : globalPoint,
                                 localPoint : undefined,
                                 target : view,
@@ -270,7 +270,7 @@ mod({
                 });
                 // To save some object creation we create one event...
                 var mouseOutEvent = m.MouseEventNote({
-                    name : m.Notifications.View.MOUSE_OUT,
+                    name : m.View.MOUSE_OUT,
                     globalPoint : globalPoint,
                     localPoint : undefined,
                     body : nativeEvent
@@ -286,13 +286,22 @@ mod({
                     }
                 }
                 // And use it here...
-                mouseOutEvent.name = m.Notifications.Stage.MOUSE_LEAVE;
+                mouseOutEvent.name = m.Stage.MOUSE_LEAVE;
                 mouseOutEvent.target = self;
                 self.$mouseSettings.mousedOver = false;
                 self.dispatch(mouseOutEvent);
             };
             return self;
         };
+        //--------------------------------------
+        //  NOTIFICATIONS SENT BY THIS ADDIN
+        //--------------------------------------
+        var events = {
+             // Sent from the Stage every frame just before rendering...
+             FRAME_TICK : 'frameTick',
+             MOUSE_LEAVE : 'mouseLeave'
+         };
+         m.safeAddinAllPropertiesOf(addin, events);
         
         return addin;
         

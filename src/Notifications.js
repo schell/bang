@@ -15,38 +15,7 @@ mod({
          * @param - m Object - The mod modules object.
          */
          return {
-             View : {
-                 // Sent from a View just after that view updates its drawing context...
-                 DID_UPDATE_CONTEXT : 'didUpdateContext',
-                 // Sent from a View after being added to a ViewContainer...
-                 WAS_ADDED_TO_VIEWCONTAINER : 'wasAddedToViewContainer',
-                 // Sent from a View after being removed from a ViewContainer...
-                 WAS_REMOVED_FROM_VIEWCONTAINER : 'wasRemovedFromViewContainer',
-                 // Sent from a View just after the user mouses on said View...
-                 MOUSE_DOWN : 'mouseDown',
-                 MOUSE_UP : 'mouseUp',
-                 MOUSE_CLICK : 'mouseClick',
-                 MOUSE_MOVE : 'mouseMove',
-                 MOUSE_OVER : 'mouseOver',
-                 MOUSE_OUT : 'mouseOut'
-             },
-             ViewContainer : {
-                 // Sent from a ViewContainer after adding a subview, just after said subview sends WAS_ADDED_TO_VIEWCONTAINER
-                 DID_ADD_SUBVIEW : 'didAddSubview',
-                 // Sent from a ViewContainer after removing a subview, just before said subview sends WAS_REMOVED_FROM_VIEWCONTAINER
-                 DID_REMOVE_SUBVIEW : 'didRemoveSubview'
-             },
-             Stage : {
-                 // Sent from the Stage every frame just before rendering...
-                 FRAME_TICK : 'frameTick',
-                 MOUSE_LEAVE : 'mouseLeave'
-             },
-             Network : {
-                 // Sent from an object after a successful load...
-                 DID_LOAD : 'didLoad',
-                 // Sent from an object after failing to load a resource...
-                 DID_NOT_LOAD : 'didNotLoad'
-             }
+             
          };
     }
 });

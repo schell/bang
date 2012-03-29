@@ -208,7 +208,7 @@ mod({
             return _animations.length;
         };
         
-        m.safeAddin = function safeAddin (obj, key, value) {
+        m.safeAddin = function safeAddin(obj, key, value) {
             /**
              * Adds *value* to *obj* as the property *key*, unless *key*
              * already exists on *obj*.
@@ -223,7 +223,19 @@ mod({
             return false;
         };
         
-        m.safeOverride = function safeOverride (obj, key, superKey, value) {
+        m.safeAddinAllPropertiesOf = function safeAddinFromObject(obj, addin) {
+            /** * *
+            * Adds in all the properties of *addin* onto *obj*, in a safe way.
+            * @param Object The object to add properties to.
+            * @param Object The object to add properties from.
+            * @return Returns the first parameter after adding properties from the second.
+            * * **/
+            for (var key in addin) {
+                m.safeAddin(obj, key, addin[key]);
+            }
+        }
+        
+        m.safeOverride = function safeOverride(obj, key, superKey, value) {
             /** * *
             * Adds *value* to *obj* as the property *key*. If *key*
             * already exists the existing *key* is stored on *obj*

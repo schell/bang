@@ -14,7 +14,6 @@ mod({
         * Initializes the Video Addin
         * @param - m Object - The mod modules object.
         * * **/
-        
         var addin = function addinVideo (self) {
             /** * *
             * Adds Video properties to *self*.
@@ -26,13 +25,16 @@ mod({
             // Add in Bitmap
             m.Bitmap(self);
             
+            // Whether or not to autoplay...
+            m.safeAddin(self, 'autoplay', true);
+            
             m.safeOverride(self, 'load', 'bitmap_load', function Video_load(src) {
                 /** * *
                 * Loads a video.
                 * @param String The source path of the video to load.
                 * * **/
                 var video = document.createElement('video');
-                video.autoplay = true;
+                video.autoplay = self.autoplay;
                 video.addEventListener('loadstart', function onLoadVideoStart(e) {
                 });
                 video.addEventListener('progress', function onLoadVideoProgress(e) {
@@ -40,13 +42,13 @@ mod({
                 video.addEventListener('canplay', function onLoadVideoCanPlay(e) {
                     self.image = video;
                     self.video = video;
-                    self.sendNotification(m.Notifications.Network.DID_LOAD, src);
+                    self.sendNotification(m.Bitmap.DID_LOAD, src);
                 });
                 video.addEventListener('error', function onErrorVideo(e) {
                     var error = m.LoadError({
                         message : 'Video could not load '+src
                     });
-                    self.sendNotification(m.Notifications.Network.DID_NOT_LOAD, error);
+                    self.sendNotification(m.Bitmap.DID_NOT_LOAD, error);
                 });
                 video.src = src;
                 video.load();

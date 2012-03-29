@@ -42,7 +42,7 @@ mod({
             assert.suite = 'ViewContainer Tests';
         
             var calledUpdateContext = false;
-            view.addInterest(view, m.Notifications.View.DID_UPDATE_CONTEXT, function updatedContext(note) {
+            view.addInterest(view, m.View.DID_UPDATE_CONTEXT, function updatedContext(note) {
                 calledUpdateContext = true;
             });
             var container = m.ViewContainer({
@@ -72,7 +72,7 @@ mod({
             }
         
             topOfTree.context = 666;
-            topOfTree.sendNotification(m.Notifications.View.DID_UPDATE_CONTEXT, topOfTree.context);
+            topOfTree.sendNotification(m.View.DID_UPDATE_CONTEXT, topOfTree.context);
             assert.eq(lastBranch.context, 666, 'Branches of displaylist update context when update note sent.');
         
             assert.suite = 'Stage Tests';
@@ -145,7 +145,7 @@ mod({
             green.addSubview(red);
             green.addSubview(blue);
             green.drawQueue.push(makeDrawFunction(green, 'rgb(0, 255, 0)'));
-            green.addInterest(undefined, m.Notifications.Stage.FRAME_TICK, function tick(note) {
+            green.addInterest(undefined, m.Stage.FRAME_TICK, function tick(note) {
                 red.rotation += 2;
                 blue.rotation += 2;
                 green.rotation -= 2;
@@ -279,14 +279,14 @@ mod({
                 stage.tag = 'stage';
                 stage.alpha = 0.5;
                 stage.addHitAreaDrawFunction('green', 'black');
-                stage.addInterest(stage, m.Notifications.View.MOUSE_DOWN, onMouseEvent);
+                stage.addInterest(stage, m.View.MOUSE_DOWN, onMouseEvent);
                 
                 var root = m.ViewContainer({
                     tag : 'root',
                     x : stage.hitArea.width()/2 - 50,
                     hitArea : m.Rectangle.from(0, 0, 100, 100)
                 });
-                root.addInterest(root, m.Notifications.View.MOUSE_DOWN, onMouseEvent);
+                root.addInterest(root, m.View.MOUSE_DOWN, onMouseEvent);
                 root.addHitAreaDrawFunction('red', 'red');
                 stage.addSubview(root);
                 
@@ -296,7 +296,7 @@ mod({
                     y : 50,
                     hitArea : m.Rectangle.from(0, 0, 100, 100)
                 });
-                leftbranch.addInterest(leftbranch, m.Notifications.View.MOUSE_DOWN, onMouseEvent);
+                leftbranch.addInterest(leftbranch, m.View.MOUSE_DOWN, onMouseEvent);
                 leftbranch.addHitAreaDrawFunction('yellow', 'fuchsia');
                 root.addSubview(leftbranch);
                 
@@ -305,7 +305,7 @@ mod({
                     y : 100,
                     hitArea : m.Rectangle.from(0, 0, 50, 50)
                 });
-                leftleftleaf.addInterest(leftleftleaf, m.Notifications.View.MOUSE_DOWN, onMouseEvent);
+                leftleftleaf.addInterest(leftleftleaf, m.View.MOUSE_DOWN, onMouseEvent);
                 leftleftleaf.addHitAreaDrawFunction('gray', 'fuchsia');
                 leftbranch.addSubview(leftleftleaf);
                 
@@ -315,7 +315,7 @@ mod({
                     y : 100,
                     hitArea : m.Rectangle.from(0, 0, 50, 50)
                 });
-                leftrightleaf.addInterest(leftrightleaf, m.Notifications.View.MOUSE_DOWN, onMouseEvent);
+                leftrightleaf.addInterest(leftrightleaf, m.View.MOUSE_DOWN, onMouseEvent);
                 leftrightleaf.addHitAreaDrawFunction('gray', 'teal');
                 leftbranch.addSubview(leftrightleaf);
                 
@@ -325,7 +325,7 @@ mod({
                     y : 50,
                     hitArea : m.Rectangle.from(0, 0, 100, 100)
                 });
-                rightbranch.addInterest(rightbranch, m.Notifications.View.MOUSE_DOWN, onMouseEvent);
+                rightbranch.addInterest(rightbranch, m.View.MOUSE_DOWN, onMouseEvent);
                 rightbranch.addHitAreaDrawFunction('yellow', 'teal');
                 root.addSubview(rightbranch);
                 
@@ -334,7 +334,7 @@ mod({
                     y : 100,
                     hitArea : m.Rectangle.from(0, 0, 50, 50)
                 });
-                rightleftleaf.addInterest(rightleftleaf, m.Notifications.View.MOUSE_DOWN, onMouseEvent);
+                rightleftleaf.addInterest(rightleftleaf, m.View.MOUSE_DOWN, onMouseEvent);
                 rightleftleaf.addHitAreaDrawFunction('gray', 'fuchsia');
                 rightbranch.addSubview(rightleftleaf);
                 
@@ -344,7 +344,7 @@ mod({
                     y : 100,
                     hitArea : m.Rectangle.from(0, 0, 50, 50)
                 });
-                rightrightleaf.addInterest(rightrightleaf, m.Notifications.View.MOUSE_DOWN, onMouseEvent);
+                rightrightleaf.addInterest(rightrightleaf, m.View.MOUSE_DOWN, onMouseEvent);
                 rightrightleaf.addHitAreaDrawFunction('gray', 'teal');
                 rightbranch.addSubview(rightrightleaf);
                 
@@ -354,7 +354,7 @@ mod({
                     y : 50,
                     hitArea : m.Rectangle.from(0, 0, 50, 50)
                 });
-                rightrightrightleaf.addInterest(rightrightrightleaf, m.Notifications.View.MOUSE_DOWN, onMouseEvent);
+                rightrightrightleaf.addInterest(rightrightrightleaf, m.View.MOUSE_DOWN, onMouseEvent);
                 rightrightrightleaf.addHitAreaDrawFunction('gray', 'teal');
                 rightrightleaf.addSubview(rightrightrightleaf);
                 
@@ -422,15 +422,15 @@ mod({
                     // Reset the drawQueue to the old one...
                     el.drawQueue = oldQueue.slice();
                     
-                    el.addInterest(el, m.Notifications.View.MOUSE_DOWN, function(mouseNote) {
+                    el.addInterest(el, m.View.MOUSE_DOWN, function(mouseNote) {
                         console.log(el.toString(),'mouse down');
                         el.drawQueue = downQueue.slice();
                     });
-                    el.addInterest(el, m.Notifications.View.MOUSE_UP, function(mouseNote) {
+                    el.addInterest(el, m.View.MOUSE_UP, function(mouseNote) {
                         console.log(el.toString(),'mouse up');
                         el.drawQueue = upQueue.slice();
                     });
-                    el.addInterest(el, m.Notifications.View.MOUSE_MOVE, function(mouseNote) {
+                    el.addInterest(el, m.View.MOUSE_MOVE, function(mouseNote) {
                         var x = mouseNote.localPoint.x();
                         var y = mouseNote.localPoint.y();
                         el.drawQueue = [
@@ -454,13 +454,13 @@ mod({
                             }
                         ];
                     });
-                    el.addInterest(el, m.Notifications.View.MOUSE_OVER, function(mouseNote) {
+                    el.addInterest(el, m.View.MOUSE_OVER, function(mouseNote) {
                         el.drawQueue = overQueue.slice();
                     });
-                    el.addInterest(el, m.Notifications.View.MOUSE_OUT, function(mouseNote) {
+                    el.addInterest(el, m.View.MOUSE_OUT, function(mouseNote) {
                         el.drawQueue = oldQueue.slice();
                     });
-                    el.addInterest(el, m.Notifications.View.MOUSE_CLICK, function(mouseNote) {
+                    el.addInterest(el, m.View.MOUSE_CLICK, function(mouseNote) {
                         var x = mouseNote.globalPoint.x();
                         var y = mouseNote.globalPoint.y();
                         var block = m.View({
@@ -488,7 +488,7 @@ mod({
                         
                         // Test that the stage issues MOUSE_LEAVE events...
                         var leaveTarget = false;
-                        stage.addInterest(stage, m.Notifications.Stage.MOUSE_LEAVE, function(note) {
+                        stage.addInterest(stage, m.Stage.MOUSE_LEAVE, function(note) {
                             leaveTarget = note.body.target;
                         });
                         stage.onmouseout({

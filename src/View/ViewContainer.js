@@ -45,8 +45,8 @@ mod({
                 }
                 _subviews.push(subview);
                 // Let everyone know that this added a view...
-                subview.sendNotification(m.Notifications.View.WAS_ADDED_TO_VIEWCONTAINER, self);
-                self.sendNotification(m.Notifications.ViewContainer.DID_ADD_SUBVIEW, subview);
+                subview.sendNotification(m.View.WAS_ADDED_TO_VIEWCONTAINER, self);
+                self.sendNotification(addin.DID_ADD_SUBVIEW, subview);
             });
             m.safeAddin(self, 'removeSubview', function ViewContainer_removeSubview(subview) {
                 /** * *
@@ -57,8 +57,8 @@ mod({
                 if (ndx !== -1) {
                     subview.parent = undefined;
                     _subviews.splice(ndx, 1);
-                    self.sendNotification(m.Notifications.ViewContainer.DID_REMOVE_SUBVIEW, subview);
-                    subview.sendNotification(m.Notifications.View.WAS_REMOVED_FROM_VIEWCONTAINER, self);
+                    self.sendNotification(m.ViewContainer.DID_REMOVE_SUBVIEW, subview);
+                    subview.sendNotification(m.View.WAS_REMOVED_FROM_VIEWCONTAINER, self);
                 }
             });
             m.safeAddin(self, 'treeString', function ViewContainer_treeString(n) {
@@ -97,8 +97,18 @@ mod({
             
             return self;
         };
-        
-        return addin;
+        //--------------------------------------
+        //  NOTIFICATIONS SENT BY THIS ADDIN
+        //--------------------------------------
+        var events = {
+             // Sent from a ViewContainer after adding a subview, just after said subview sends WAS_ADDED_TO_VIEWCONTAINER
+             DID_ADD_SUBVIEW : 'didAddSubview',
+             // Sent from a ViewContainer after removing a subview, just before said subview sends WAS_REMOVED_FROM_VIEWCONTAINER
+             DID_REMOVE_SUBVIEW : 'didRemoveSubview'
+         };
+         m.safeAddinAllPropertiesOf(addin, events);
+         
+         return addin;
         
     }
 });

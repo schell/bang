@@ -46,7 +46,7 @@
                     return undefined;
                 },
                 callback : function callbackMain (m) {
-                    go( /*
+                    go( 
                         m.GlobalTests,
                         m.GeomTests, 
                         m.NoteTests,
@@ -54,8 +54,8 @@
                         m.BitmapTests,
                         m.SpriteTests,
                         m.TextTests,
-                        */m.VideoTests,
-                        //m.UtilsTests,
+                        //m.VideoTests,
+                        m.UtilsTests,
                         function() {
                             m.assert.stat();
                         }).start();

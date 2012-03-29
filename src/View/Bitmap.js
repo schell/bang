@@ -38,13 +38,13 @@ mod({
                 var image = new Image();
                 image.onload = function onLoadImage() {
                     self.image = image;
-                    self.sendNotification(m.Notifications.Network.DID_LOAD, src);
+                    self.sendNotification(m.Bitmap.DID_LOAD, src);
                 };
                 image.onerror = function onErrorImage() {
                     var error = m.LoadError({
                         message : 'Bitmap could not load '+src
                     });
-                    self.sendNotification(m.Notifications.Network.DID_NOT_LOAD, error);
+                    self.sendNotification(m.Bitmap.DID_NOT_LOAD, error);
                 };
                 image.src = src;
             });
@@ -98,6 +98,16 @@ mod({
             
             return self;
         };
+        //--------------------------------------
+        //  NOTIFICATIONS SENT BY THIS ADDIN
+        //--------------------------------------
+        var events = {
+             // Sent from an object after a successful load...
+             DID_LOAD : 'didLoad',
+             // Sent from an object after failing to load a resource...
+             DID_NOT_LOAD : 'didNotLoad'
+         };
+         m.safeAddinAllPropertiesOf(addin, events);
         
         return addin;
         
