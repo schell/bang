@@ -1,0 +1,147 @@
+<html>
+<!-- __                      
+    |  |__ ___ _ _____ _____ 
+    |  _  |  _  |     |  _  |
+    |_____|___!_|__!__|___  |
+                      |_____|    
+    you know, for javascripts-->
+    <head>
+        <meta http-equiv="Content-type" content="text/html; charset=utf-8">
+        <title>bang::compiler</title>
+        <script src="mod.js" type="text/javascript" charset="utf-8"></script>
+    </head>
+    <body id="compiler">
+        <div id="entrypoint"></div>
+        </form>
+        <script type="text/javascript" charset="utf-8">
+            mod.useTagInjection = true;
+            mod.expansions = {
+                bang : 'src/'
+            };
+            mod({
+                name : 'main',
+                dependencies : ['bang::Utils/PNGEncoder.js'],
+                init : function initMain(m) {
+                    var compiler = document.createElement('div');
+                    var textarea = document.createElement('textarea');
+                    textarea.id = 'code';
+                    textarea.cols = 50;
+                    textarea.rows = 5;
+                    
+                    function radioButton(name, value, checked) {
+                        var radio = document.createElement('input');
+                            radio.type = 'radio';
+                            radio.name = name;
+                            radio.value = value;
+                            if (checked) {
+                                radio.checked = 'checked';
+                            }
+                        return radio;
+                    }
+                    
+                    var compLvls = ['WHITESPACE_ONLY','SIMPLE_OPTIMIZATIONS','ADVANCED_OPTIMIZATIONS'].map(function(el) {
+                        return radioButton('comp_lvl', el);
+                    });
+                    compLvls[2].selected = true;
+                    
+                    var submit = document.createElement('input');
+                    submit.type = 'submit';
+                    submit.value = "Compile"; 
+                    var output = document.createElement('div');
+                    output.style.cssText = "width:100%;";
+                    
+                    function br() {
+                        return document.createElement('br');
+                    }
+                    
+                    compiler.appendChild(textarea);
+                    compiler.appendChild(br());
+                    compLvls.map(function(el) {
+                        compiler.appendChild(el);
+                        compiler.innerHTML += el.value;
+                        compiler.appendChild(br());
+                    });
+                    compiler.appendChild(br());
+                    compiler.appendChild(submit);
+                    compiler.appendChild(output);
+                    
+                    var image = false;
+                    
+                    submit.onclick = function() {
+                        var code = document.getElementById('code').value.toString();
+                        var params = '';
+
+                        function addParam(name, value) {
+                            if (params === '') {
+                                params = name;
+                            } else {
+                                params += '&'+name;
+                            }
+                            params += '=' + encodeURIComponent(value);
+                        }
+
+                        addParam("output_format", "json");
+                        addParam("output_info", "compiled_code");
+                        addParam("output_info", "warnings");
+                        addParam("output_info", "errors");
+                        addParam("output_info", "statistics");
+                        addParam("warning_level", "default");
+                        var lvl = function(){
+                            var level = 'SIMPLE_OPTIMIZATIONS';
+                            Array.prototype.map.call(document.getElementsByName('comp_lvl'), function(el) {
+                                if (el.checked) {
+                                    level = el.value;
+                                }
+                            });
+                            return level;
+                        }();
+                        console.log('compiling using level:', lvl);
+                        addParam("compilation_level", lvl);
+                        addParam("js_code", code); 
+  
+                        var oXHR = new XMLHttpRequest();  
+                        oXHR.open("POST", "http://closure-compiler.appspot.com/compile");  
+                        oXHR.setRequestHeader("Content-Type", "application/x-www-form-urlencoded;charset=UTF-8");
+                        oXHR.send(params);
+                        
+                        // Give some indeterminant feedback...
+                        var update = function() {
+                            var value = submit.value + '.';
+                            submit.value = value.replace('....', '');
+                            setTimeout(update, 300);
+                        };
+                        
+                        oXHR.onload = function (oEvent) {
+                            var response = oXHR.responseText; // Note: not oXHR.responseText  
+                            var json = JSON.parse(response);
+                            var modules = m;
+                            console.log('compiler response:',json);
+                            var main = eval(json.compiledCode);
+                            // Cancel the indeterminant feedback...
+                            update = function(){
+                                submit.value = "Compile";
+                                if (typeof main === 'function') {
+                                    if (image) {
+                                        output.removeChild(image);
+                                    }
+                                    image = modules.PNGEncoder.PNGFromString(json.compiledCode);
+                                    output.appendChild(image);
+                                }
+                            };
+                        };  
+                        
+                        submit.value = "Compiling";
+                        update();
+                    };
+                    
+                    return function exporter(entrypoint) {
+                        entrypoint.appendChild(compiler);
+                        return m;
+                    }
+                }
+            }).onload(function(m) {
+                m.main(document.getElementById('entrypoint'));
+            });
+        </script>
+    </body>
+</html>
