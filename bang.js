@@ -77,8 +77,11 @@
                 // Inside the devil's den there is evil...
                 var main = eval(src);
                 if (typeof main === 'function') {
-                    // Give the program its entry point...
-                    main(element);
+                    // Give the program its entry point and
+                    // store whatever it creates in a new context...
+                    var context = main(element);
+                    window.bang.contexts = window.bang.contexts || {};
+                    window.bang.contexts[element.id] = context;
                 }
             } else {
                 throw new Error('Could not get image data.');
@@ -91,9 +94,11 @@
     }
     // The actual initializer...
     window.bang = function() {
-        Array.prototype.map.call(document.getElementsByClassName('bang'), function (el) {
+        Array.prototype.map.call(document.getElementsByClassName('bang'), function (el,ndx) {
             var src = el.dataset.source;
-            initElementWithSrcImage(el, src);
+            var id = el.id || 'bang_'+ndx;
+            el.id = id;
+            var context = initElementWithSrcImage(el, src);
         });
     };
 }(window));
