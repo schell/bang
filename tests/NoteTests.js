@@ -37,21 +37,21 @@ mod({
                 var testCalls = function testCalls(n) {
                         calls++;
                 };
-                ec.addInterest(listener, dispatcher, 'bigNote', testCalls);
+                ec.addListener(listener, dispatcher, 'bigNote', testCalls);
         
-                assert.eq(ec.totalInterests(), 1, 'NoteCenter can add interests.');
+                assert.eq(ec.totalListeners(), 1, 'NoteCenter can add interests.');
         
                 ec.dispatch(note);
                 assert.eq(calls, 1, 'NoteCenter can dispatch notes.');
         
-                ec.removeInterest(listener, dispatcher, 'bigNote');
-                assert.eq(ec.totalInterests(), 0, 'NoteCenter can remove interests.');
+                ec.removeListener(listener, dispatcher, 'bigNote');
+                assert.eq(ec.totalListeners(), 0, 'NoteCenter can remove interests.');
         
                 ec.dispatch(note);
                 assert.eq(calls, 1, 'Removing interests stops dispatching of notes.');
         
-                ec.addInterest(listener, undefined, 'asdf', testCalls);
-                ec.addInterest(anotherListener, undefined, 'asdf', testCalls);
+                ec.addListener(listener, undefined, 'asdf', testCalls);
+                ec.addListener(anotherListener, undefined, 'asdf', testCalls);
                 var noteWithoutDispatcher = Note({
                     name : 'asdf'
                 });
@@ -59,7 +59,7 @@ mod({
                 assert.eq(calls, 3, 'NoteCenter can dispatch notes to observers listening for just names.');
         
                 var objectListener = {hi:'hi there, i only listener for objects...'};
-                ec.addInterest(objectListener, dispatcher, undefined, testCalls);
+                ec.addListener(objectListener, dispatcher, undefined, testCalls);
                 var noteWithoutName = Note({
                     dispatcher : dispatcher
                 });
@@ -71,12 +71,12 @@ mod({
                 ec.dispatch(noteWithNameAndObject);
                 assert.eq(calls, 5, 'NoteCenter can dispatch notes to observers listening for just objects.');
         
-                ec.removeInterest(listener, undefined, 'asdf');
-                ec.removeInterest(anotherListener, undefined, 'asdf');
-                assert.eq(ec.totalInterests(), 1, 'NoteCenter can remove observers listening for just note names.');
+                ec.removeListener(listener, undefined, 'asdf');
+                ec.removeListener(anotherListener, undefined, 'asdf');
+                assert.eq(ec.totalListeners(), 1, 'NoteCenter can remove observers listening for just note names.');
         
-                ec.removeInterest(objectListener, dispatcher, undefined);
-                assert.eq(ec.totalInterests(), 0, 'NoteCenter can remove observers listening forjust objects.');
+                ec.removeListener(objectListener, dispatcher, undefined);
+                assert.eq(ec.totalListeners(), 0, 'NoteCenter can remove observers listening forjust objects.');
             })();
         
             (function Listener_Dispatcher_tests() {
@@ -92,11 +92,11 @@ mod({
                 var callback = function(note) {
                     payload = note.body;
                 };
-                listener.addInterest(dispatcher, 'a note name', callback);
+                listener.addListener(dispatcher, 'a note name', callback);
                 dispatcher.sendNotification('a note name', 666);
                 assert.eq(payload, 666, 'Listeners can receive notification from dispatchers.');
             
-                listener.removeInterest(dispatcher, 'a note name');
+                listener.removeListener(dispatcher, 'a note name');
                 dispatcher.sendNotification('a note name', 777);
                 assert.eq(payload, 666, 'Listeners can remove interests.');
             
@@ -106,13 +106,13 @@ mod({
                 Listener(itself);
                 Dispatcher(itself);
                 var listensToItself = false;
-                itself.addInterest(itself, 'asdf', function asdfCallback(n) {
+                itself.addListener(itself, 'asdf', function asdfCallback(n) {
                     listensToItself = true;
                 });
                 itself.sendNotification('asdf', 666);
                 assert.eq(listensToItself, true, 'Listeners can listen to themselves.');
                 
-                listener.addInterest(dispatcher, 'asdf', function(){});
+                listener.addListener(dispatcher, 'asdf', function(){});
                 var listForASDF = listener.noteCenter.dispatchersOfNoteWithName('asdf');
                 var compareList = [itself,dispatcher];
                 assert.eq(listForASDF.toString(), compareList.toString(), 'NoteCenter can return list of dispatchers of note name.');

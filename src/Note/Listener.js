@@ -28,7 +28,7 @@ mod({
             // Add in NotePasser properties...
             m.NotePasser(self);
             
-            m.safeAddin(self, 'addInterest', function View_addNoteListener(dispatcher, noteName, callback) {
+            m.safeAddin(self, 'addListener', function View_addNoteListener(dispatcher, noteName, callback) {
                 /**
                  * Listens for notes named *noteName* dispatched from *dispatcher*. Calls *callback* when
                  * received.
@@ -38,17 +38,17 @@ mod({
                 noteName = m.ifndefInit(noteName, undefined);
                 callback = m.ifndefInit(callback, function blankCallback(note) {});
                 
-                self.noteCenter.addInterest(listener, dispatcher, noteName, callback);
+                self.noteCenter.addListener(listener, dispatcher, noteName, callback);
             });
             
-            m.safeAddin(self, 'removeInterest', function _name (dispatcher, noteName) {
+            m.safeAddin(self, 'removeListener', function _name (dispatcher, noteName) {
                 /**
                  * Stops listening for notes named *noteName* dispatched from *dispatcher*.
                  */
                 var listener = self;
                 dispatcher = m.ifndefInitObj(dispatcher, undefined);
                 noteName = m.ifndefInitObj(noteName, undefined);
-                self.noteCenter.removeInterest(listener, dispatcher, noteName);
+                self.noteCenter.removeListener(listener, dispatcher, noteName);
             });
             
             return self;

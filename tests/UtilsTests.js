@@ -47,7 +47,7 @@ mod({
                     var png = m.PNGEncoder.PNGFromString(src);
                     document.body.appendChild(png);
                     var bm = m.Bitmap();
-                    bm.addInterest(bm, m.Bitmap.DID_LOAD, function() {
+                    bm.addListener(bm, m.Bitmap.DID_LOAD, function() {
                         var string = m.PNGEncoder.StringFromBitmap(bm);
                         assert.eq(src.length, string.length, 'Can encode lots of data to png and back without loosing data.');
                         cb();
@@ -56,15 +56,15 @@ mod({
                 },
                 function bitmapEncodeTest(cb) {
                     var block = m.Bitmap();
-                    block.addInterest(block, m.Bitmap.DID_LOAD, function() {
-                        block.removeInterest(block, m.Bitmap.DID_LOAD);
+                    block.addListener(block, m.Bitmap.DID_LOAD, function() {
+                        block.removeListener(block, m.Bitmap.DID_LOAD);
                         
                         var blockReEncoded = m.Bitmap({
                             x : block.image.width
                         });
                         var src = m.PNGEncoder.PNGDataFromBitmap(block);
                         
-                        blockReEncoded.addInterest(blockReEncoded, m.Bitmap.DID_LOAD, function() {
+                        blockReEncoded.addListener(blockReEncoded, m.Bitmap.DID_LOAD, function() {
                             var reEncodedSrc = m.PNGEncoder.PNGDataFromBitmap(blockReEncoded);
                             assert.eq(reEncodedSrc === src, true, 'PNGEncoder can encode from bitmap.');
                             cb();
@@ -80,7 +80,7 @@ mod({
                     var string = 'var b = 24; var c = 16; var d = b/c; var s = "This is a string with the number one point five after some dots..."; a = s+(b/c).toString();for(var i=0;i<s.length;i++){d+=s.charCodeAt(i);}';
                     var pngSrc = m.PNGEncoder.PNGSrcFromString(string);
                     var pngBM = m.Bitmap();
-                    pngBM.addInterest(pngBM, m.Bitmap.DID_LOAD, function() {
+                    pngBM.addListener(pngBM, m.Bitmap.DID_LOAD, function() {
                         var srcString = m.PNGEncoder.StringFromBitmap(pngBM);
                         if (srcString !== string) {
                             console.log(string);

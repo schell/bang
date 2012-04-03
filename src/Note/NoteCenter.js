@@ -41,7 +41,7 @@ mod({
                 return observer;
             }
             
-            m.safeAddin(self, 'totalInterests', function NoteCenter_totalInterests() {
+            m.safeAddin(self, 'totalListeners', function NoteCenter_totalListeners() {
                 /**
                  * Returns the total number of stored interests.
                  * @return Number
@@ -71,7 +71,7 @@ mod({
                 return list;
             });
             
-            m.safeAddin(self, 'addInterest', function NoteCenter_addInterest(listener, dispatcher, name, callback) {
+            m.safeAddin(self, 'addListener', function NoteCenter_addListener(listener, dispatcher, name, callback) {
                 /**
                  * Registers *listener* as interested in receiving notifications of *name*, 
                  * coming from *dispatcher*. Calls *callback* when notes of this type get dispatched.
@@ -135,7 +135,7 @@ mod({
                 }
             });
             
-            m.safeAddin(self, 'removeInterest', function NoteCenter_removeInterest(listener, dispatcher, name, callback) {
+            m.safeAddin(self, 'removeListener', function NoteCenter_removeListener(listener, dispatcher, name, callback) {
                 if (!m.defined(listener)) {
                     throw new Error('Listener must be defined.');
                 } else if (!m.defined(dispatcher) && !m.defined(name)) {

@@ -129,8 +129,8 @@ mod({
                     return el;
                 });
             });
-            self.addInterest(undefined, m.ViewContainer.DID_ADD_SUBVIEW, compileDisplayList);
-            self.addInterest(undefined, m.ViewContainer.DID_REMOVE_SUBVIEW, compileDisplayList);
+            self.addListener(undefined, m.ViewContainer.DID_ADD_SUBVIEW, compileDisplayList);
+            self.addListener(undefined, m.ViewContainer.DID_REMOVE_SUBVIEW, compileDisplayList);
             //--------------------------------------
             //  MOUSE INPUT HANDLING
             //--------------------------------------

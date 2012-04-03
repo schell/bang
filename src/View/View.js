@@ -267,17 +267,17 @@ mod({
             m.safeAddin(self, 'onAddedToViewContainer', function View_onAddedToViewContainer(note) {
                 if (m.defined(self.parent)) {
                     // Stop listening to the old parent...
-                    self.removeInterest(self.parent);
+                    self.removeListener(self.parent);
                 }
                 // Update...
                 self.parent = note.body;
                 self.stage = self.parent.stage;
                 self.context = self.parent.context;
-                self.addInterest(self.parent, addin.DID_UPDATE_CONTEXT, self.onParentUpdatedContext);
+                self.addListener(self.parent, addin.DID_UPDATE_CONTEXT, self.onParentUpdatedContext);
                 // Notify
                 self.sendNotification(addin.DID_UPDATE_CONTEXT, self.context);
             });
-            self.addInterest(self, addin.WAS_ADDED_TO_VIEWCONTAINER, self.onAddedToViewContainer);
+            self.addListener(self, addin.WAS_ADDED_TO_VIEWCONTAINER, self.onAddedToViewContainer);
             
             return self;
         };

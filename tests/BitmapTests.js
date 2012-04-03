@@ -26,14 +26,14 @@ mod({
             var bm = m.Bitmap();
             
             function loadBitmapTests(cb) {
-                bm.addInterest(bm, m.Bitmap.DID_NOT_LOAD, function(note) {
+                bm.addListener(bm, m.Bitmap.DID_NOT_LOAD, function(note) {
                     assert.eq(note.body.type, m.LoadError.type, 'Bitmap notifies of failed image load.');
-                    bm.removeInterest(bm, m.Bitmap.DID_NOT_LOAD);
+                    bm.removeListener(bm, m.Bitmap.DID_NOT_LOAD);
                 
                 
                     bm.load(local);
                 });
-                bm.addInterest(bm, m.Bitmap.DID_LOAD, function(note) {
+                bm.addListener(bm, m.Bitmap.DID_LOAD, function(note) {
                     assert.eq(note.body, local, 'Bitmap notifies of successfull image load.');
                     cb();
                 });

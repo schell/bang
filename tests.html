@@ -45,7 +45,7 @@
                 m.assert.eq('main' in m2, true, 'Can get another bang eval.');
                 var m2stage = m2.Stage();
                 
-                m1stage.addInterest(m1stage, m1.Stage.FRAME_TICK, function(note) {});
+                m1stage.addListener(m1stage, m1.Stage.FRAME_TICK, function(note) {});
                 
                 assert.eq(m1stage.noteCenter.observers().length-1, m2stage.noteCenter.observers().length, 'Can add observers to bang context and contexts are seperate.');
                 
@@ -61,13 +61,13 @@
                     var over = false;
                     var moved = false;
                     // Add an interest in mouseLeave and mouseOver...
-                    stage.addInterest(stage, b.Stage.MOUSE_LEAVE, function() {
+                    stage.addListener(stage, b.Stage.MOUSE_LEAVE, function() {
                         over = false;
                     });
-                    stage.addInterest(stage, b.View.MOUSE_MOVE, function() {
+                    stage.addListener(stage, b.View.MOUSE_MOVE, function() {
                         moved = true;
                     });
-                    stage.addInterest(stage, b.View.MOUSE_OVER, function() {
+                    stage.addListener(stage, b.View.MOUSE_OVER, function() {
                         over = true;
                     });
                     // Send a fake mouse event...

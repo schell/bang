@@ -25,14 +25,14 @@ mod({
             var cb = function(note) {
                 payload = note.body;
             };
-            view.addInterest(view, 'a note name', cb);
+            view.addListener(view, 'a note name', cb);
             view.dispatch(m.Note({
                 name : 'a note name',
                 body : 666
             }));
             assert.eq(payload, 666, 'View can add interests and dispatch notifications.');
            
-            view.removeInterest(view, 'a note name');
+            view.removeListener(view, 'a note name');
             view.dispatch(m.Note({
                 name : 'a note name',
                 body : 777
@@ -42,7 +42,7 @@ mod({
             assert.suite = 'ViewContainer Tests';
         
             var calledUpdateContext = false;
-            view.addInterest(view, m.View.DID_UPDATE_CONTEXT, function updatedContext(note) {
+            view.addListener(view, m.View.DID_UPDATE_CONTEXT, function updatedContext(note) {
                 calledUpdateContext = true;
             });
             var container = m.ViewContainer({
@@ -145,7 +145,7 @@ mod({
             green.addView(red);
             green.addView(blue);
             green.drawQueue.push(makeDrawFunction(green, 'rgb(0, 255, 0)'));
-            green.addInterest(undefined, m.Stage.FRAME_TICK, function tick(note) {
+            green.addListener(undefined, m.Stage.FRAME_TICK, function tick(note) {
                 red.rotation += 2;
                 blue.rotation += 2;
                 green.rotation -= 2;
@@ -279,14 +279,14 @@ mod({
                 stage.tag = 'stage';
                 stage.alpha = 0.5;
                 stage.addHitAreaDrawFunction('green', 'black');
-                stage.addInterest(stage, m.View.MOUSE_DOWN, onMouseEvent);
+                stage.addListener(stage, m.View.MOUSE_DOWN, onMouseEvent);
                 
                 var root = m.ViewContainer({
                     tag : 'root',
                     x : stage.hitArea.width()/2 - 50,
                     hitArea : m.Rectangle.from(0, 0, 100, 100)
                 });
-                root.addInterest(root, m.View.MOUSE_DOWN, onMouseEvent);
+                root.addListener(root, m.View.MOUSE_DOWN, onMouseEvent);
                 root.addHitAreaDrawFunction('red', 'red');
                 stage.addView(root);
                 
@@ -296,7 +296,7 @@ mod({
                     y : 50,
                     hitArea : m.Rectangle.from(0, 0, 100, 100)
                 });
-                leftbranch.addInterest(leftbranch, m.View.MOUSE_DOWN, onMouseEvent);
+                leftbranch.addListener(leftbranch, m.View.MOUSE_DOWN, onMouseEvent);
                 leftbranch.addHitAreaDrawFunction('yellow', 'fuchsia');
                 root.addView(leftbranch);
                 
@@ -305,7 +305,7 @@ mod({
                     y : 100,
                     hitArea : m.Rectangle.from(0, 0, 50, 50)
                 });
-                leftleftleaf.addInterest(leftleftleaf, m.View.MOUSE_DOWN, onMouseEvent);
+                leftleftleaf.addListener(leftleftleaf, m.View.MOUSE_DOWN, onMouseEvent);
                 leftleftleaf.addHitAreaDrawFunction('gray', 'fuchsia');
                 leftbranch.addView(leftleftleaf);
                 
@@ -315,7 +315,7 @@ mod({
                     y : 100,
                     hitArea : m.Rectangle.from(0, 0, 50, 50)
                 });
-                leftrightleaf.addInterest(leftrightleaf, m.View.MOUSE_DOWN, onMouseEvent);
+                leftrightleaf.addListener(leftrightleaf, m.View.MOUSE_DOWN, onMouseEvent);
                 leftrightleaf.addHitAreaDrawFunction('gray', 'teal');
                 leftbranch.addView(leftrightleaf);
                 
@@ -325,7 +325,7 @@ mod({
                     y : 50,
                     hitArea : m.Rectangle.from(0, 0, 100, 100)
                 });
-                rightbranch.addInterest(rightbranch, m.View.MOUSE_DOWN, onMouseEvent);
+                rightbranch.addListener(rightbranch, m.View.MOUSE_DOWN, onMouseEvent);
                 rightbranch.addHitAreaDrawFunction('yellow', 'teal');
                 root.addView(rightbranch);
                 
@@ -334,7 +334,7 @@ mod({
                     y : 100,
                     hitArea : m.Rectangle.from(0, 0, 50, 50)
                 });
-                rightleftleaf.addInterest(rightleftleaf, m.View.MOUSE_DOWN, onMouseEvent);
+                rightleftleaf.addListener(rightleftleaf, m.View.MOUSE_DOWN, onMouseEvent);
                 rightleftleaf.addHitAreaDrawFunction('gray', 'fuchsia');
                 rightbranch.addView(rightleftleaf);
                 
@@ -344,7 +344,7 @@ mod({
                     y : 100,
                     hitArea : m.Rectangle.from(0, 0, 50, 50)
                 });
-                rightrightleaf.addInterest(rightrightleaf, m.View.MOUSE_DOWN, onMouseEvent);
+                rightrightleaf.addListener(rightrightleaf, m.View.MOUSE_DOWN, onMouseEvent);
                 rightrightleaf.addHitAreaDrawFunction('gray', 'teal');
                 rightbranch.addView(rightrightleaf);
                 
@@ -354,7 +354,7 @@ mod({
                     y : 50,
                     hitArea : m.Rectangle.from(0, 0, 50, 50)
                 });
-                rightrightrightleaf.addInterest(rightrightrightleaf, m.View.MOUSE_DOWN, onMouseEvent);
+                rightrightrightleaf.addListener(rightrightrightleaf, m.View.MOUSE_DOWN, onMouseEvent);
                 rightrightrightleaf.addHitAreaDrawFunction('gray', 'teal');
                 rightrightleaf.addView(rightrightrightleaf);
                 
@@ -422,15 +422,15 @@ mod({
                     // Reset the drawQueue to the old one...
                     el.drawQueue = oldQueue.slice();
                     
-                    el.addInterest(el, m.View.MOUSE_DOWN, function(mouseNote) {
+                    el.addListener(el, m.View.MOUSE_DOWN, function(mouseNote) {
                         console.log(el.toString(),'mouse down');
                         el.drawQueue = downQueue.slice();
                     });
-                    el.addInterest(el, m.View.MOUSE_UP, function(mouseNote) {
+                    el.addListener(el, m.View.MOUSE_UP, function(mouseNote) {
                         console.log(el.toString(),'mouse up');
                         el.drawQueue = upQueue.slice();
                     });
-                    el.addInterest(el, m.View.MOUSE_MOVE, function(mouseNote) {
+                    el.addListener(el, m.View.MOUSE_MOVE, function(mouseNote) {
                         var x = mouseNote.localPoint.x();
                         var y = mouseNote.localPoint.y();
                         el.drawQueue = [
@@ -454,13 +454,13 @@ mod({
                             }
                         ];
                     });
-                    el.addInterest(el, m.View.MOUSE_OVER, function(mouseNote) {
+                    el.addListener(el, m.View.MOUSE_OVER, function(mouseNote) {
                         el.drawQueue = overQueue.slice();
                     });
-                    el.addInterest(el, m.View.MOUSE_OUT, function(mouseNote) {
+                    el.addListener(el, m.View.MOUSE_OUT, function(mouseNote) {
                         el.drawQueue = oldQueue.slice();
                     });
-                    el.addInterest(el, m.View.MOUSE_CLICK, function(mouseNote) {
+                    el.addListener(el, m.View.MOUSE_CLICK, function(mouseNote) {
                         var x = mouseNote.globalPoint.x();
                         var y = mouseNote.globalPoint.y();
                         var block = m.View({
@@ -488,7 +488,7 @@ mod({
                         
                         // Test that the stage issues MOUSE_LEAVE events...
                         var leaveTarget = false;
-                        stage.addInterest(stage, m.Stage.MOUSE_LEAVE, function(note) {
+                        stage.addListener(stage, m.Stage.MOUSE_LEAVE, function(note) {
                             leaveTarget = note.body.target;
                         });
                         stage.onmouseout({
