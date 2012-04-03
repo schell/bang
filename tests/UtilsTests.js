@@ -1,6 +1,6 @@
 /** * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * *
 * UtilsTests.js
-* Tests the PNGEncoder addin and other utilities.
+* Tests some utilities.
 * Copyright (c) 2012 Schell Scivally. All rights reserved.
 * 
 * @author    Schell Scivally
@@ -8,10 +8,10 @@
 * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * **/
 mod({
     name : 'UtilsTests',
-    dependencies : [ 'bang::Global.js', 'bang::View/Bitmap.js', 'bang::Utils/Utils.js', 'bang::Utils/PNGEncoder.js' ],
+    dependencies : [ 'bang::Global.js', 'bang::View/Bitmap.js', 'bang::Utils/Utils.js' ],
     init : function initUtilsTests (m) {
         /** * *
-        * Initializes the PNGEncoderTests Addin
+        * Initializes the UtilsTests Addin
         * @param - m Object - The mod modules object.
         * * **/ 
         return function runUtilsTests(callback) {
@@ -44,44 +44,23 @@ mod({
                     assert.eq(message, msgOut, 'Can encode data to canvas and back.');
                     
                     var src = mod.compile();
-                    var png = m.PNGEncoder.PNGFromString(src);
+                    var png = m.Utils.StringToImage(src);
                     document.body.appendChild(png);
                     var bm = m.Bitmap();
                     bm.addListener(bm, m.Bitmap.DID_LOAD, function() {
-                        var string = m.PNGEncoder.StringFromBitmap(bm);
+                        var string = m.Utils.ImageToString(bm.image);
                         assert.eq(src.length, string.length, 'Can encode lots of data to png and back without loosing data.');
                         cb();
                     });
                     bm.load(png.src);
                 },
-                function bitmapEncodeTest(cb) {
-                    var block = m.Bitmap();
-                    block.addListener(block, m.Bitmap.DID_LOAD, function() {
-                        block.removeListener(block, m.Bitmap.DID_LOAD);
-                        
-                        var blockReEncoded = m.Bitmap({
-                            x : block.image.width
-                        });
-                        var src = m.PNGEncoder.PNGDataFromBitmap(block);
-                        
-                        blockReEncoded.addListener(blockReEncoded, m.Bitmap.DID_LOAD, function() {
-                            var reEncodedSrc = m.PNGEncoder.PNGDataFromBitmap(blockReEncoded);
-                            assert.eq(reEncodedSrc === src, true, 'PNGEncoder can encode from bitmap.');
-                            cb();
-                        });
-                        blockReEncoded.load('data:image/png;base64,'+src);
-                        stage.addView(blockReEncoded);
-                    });
-                    block.load('images/block.png');
-                    stage.addView(block);
-                },
                 function JSEncodeTest(cb) {
                     var a = 666;
                     var string = 'var b = 24; var c = 16; var d = b/c; var s = "This is a string with the number one point five after some dots..."; a = s+(b/c).toString();for(var i=0;i<s.length;i++){d+=s.charCodeAt(i);}';
-                    var pngSrc = m.PNGEncoder.PNGSrcFromString(string);
+                    var png = m.Utils.StringToImage(string);
                     var pngBM = m.Bitmap();
                     pngBM.addListener(pngBM, m.Bitmap.DID_LOAD, function() {
-                        var srcString = m.PNGEncoder.StringFromBitmap(pngBM);
+                        var srcString = m.Utils.ImageToString(pngBM.image);
                         if (srcString !== string) {
                             console.log(string);
                             console.log('\n');
@@ -92,11 +71,21 @@ mod({
                         assert.eq(d, 6035.5, 'Can correctly evaluate data stored in PNG format.');
                         
                         var projectCompilation = mod.compile();
-                        pngSrc = m.PNGEncoder.PNGSrcFromString(projectCompilation);
-                        document.write('<img title="bang_and_tests.png" src="'+pngSrc+'">');
+                        var PNG = m.Utils.StringToImage(projectCompilation);
+                        var GIF = m.Utils.StringToImage(projectCompilation, 'image/gif');
+                        document.body.innerHTML = '';
+                        function h3(string) {
+                            var h3 = document.createElement('h3');
+                            h3.innerHTML = string;
+                            return h3;
+                        }
+                        document.body.appendChild(h3('png'));
+                        document.body.appendChild(PNG);
+                        document.body.appendChild(h3('gif'));
+                        document.body.appendChild(GIF);
                         cb();
                     });
-                    pngBM.load(pngSrc);
+                    pngBM.load(png.src);
                     stage.addView(pngBM);
                 },
                 function () {

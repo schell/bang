@@ -21,7 +21,7 @@
             };
             mod({
                 name : 'main',
-                dependencies : ['bang::Utils/PNGEncoder.js'],
+                dependencies : ['bang::Utils/Utils.js'],
                 init : function initMain(m) {
                     var compiler = document.createElement('div');
                     var textarea = document.createElement('textarea');
@@ -105,34 +105,28 @@
                         oXHR.setRequestHeader("Content-Type", "application/x-www-form-urlencoded;charset=UTF-8");
                         oXHR.send(params);
                         
-                        // Give some indeterminant feedback...
-                        var update = function() {
-                            var value = submit.value + '.';
-                            submit.value = value.replace('....', '');
-                            setTimeout(update, 300);
-                        };
-                        
                         oXHR.onload = function (oEvent) {
-                            var response = oXHR.responseText; // Note: not oXHR.responseText  
+                            var response = oXHR.responseText; 
                             var json = JSON.parse(response);
                             var modules = m;
                             console.log('compiler response:',json);
                             var main = eval(json.compiledCode);
-                            // Cancel the indeterminant feedback...
-                            update = function(){
-                                submit.value = "Compile";
-                                if (typeof main === 'function') {
-                                    if (image) {
-                                        output.removeChild(image);
-                                    }
-                                    image = modules.PNGEncoder.PNGFromString(json.compiledCode);
-                                    output.appendChild(image);
+                            
+                            submit.value = "Done!";
+                            setTimeout(function(){
+                                submit.value = 'Compile';
+                            },1000);
+                            
+                            if (typeof main === 'function') {
+                                if (image) {
+                                    output.removeChild(image);
                                 }
-                            };
+                                image = m.Utils.StringToImage(json.compiledCode);
+                                output.appendChild(image);
+                            }
                         };  
                         
-                        submit.value = "Compiling";
-                        update();
+                        submit.value = "Compiling...";
                     };
                     
                     return function exporter(entrypoint) {

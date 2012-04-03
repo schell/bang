@@ -16,7 +16,7 @@ mod({
         * * **/
         
         var utils = {};
-        utils.findFactors = function findFactors(len) {
+        utils.findFactors = function Utils_findFactors(len) {
             /** * *
             * Finds some nice factors for len.
             * @return Array
@@ -35,7 +35,7 @@ mod({
             return [w,h];
         };
         
-        utils.squarifyLength = function squarifyLength(len, tolerance) {
+        utils.squarifyLength = function Utils_squarifyLength(len, tolerance) {
             /** * *
             * Attempts to 'squarify' a length.
             * @param len The length of data to squarify.
@@ -53,7 +53,7 @@ mod({
             return [w, h];
         };
         
-        utils.bitStream = function bitStream(array, bitsper) {
+        utils.bitStream = function Utils_bitStream(array, bitsper) {
             /** * *
             * Creates a bitstream object.
             * @param Array The array to treat as a bitstream.
@@ -68,10 +68,10 @@ mod({
                     var x = i%bitsper + 1;
                     return data[ndx] >> (bitsper-x) & 1;
                 }
-            }
+            };
         };
         
-        utils.packStringIntoImageData = function packStringIntoImageData(string) {
+        utils.packStringIntoImageData = function Utils_packStringIntoImageData(string) {
             /** * *
             * The same as packStringIntoImageData, but with a 12.5% compression improvement.
             * @param string The message to store.
@@ -119,7 +119,7 @@ mod({
             return packed;
         };
             
-        utils.unpackImageDataToString = function unpackImageDataToString(imageData) {
+        utils.unpackImageDataToString = function Utils_unpackImageDataToString(imageData) {
             /** * *
             * Unpacks a message from an ImageData object.
             * @param imageData
@@ -157,6 +157,52 @@ mod({
                 return string;
             }
             return unpackStringFromArray(data);
+        };
+        
+        utils.StringToImage = function Utils_StringToImage(string, type) {
+            /** * *
+            * Returns the PNG representation of a string.
+            * Packs the string's 7bit characters tightly into 
+            * each pixel's 3 8bit RGB channels.
+            * Be warned that specifying a type parameter of a 
+            * lossy format will result in the loss of the packed 
+            * string's integrity (meaning don't use it, or use PNG,
+            * maybe GIF)
+            * @param String
+            * @param String
+            * @return Image
+            * * **/
+            var imageData = utils.packStringIntoImageData(string);
+            var c = document.createElement('canvas');
+            c.width = imageData.width;
+            c.height = imageData.height;
+            var ctx = c.getContext('2d');
+            ctx.putImageData(imageData, 0, 0);
+            var src = c.toDataURL(type);
+            var img = document.createElement('img');
+            img.src = src;
+            return img;
+        };
+        
+        utils.ImageToString = function Utils_PNGToString(image) {
+            /** * *
+            * Returns the String representation of the data stored
+            * in the RGB channels of a loaded Image.
+            * The image must be loaded!
+            * @param Image
+            * @return String
+            * * **/
+            var canvas = document.createElement('canvas');
+            canvas.width = image.width;
+            canvas.height = image.height;
+            var ctx = canvas.getContext('2d');
+            ctx.drawImage(image, 0, 0);
+            var imageData = ctx.getImageData(0, 0, image.width, image.height);
+            if (imageData) {
+                var string = utils.unpackImageDataToString(imageData);
+                return string;
+            }
+            return false;
         };
         
         return utils;
