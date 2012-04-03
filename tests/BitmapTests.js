@@ -41,7 +41,7 @@ mod({
             }
             
             function drawBitmapTests(cb) {
-                stage.addSubview(bm);
+                stage.addView(bm);
                 setTimeout(function() {
                     var canSeeBitmap = m.interactiveTests ? confirm('Can you see a bloody block rendered on the stage? (hit enter or click "Okay" to answer "yes, I do.")') : true;
                     assert.eq(canSeeBitmap, true, 'Bitmap can render to stage');

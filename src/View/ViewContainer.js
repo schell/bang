@@ -39,16 +39,16 @@ mod({
                     return el;
                 });
             });
-            m.safeAddin(self, 'addSubview', function ViewContainer_addSubview(subview) {
+            m.safeAddin(self, 'addView', function ViewContainer_addView(subview) {
                 if (m.defined(subview.parent)) {
-                    subview.parent.removeSubview(subview);
+                    subview.parent.removeView(subview);
                 }
                 _subviews.push(subview);
                 // Let everyone know that this added a view...
                 subview.sendNotification(m.View.WAS_ADDED_TO_VIEWCONTAINER, self);
                 self.sendNotification(addin.DID_ADD_SUBVIEW, subview);
             });
-            m.safeAddin(self, 'removeSubview', function ViewContainer_removeSubview(subview) {
+            m.safeAddin(self, 'removeView', function ViewContainer_removeView(subview) {
                 /** * *
                 * Removes *subview* from this view's display list.
                 * @param - subview View

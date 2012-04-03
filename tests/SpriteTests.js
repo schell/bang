@@ -39,7 +39,7 @@ mod({
             });
             sprite.load(sheet);
             
-            stage.addSubview(sprite);
+            stage.addView(sprite);
             
             setTimeout(function() {
                 stage.remove();

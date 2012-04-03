@@ -28,7 +28,7 @@ mod({
             
             video.load('videos/earth.mp4');
             
-            stage.addSubview(video);
+            stage.addView(video);
         };
     }
 });

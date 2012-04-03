@@ -70,10 +70,10 @@ mod({
                             cb();
                         });
                         blockReEncoded.load('data:image/png;base64,'+src);
-                        stage.addSubview(blockReEncoded);
+                        stage.addView(blockReEncoded);
                     });
                     block.load('images/block.png');
-                    stage.addSubview(block);
+                    stage.addView(block);
                 },
                 function JSEncodeTest(cb) {
                     var a = 666;
@@ -97,7 +97,7 @@ mod({
                         cb();
                     });
                     pngBM.load(pngSrc);
-                    stage.addSubview(pngBM);
+                    stage.addView(pngBM);
                 },
                 function () {
                     stage.remove();

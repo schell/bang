@@ -49,12 +49,12 @@ mod({
                 tag : 'container'
             });
             container.context = 1000;
-            container.addSubview(view);
+            container.addView(view);
             assert.eq(container.subviews().length, 1, 'ViewContainer can add subviews.');
             assert.eq(view.parent === container, true, 'ViewContainers set their subview\'s parent property to itself.');
             assert.eq(view.context, 1000, 'Views update their context when added to parent.');
             assert.eq(calledUpdateContext, true, 'View sends notification when context is updated.');
-            container.removeSubview(view);
+            container.removeView(view);
             assert.eq(container.subviews().length, 0, 'ViewContainer can remove subviews.');
             assert.eq(container.subviews().indexOf(view), -1, 'ViewContainer can remove subviews.');
         
@@ -67,7 +67,7 @@ mod({
                 var branch = m.ViewContainer({
                     tag : 'tree_'+(i+1).toString()
                 });
-                lastBranch.addSubview(branch);
+                lastBranch.addView(branch);
                 lastBranch = branch;
             }
         
@@ -93,7 +93,7 @@ mod({
             stage.setParentElement('bang');
             assert.eq(document.getElementById(stage.canvas.id) !== null, true, 'Stage is injected into parent div.');
         
-            stage.addSubview(view);
+            stage.addView(view);
             assert.eq(m.defined(view.context) && view.context === stage.context, true, 'Subviews inherit parent\'s context.');
             assert.eq(m.defined(view.stage) && view.stage === stage, true, 'Subviews inherit parent\'s stage.');
             
@@ -142,8 +142,8 @@ mod({
                 y : 200,
                 rotation : 0
             });
-            green.addSubview(red);
-            green.addSubview(blue);
+            green.addView(red);
+            green.addView(blue);
             green.drawQueue.push(makeDrawFunction(green, 'rgb(0, 255, 0)'));
             green.addInterest(undefined, m.Stage.FRAME_TICK, function tick(note) {
                 red.rotation += 2;
@@ -214,11 +214,11 @@ mod({
                 leftLeaf.addHitAreaDrawFunction('rgba(0,0,0,0.5)');
                 rightLeaf.addHitAreaDrawFunction('rgba(0,0,0,0.5)');
                 
-                stage.addSubview(trunk);
-                trunk.addSubview(branch);
-                branch.addSubview(branchArm);
-                branchArm.addSubview(leftLeaf);
-                branchArm.addSubview(rightLeaf);
+                stage.addView(trunk);
+                trunk.addView(branch);
+                branch.addView(branchArm);
+                branchArm.addView(leftLeaf);
+                branchArm.addView(rightLeaf);
 
                 var leftLeafHitArea = leftLeaf.getCompoundTransform().transformPolygon(leftLeaf.hitArea.copy());
                 var rightLeafHitArea = rightLeaf.getCompoundTransform().transformPolygon(rightLeaf.hitArea.copy());
@@ -235,7 +235,7 @@ mod({
                 leftInRight.drawQueue.push(function() {
                     drawPolygon(leftInRight.context, 'yellow', 'lime', leftInRight.hitArea);
                 });
-                rightLeaf.addSubview(leftInRight);
+                rightLeaf.addView(leftInRight);
                 
                 // Get the points that all should be rather similar (exactly the same in a perfect world...)
                 var leftPoint = leftLeafHitArea.pointAt(1);
@@ -254,7 +254,7 @@ mod({
                     drawPolygon(stage.context, 'blue', 'yellow', rightLeafHitArea);
                 });
                 
-                stage.removeSubview(trunk);
+                stage.removeView(trunk);
                 stage.drawQueue = [];
                 cb();
             }
@@ -288,7 +288,7 @@ mod({
                 });
                 root.addInterest(root, m.View.MOUSE_DOWN, onMouseEvent);
                 root.addHitAreaDrawFunction('red', 'red');
-                stage.addSubview(root);
+                stage.addView(root);
                 
                 var leftbranch = m.ViewContainer({
                     tag : 'leftbranch',
@@ -298,7 +298,7 @@ mod({
                 });
                 leftbranch.addInterest(leftbranch, m.View.MOUSE_DOWN, onMouseEvent);
                 leftbranch.addHitAreaDrawFunction('yellow', 'fuchsia');
-                root.addSubview(leftbranch);
+                root.addView(leftbranch);
                 
                 var leftleftleaf = m.View({
                     tag : 'leftleftleaf',
@@ -307,7 +307,7 @@ mod({
                 });
                 leftleftleaf.addInterest(leftleftleaf, m.View.MOUSE_DOWN, onMouseEvent);
                 leftleftleaf.addHitAreaDrawFunction('gray', 'fuchsia');
-                leftbranch.addSubview(leftleftleaf);
+                leftbranch.addView(leftleftleaf);
                 
                 var leftrightleaf = m.View({
                     tag : 'leftrightleaf',
@@ -317,7 +317,7 @@ mod({
                 });
                 leftrightleaf.addInterest(leftrightleaf, m.View.MOUSE_DOWN, onMouseEvent);
                 leftrightleaf.addHitAreaDrawFunction('gray', 'teal');
-                leftbranch.addSubview(leftrightleaf);
+                leftbranch.addView(leftrightleaf);
                 
                 var rightbranch = m.ViewContainer({
                     tag : 'rightbranch',
@@ -327,7 +327,7 @@ mod({
                 });
                 rightbranch.addInterest(rightbranch, m.View.MOUSE_DOWN, onMouseEvent);
                 rightbranch.addHitAreaDrawFunction('yellow', 'teal');
-                root.addSubview(rightbranch);
+                root.addView(rightbranch);
                 
                 var rightleftleaf = m.View({
                     tag : 'rightleftleaf',
@@ -336,7 +336,7 @@ mod({
                 });
                 rightleftleaf.addInterest(rightleftleaf, m.View.MOUSE_DOWN, onMouseEvent);
                 rightleftleaf.addHitAreaDrawFunction('gray', 'fuchsia');
-                rightbranch.addSubview(rightleftleaf);
+                rightbranch.addView(rightleftleaf);
                 
                 var rightrightleaf = m.ViewContainer({
                     tag : 'rightrightleaf',
@@ -346,7 +346,7 @@ mod({
                 });
                 rightrightleaf.addInterest(rightrightleaf, m.View.MOUSE_DOWN, onMouseEvent);
                 rightrightleaf.addHitAreaDrawFunction('gray', 'teal');
-                rightbranch.addSubview(rightrightleaf);
+                rightbranch.addView(rightrightleaf);
                 
                 var rightrightrightleaf = m.View({
                     tag : 'rightrightrightleaf',
@@ -356,7 +356,7 @@ mod({
                 });
                 rightrightrightleaf.addInterest(rightrightrightleaf, m.View.MOUSE_DOWN, onMouseEvent);
                 rightrightrightleaf.addHitAreaDrawFunction('gray', 'teal');
-                rightrightleaf.addSubview(rightrightrightleaf);
+                rightrightleaf.addView(rightrightrightleaf);
                 
                 var compareList = [
                     stage,
@@ -375,14 +375,14 @@ mod({
                 var newroot = m.ViewContainer({
                     tag : 'newroot'
                 });
-                newroot.addSubview(root);
-                stage.addSubview(newroot);
+                newroot.addView(root);
+                stage.addView(newroot);
                 compareList.splice(0, 1, stage, newroot);
-                assert.eq(compareList.toString(), stage.displayList().toString(), 'Stage updates accurate display list after addSubview.');
+                assert.eq(compareList.toString(), stage.displayList().toString(), 'Stage updates accurate display list after addView.');
                 // Pop off rightrightrightleaf...
                 compareList.pop();
-                rightrightleaf.removeSubview(rightrightrightleaf);
-                assert.eq(compareList.toString(), stage.displayList().toString(), 'Stage updates accurate display list after removeSubview.');
+                rightrightleaf.removeView(rightrightrightleaf);
+                assert.eq(compareList.toString(), stage.displayList().toString(), 'Stage updates accurate display list after removeView.');
                 
                 // Test mouse points
                 updateCurrentTestFuncWithView(root);
@@ -475,7 +475,7 @@ mod({
                             equation : 'easeIn',
                             onComplete : function() {
                                 delete block.tween;
-                                stage.removeSubview(block);
+                                stage.removeView(block);
                             },
                             properties : {
                                 scaleX : 100,
@@ -484,7 +484,7 @@ mod({
                                 alpha : 0
                             }
                         });
-                        stage.addSubview(block);
+                        stage.addView(block);
                         
                         // Test that the stage issues MOUSE_LEAVE events...
                         var leaveTarget = false;
@@ -510,7 +510,7 @@ mod({
                 stage = m.Stage();
                 stage.setParentElement('bang');
 
-                stage.addSubview(green);
+                stage.addView(green);
                 
                 var ease = m.Ease({
                     properties : {
@@ -545,7 +545,7 @@ mod({
                     scaled.tween.interpolate();
                 };
                 scaled.tween.interpolate();
-                stage.addSubview(scaled);
+                stage.addView(scaled);
         
                 var bar = m.View({
                     hitArea : m.Rectangle.from(-250, -5, 500, 10),
@@ -571,7 +571,7 @@ mod({
                 });
                 bar.tween.interpolate();
                 bar.drawQueue.push(makeDrawFunction(bar, 'rgb(0, 255, 255)'));
-                stage.addSubview(bar);
+                stage.addView(bar);
             }
             
             go(testHitAreaConversion, testMouseInput, testGreenEasing, testScaledEasing, callback).start();

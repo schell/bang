@@ -61,7 +61,7 @@ mod({
             });
             setTimeout(tween.interpolate,1000);
             
-            stage.addSubview(text);
+            stage.addView(text);
             
             setTimeout(function() {
                 /*stage.remove();
