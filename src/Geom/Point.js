@@ -31,7 +31,7 @@ mod({
             m.Vector(self);
 
             if (self.elements.length === 0) {
-                self.elements = m.Vector.Origin().elements;
+                self.elements = [0,0];
             }
             
             self.toString = function() {

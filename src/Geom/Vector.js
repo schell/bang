@@ -66,7 +66,7 @@ mod({
                 * * **/
                 var n = vecWithMinElements(self, vec).elements.length;
                 for (var i=0; i < n; i++) {
-                    self.elements[i] += vec[i];
+                    self.elements[i] += vec.elements[i];
                 }
             });
             m.safeAddin(self, 'subtract', function Vector_subtract(vec) {
