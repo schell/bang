@@ -175,7 +175,7 @@ mod({
         
         addin.watchPond = function addinWatchPond(pond) {
             /** * *
-            * Returns a status string for a given pond.
+            * Returns a status string for a given pond in the shared pool.
             * Good for debugging - use this as a watch expression:
             *     m.Pool.watchPond('someObjectPond')
             * @return String
@@ -183,8 +183,24 @@ mod({
             var deployed = addin.sharedInstance().pool[pond].deployedObjects.length;
             var recycled = addin.sharedInstance().pool[pond].recycledObjects.length;
             return pond + ' deployed:' + deployed + ' recycled:' + recycled;
-        }
-}
+        };
+        
+        addin.status = function addinStatus() {
+            /** * *
+            * Returns a status string for all ponds in the shared pool.
+            * Good for debugging - use this as a watch expression:
+            *     m.Pool.status()
+            * @return String
+            * * **/
+            var deployed = 0;
+            var recycled = 0;
+            var pool = addin.sharedInstance().pool;
+            for (var pond in pool) {
+                deployed += pool[pond].deployedObjects.length;
+                recycled += pool[pond].recycledObjects.length;
+            }
+            return 'Pool total deployed:' + deployed + ' recycled:' + recycled;
+        };
         
         return addin;
         
