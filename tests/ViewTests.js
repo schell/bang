@@ -472,7 +472,7 @@ mod({
                         block.tween = m.Ease({
                             target : block,
                             duration : 500,
-                            equation : 'easeIn',
+                            equation : 'easeOutExpo',
                             onComplete : function() {
                                 delete block.tween;
                                 stage.removeView(block);
@@ -500,7 +500,7 @@ mod({
                         block.tween.interpolate();
                     });
                 });
-                //cb();
+                cb();
             }
             
             function testGreenEasing(cb) {
