@@ -1,6 +1,6 @@
 /** * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * *
- *    Geometry.js
- *    The Geom Addin (mostly just for pulling in scripts from Geom)
+ *    Geometry/Geometry.js
+ *    The Geometry Addin (mostly just for constants)
  *    Copyright (c) 2012 Schell Scivally. All rights reserved.
  *
  *    @author    Schell Scivally
@@ -8,7 +8,7 @@
  * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * **/
 mod({
     name : 'Geometry',
-    dependencies : [ 'bang::Global.js', 'bang::Geom/Point.js', 'bang::Geom/Polygon.js', 'bang::Geom/Rectangle.js', 'bang::Geom/Vector.js', 'bang::Geom/Matrix.js' ],
+    dependencies : [ ],
     init : function initGeom (m) {
         /**
          * Imports geometry addins and exports some math constants.

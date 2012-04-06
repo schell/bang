@@ -8,7 +8,7 @@
 * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * **/
 mod({
     name : 'Size',
-    dependencies : [ 'bang::Geom/Point.js' ],
+    dependencies : [ 'bang::Geometry/Point.js' ],
     init : function initSize (m) {
         /**
          * Initializes the Size Addin

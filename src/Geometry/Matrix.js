@@ -17,7 +17,7 @@
 * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * **/
 mod({
     name : 'Matrix',
-    dependencies : [ 'bang::Global.js', 'bang::Geom/Vector.js' ],
+    dependencies : [ 'bang::Global.js', 'bang::Geometry/Vector.js' ],
     init : function initMatrix (m) {
         /**
          * Initializes the Matrix Addin

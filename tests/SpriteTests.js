@@ -8,7 +8,7 @@
 * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * **/
 mod({
     name : 'SpriteTests',
-    dependencies : [ 'bang::View/Sprite.js', 'bang::Geom/Rectangle.js' ],
+    dependencies : [ 'bang::View/Sprite.js', 'bang::Geometry/Rectangle.js' ],
     init : function initSpriteTests (m) {
         /**
          * Initializes the SpriteTests 
