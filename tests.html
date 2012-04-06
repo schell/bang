@@ -16,7 +16,8 @@
                 name : 'main',
                 dependencies : [ 
                     'bang::Global.js',
-                    'bang::View/Stage.js'
+                    'bang::View/Stage.js',
+                    'bang::Utils/Pool.js'
                 ],
                 init : function initMain(m) {
                     return function exporter() {
@@ -49,14 +50,36 @@
                 
                 assert.eq(m1stage.noteCenter.observers().length-1, m2stage.noteCenter.observers().length, 'Can add observers to bang context and contexts are seperate.');
                 
+                //--------------------------------------
+                //  SOME TESTING HELPERS
+                //--------------------------------------
+                function initTestAndGetStage(modulesToInit) {
+                    var b = newBangContext();
+                    b.safeAddinAllPropertiesOf(modulesToInit, b);
+                    var div = document.createElement('div');
+                    document.body.appendChild(div);
+                    var stage = modulesToInit.Stage();
+                    stage.setParentElement(div);
+                    modulesToInit.$testing = {
+                        stage : stage,
+                        div : div
+                    };
+                    return stage;
+                }
+                function cleanUpTest(modulesToCleanUp) {
+                    modulesToCleanUp.$testing.stage.remove();
+                    document.body.removeChild(modulesToCleanUp.$testing.div);
+                }
+                //--------------------------------------
+                //  TESTS
+                //--------------------------------------
                 function canGetMouseOverAfterMouseLeave(cb) {
                     console.log('canGetMouseOverAfterMouseLeave test');
                     
-                    var b = newBangContext();
-                    var div = document.createElement('div');
-                    document.body.appendChild(div);
-                    var stage = b.Stage();
-                    stage.setParentElement(div);
+                    var b = {};
+                    var stage = initTestAndGetStage(b);
+                    assert.suite = 'canGetMouseOverAfterMouseLeave';
+                    assert.eq('Stage' in b, true, 'Can init modules in test setup.');
                     
                     var over = false;
                     var moved = false;
@@ -80,13 +103,120 @@
                     stage.canvas.onmousemove({offsetX:1,offsetY:1});
                     assert.eq(over, true, 'Can get mouse over event again.');
                     
-                    stage.remove();
-                    document.body.removeChild(div);
+                    cleanUpTest(b);
                     cb();
+                }
+                
+                function testPools(cb) {
+                    var b = {};
+                    var stage = initTestAndGetStage(b);
+                    assert.suite = 'testPools';
+                    
+                    var creations = 0;
+                    var draws = 0;
+                    function createPoint() {
+                        creations++;
+                        return b.Matrix({
+                            elements : [
+                                Math.random()*stage.hitArea.width(),
+                                Math.random()*stage.hitArea.height()
+                            ]
+                        });
+                    }
+                    function initPoint(p) {
+                        // Do nothing...
+                        p.elements[0] = Math.random()*stage.hitArea.width();
+                        p.elements[1] = Math.random()*stage.hitArea.height();
+                    }
+                    function recyclePoint(p) {
+                        p.elements[0] = 0;
+                        p.elements[1] = 0;
+                    }
+                    
+                    var time = 0;
+                    function report() {
+                        var millis = Date.now()-time;
+                        var secs = millis/1000;
+                        var fps = draws/secs;
+                        
+                        console.log('Created',creations,'objects and drew',draws,'frames in ',secs,'seconds(',fps,'fps).');
+                        
+                        time = 0;
+                        draws = 0;
+                        creations = 0;
+                        
+                        stage.removeListener(undefined, m.Stage.FRAME_TICK);
+                        stage.drawQueue.length = 0;
+                    }
+                    
+                    function stressItOut() {
+                        /** * *
+                        * This should make lots and lots of Points in random places,
+                        * changing every frame...
+                        * * **/
+                        var points = [];
+                        for (var i=0; i < 100; i++) {
+                            points.push(createPoint());
+                        }
+                        // Reset the stage's drawQueue...
+                        stage.drawQueue.length = 0;
+                        // Push something to draw the rando points...
+                        stage.drawQueue.push(function() {
+                            draws++;
+                            points.map(function(p) {
+                                stage.context.fillRect(p.elements[0]-2,p.elements[1]-2,4,4);
+                            });
+                        });
+                    }
+                    
+                    var pool = b.Pool.sharedInstance();
+                    pool.addPond('RandomPoint', createPoint, initPoint, recyclePoint);
+                    function usePools() {
+                        /** * *
+                        * This should make 100 Points in random places,
+                        * and they will sit still...
+                        * * **/
+                        var points = [];
+                        for (var i=0; i < 100; i++) {
+                            points.push(pool.get('RandomPoint'));
+                        }
+                        // Reset the stage's drawQueue...
+                        stage.drawQueue.length = 0;
+                        // Push something to draw the rando points...
+                        stage.drawQueue.push(function() {
+                            draws++;
+                            points.map(function(p) {
+                                stage.context.fillRect(p.elements[0]-2,p.elements[1]-2,4,4);
+                                pool.toss(p);
+                            });
+                        });
+                    }
+                    
+                    stage.addListener(undefined, m.Stage.FRAME_TICK, stressItOut);
+                    time = Date.now();
+                    
+                    var chugFor = 3000;
+                    setTimeout(function() {
+                        report();
+                        
+                        // Do the pool report...
+                        stage.addListener(undefined, m.Stage.FRAME_TICK, usePools);
+                        time = Date.now();
+                        setTimeout(function() {
+                            stage.removeListener(undefined, m.Stage.FRAME_TICK);
+                            stage.drawQueue.length = 0;
+                            
+                            report();
+                        }, chugFor)
+                        
+                    }, chugFor);
+                    
+                    //cb();
                 }
                 
                 go(
                     canGetMouseOverAfterMouseLeave,
+                    testPools,
                     m.assert.stat
                 ).start();
             });

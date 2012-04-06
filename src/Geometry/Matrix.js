@@ -265,10 +265,10 @@ mod({
                 * Transforms a 2D vector by this matrix
                 * * **/
                 // Make the 2-vector homogenous...
-                vec.elements.push(1); 
+                vec.elements[2] = 1; 
                 var mat = self.copy();
                 mat.multiply(vec);
-                mat.elements.pop();
+                mat.elements.length = 2;
                 vec.elements = mat.elements;
                 return vec;
             });

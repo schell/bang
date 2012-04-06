@@ -8,7 +8,7 @@
  * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * **/
 mod({
     name : 'View',
-    dependencies : [ 'bang::Global.js', 'bang::Geometry/Matrix.js', 'bang::Geometry/Geometry.js', 'bang::Note/Listener.js', 'bang::Note/Dispatcher.js' ],
+    dependencies : [ 'bang::Global.js', 'bang::Geometry/Rectangle.js', 'bang::Geometry/Matrix.js', 'bang::Geometry/Geometry.js', 'bang::Note/Listener.js', 'bang::Note/Dispatcher.js' ],
     init : function initView(m) {
         /** * *
         * Initializes the View Addin
@@ -223,7 +223,7 @@ mod({
                 * * **/
                 fill = m.ifndefInit(fill, 'rgba(0,0,0,0.5)');
                 stroke = m.ifndefInit(stroke, 'rgba(0,0,0,0.8)');
-                var drawFunc = function () {
+                var drawFunc = function hitAreaDrawFunction() {
                     self.context.save();
                     self.context.fillStyle = fill;
                     self.context.strokeStyle = stroke;

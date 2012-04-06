@@ -8,7 +8,7 @@
 * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * **/
 mod({
     name : 'Stage',
-    dependencies : [ 'bang::View/ViewContainer.js', 'bang::Geometry/Matrix.js', 'bang::Note/MouseEventNote.js' ],
+    dependencies : [ 'bang::View/ViewContainer.js', 'bang::Geometry/Matrix.js', 'bang::Note/MouseEventNote.js', 'bang::Utils/Pool.js' ],
     init : function initStage (m) {
         /**
          * Initializes the Stage Addin
@@ -132,6 +132,39 @@ mod({
             self.addListener(undefined, m.ViewContainer.DID_ADD_SUBVIEW, compileDisplayList);
             self.addListener(undefined, m.ViewContainer.DID_REMOVE_SUBVIEW, compileDisplayList);
             //--------------------------------------
+            //  MOUSE INPUT POOLING
+            //--------------------------------------
+            var pool = m.Pool.sharedInstance();
+            var pointPond = 'MousePoint';
+            var eventPond = 'MouseEvent';
+            if (!pool.pondExists(pointPond)) {
+                pool.addPond(pointPond, function createMousePoint() {
+                    return m.Point();
+                }, function(){}, function(){});
+            }
+            function getMousePoint(nativeEvent) {
+                var point = pool.get(pointPond);
+                if (nativeEvent) {
+                    point.elements[0] = nativeEvent.offsetX;
+                    point.elements[1] = nativeEvent.offsetY;
+                }
+                return point;
+            }
+            function tossMousePoint(mp) {
+                return pool.toss(mp);
+            }
+            if (!pool.pondExists(eventPond)) {
+                pool.addPond(eventPond, function createNote() {
+                    return m.MouseEventNote();
+                }, function(){}, function(){});
+            }
+            function getMouseNote() {
+                return pool.get(eventPond);
+            }
+            function tossMouseNote(mn) {
+                return pool.toss(mn);
+            }
+            //--------------------------------------
             //  MOUSE INPUT HANDLING
             //--------------------------------------
             function sortByNdxInDisplayList(a, b) {
@@ -142,7 +175,7 @@ mod({
                 var bndx = _displayList.indexOf(b);
                 return andx - bndx;
             }   
-            function createMouseEvent(eventName, nativeEvent) {
+            function createMouseNote(eventName, nativeEvent) {
                 /** * *
                 * Fires a mouse down event into the display list. This function is meant to be attached
                 * to a canvas's onmouse* callback.
@@ -160,23 +193,31 @@ mod({
                     if (m.defined(potentialDispatcher.hitArea)) {
                         // Get the dispatcher's hitArea in global coords...
                         var poly = potentialDispatcher.hitArea.copy();
-                        var globalPoint = m.Point({
-                            elements : [
-                                x, y
-                            ]
-                        });
-                        var localPoint = potentialDispatcher.convertPolygonToLocal(globalPoint.copy());
+                        var globalPoint = getMousePoint();
+                        globalPoint.elements[0] = x;
+                        globalPoint.elements[1] = y;
+                        
+                        var localPoint = getMousePoint();
+                        localPoint.elements[0] = x;
+                        localPoint.elements[1] = y;
+                        localPoint = potentialDispatcher.convertPolygonToLocal(localPoint);
+                        
                         var hit = poly.containsPoint(localPoint);
                         if (hit) {
-                            var note = m.MouseEventNote({
-                                name : eventName,
-                                localPoint : localPoint,
-                                globalPoint : globalPoint,
-                                target : potentialDispatcher,
-                                body : nativeEvent
-                            });
+                            var note = getMouseNote();
+                                note.name = eventName;
+                                note.localPoint = localPoint;
+                                note.globalPoint = globalPoint;
+                                note.target = potentialDispatcher;
+                                note.body = nativeEvent;
+
+                            tossMousePoint(globalPoint);
+                            tossMousePoint(localPoint);
                             return note;
                         }
+                        
+                        tossMousePoint(globalPoint);
+                        tossMousePoint(localPoint);
                     }
                 }
                 // If nothing was found, return false...
@@ -186,35 +227,38 @@ mod({
                 /** * *
                 * Dispatches a mouse down event.
                 * * **/
-                var mouseEventNote = createMouseEvent(m.View.MOUSE_DOWN, nativeEvent);
+                var mouseEventNote = createMouseNote(m.View.MOUSE_DOWN, nativeEvent);
                 if (mouseEventNote) {
                     mouseEventNote.target.dispatch(mouseEventNote);
                 }
+                tossMouseNote(mouseEventNote);
             });
             m.safeAddin(self, 'fireMouseUpEvent', function Stage_mouseUp(nativeEvent) {
                 /** * *
                 * Dispatches a mouse up event.
                 * * **/
-                var mouseEventNote = createMouseEvent(m.View.MOUSE_UP, nativeEvent);
+                var mouseEventNote = createMouseNote(m.View.MOUSE_UP, nativeEvent);
                 if (mouseEventNote) {
                     mouseEventNote.target.dispatch(mouseEventNote);
                 }
+                tossMouseNote(mouseEventNote);
             });
             m.safeAddin(self, 'fireMouseClickEvent', function Stage_mouseUp(nativeEvent) {
                 /** * *
                 * Dispatches a mouse up event.
                 * * **/
-                var mouseEventNote = createMouseEvent(m.View.MOUSE_CLICK, nativeEvent);
+                var mouseEventNote = createMouseNote(m.View.MOUSE_CLICK, nativeEvent);
                 if (mouseEventNote) {
                     mouseEventNote.target.dispatch(mouseEventNote);
                 }
+                tossMouseNote(mouseEventNote);
             });
             // A private boolean to hold whether or not ANY views have been moused over...
             m.safeAddin(self, 'fireMouseMoveEvent', function Stage_mouseMove(nativeEvent) {
                 /** * *
                 * Dispatches a mouse move event or a mouse over.
                 * * **/
-                var mouseEventNote = createMouseEvent(m.View.MOUSE_MOVE, nativeEvent);
+                var mouseEventNote = createMouseNote(m.View.MOUSE_MOVE, nativeEvent);
                 var overView = false;
                 if (mouseEventNote) {
                     overView = mouseEventNote.target;
@@ -225,6 +269,7 @@ mod({
                     }
                     mouseEventNote.target.dispatch(mouseEventNote);
                 } 
+                mouseEventNote = tossMouseNote(mouseEventNote);
                 
                 // Fire mouseOut events for previously moused over
                 // views, as long as there are some...
@@ -234,26 +279,25 @@ mod({
                         continue;
                     }
                     if (view.$mouseSettings.mousedOver === true) {
-                        var globalPoint = m.Point({
-                            elements : [
-                                nativeEvent.offsetX,
-                                nativeEvent.offsetY
-                            ]
-                        });
-                        var localPoint = view.convertPolygonToLocal(globalPoint.copy());
-                        if (view.hitArea.containsPoint(localPoint)) {
-                            continue;
-                        } else {
+                        var globalPoint = getMousePoint(nativeEvent); 
+                        var localPoint = getMousePoint(nativeEvent);
+                        localPoint = view.convertPolygonToLocal(localPoint);
+                            
+                        if (! view.hitArea.containsPoint(localPoint)) {
                             view.$mouseSettings.mousedOver = false;
-                            var mouseOutEvent = m.MouseEventNote({
-                                name : m.View.MOUSE_OUT,
-                                globalPoint : globalPoint,
-                                localPoint : undefined,
-                                target : view,
-                                body : nativeEvent
-                            });
+                            var mouseOutEvent = getMouseNote();
+                                mouseOutEvent.name = m.View.MOUSE_OUT;
+                                mouseOutEvent.globalPoint = globalPoint;
+                                mouseOutEvent.localPoint = undefined;
+                                mouseOutEvent.target = view;
+                                mouseOutEvent.body = nativeEvent;
+                                
                             view.dispatch(mouseOutEvent);
+                            tossMouseNote(mouseOutEvent);
                         }
+
+                        tossMousePoint(globalPoint);
+                        tossMousePoint(localPoint);
                     }
                 }
             });
@@ -262,34 +306,32 @@ mod({
             self.canvas.onclick = self.fireMouseClickEvent;
             self.canvas.onmousemove = self.fireMouseMoveEvent;
             self.canvas.onmouseout = function mouseOutAll(nativeEvent) {
-                var globalPoint = m.Point({
-                    elements : [
-                        nativeEvent.offsetX,
-                        nativeEvent.offsetY
-                    ]
-                });
+                var globalPoint = getMousePoint(nativeEvent);
+                
                 // To save some object creation we create one event...
-                var mouseOutEvent = m.MouseEventNote({
-                    name : m.View.MOUSE_OUT,
-                    globalPoint : globalPoint,
-                    localPoint : undefined,
-                    body : nativeEvent
-                });
+                var mouseOutNote = getMouseNote();
+                    mouseOutNote.name = m.View.MOUSE_OUT;
+                    mouseOutNote.globalPoint = globalPoint;
+                    mouseOutNote.localPoint = undefined;
+                    mouseOutNote.body = nativeEvent;
                 
                 for (var i = _displayList.length - 1; i >= 0; i--){
                     var view = _displayList[i];
                     if (view.$mouseSettings.mousedOver === true) {
                         view.$mouseSettings.mousedOver = false;
                         // Use the created mouse event here...
-                        mouseOutEvent.target = view;
-                        view.dispatch(mouseOutEvent);
+                        mouseOutNote.target = view;
+                        view.dispatch(mouseOutNote);
                     }
                 }
                 // And use it here...
-                mouseOutEvent.name = m.Stage.MOUSE_LEAVE;
-                mouseOutEvent.target = self;
+                mouseOutNote.name = m.Stage.MOUSE_LEAVE;
+                mouseOutNote.target = self;
                 self.$mouseSettings.mousedOver = false;
-                self.dispatch(mouseOutEvent);
+                self.dispatch(mouseOutNote);
+                
+                tossMouseNote(mouseOutNote);
+                tossMousePoint(globalPoint);
             };
             return self;
         };

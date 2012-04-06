@@ -8,12 +8,12 @@
  * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * **/
 mod({
     name : 'Dispatcher',
-    dependencies : [ 'bang::Note/Note.js', 'bang::Note/NotePasser.js', 'bang::Note/NoteCenter.js' ],
+    dependencies : [ 'bang::Note/Note.js', 'bang::Note/NotePasser.js', 'bang::Note/NoteCenter.js', 'bang::Utils/Pool.js' ],
     init : function initDispatcher (m) {
-        /**
-         * Initializes the Dispatcher Addin
-         * @param - m Object - The mod modules object.
-         */
+        /** * *
+        * Initializes the Dispatcher Addin
+        * @param - m Object - The mod modules object.
+        * * **/
         
         var addin = function addinDispatcher (self) {
             /**
@@ -24,10 +24,27 @@ mod({
             self = m.Object(self); 
             
             m.safeAddin(self, 'tag', 'Dispatcher');
-            
             // Add in NotePasser properties
             m.NotePasser(self);
-            
+            //--------------------------------------
+            //  NOTIFICATION POOLING
+            //--------------------------------------
+            var pool = m.Pool.sharedInstance();
+            var pond = 'DispatcherNotes';
+            if (!pool.pondExists(pond)) {
+                pool.addPond(pond,function() {
+                    return m.Note();
+                },function() {}, function() {});
+            }
+            function getNote() {
+                return pool.get(pond);
+            }
+            function tossNote(n) {
+                return pool.toss(n);
+            }
+            //--------------------------------------
+            //  DISPATCHING
+            //--------------------------------------
             m.safeAddin(self, 'dispatch', function Dispatcher_dispatch(note) {
                 /**
                  * Dispatches *note* to this dispatcher's note center.
@@ -35,16 +52,15 @@ mod({
                 note.dispatcher = self;
                 self.noteCenter.dispatch(note);
             });
-            
             m.safeAddin(self, 'sendNotification', function Dispatcher_sendNotification(name, body) {
                 /**
                  * Dispatches a note with *name* and *body* to this dispatcher's note center.
                  */
-                var note = m.Note({
-                    name : name, 
-                    body : body
-                });
+                var note = getNote();
+                note.name = name;
+                note.body = body;
                 self.dispatch(note);
+                tossNote(note);
             });
             
             return self;

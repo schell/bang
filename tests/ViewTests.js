@@ -491,7 +491,7 @@ mod({
                         stage.addListener(stage, m.Stage.MOUSE_LEAVE, function(note) {
                             leaveTarget = note.body.target;
                         });
-                        stage.onmouseout({
+                        stage.canvas.onmouseout({
                             offsetX : 0,
                             offsetY : -1
                         });
@@ -500,7 +500,7 @@ mod({
                         block.tween.interpolate();
                     });
                 });
-                cb();
+                //cb();
             }
             
             function testGreenEasing(cb) {

@@ -90,6 +90,12 @@ mod({
                 _observers.push(observer);
             });
             
+            var callbackObserver = function NoteCenter_dispatch_callback(observer, note) {
+                /**
+                 * Calls the observer's callback function and sets *dispatched*.
+                 */
+                observer.callback.call(observer.listener, note);
+            };
             m.safeAddin(self, 'dispatch', function NoteCenter_dispatch (note) {
                 /**
                  * Dispatches *note* to listening observers.
@@ -98,13 +104,6 @@ mod({
                 if (!m.defined(note)) {
                     throw new Error('Note to dispatch must be defined.');
                 }
-                
-                var callback = function NoteCenter_dispatch_callback(observer, note) {
-                    /**
-                     * Calls the observer's callback function and sets *dispatched*.
-                     */
-                    observer.callback.call(observer.listener, note);
-                };
                 
                 for (var i = _observers.length - 1; i >= 0; i--){
                     var observer = _observers[i];
@@ -117,19 +116,19 @@ mod({
                                 // This observer is listening for a specific notification.
                                 if (observer.name === note.name) {
                                     // This observer is listening for this specific notification.
-                                    callback(observer, note);
+                                    callbackObserver(observer, note);
                                     continue;
                                 }
                             } else {
                                 // This observer is listening for any notes from this specific object.
-                                callback(observer, note);
+                                callbackObserver(observer, note);
                                 continue;
                             }
                         }
                     } else if (m.defined(observer.name) && observer.name === note.name) {
                         // This observer is listening to all notifications with this name, 
                         // coming from no specific object.
-                        callback(observer, note);
+                        callbackObserver(observer, note);
                         continue;
                     }
                 }

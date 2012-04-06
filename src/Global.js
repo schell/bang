@@ -223,7 +223,7 @@ mod({
             return false;
         };
         
-        m.safeAddinAllPropertiesOf = function safeAddinFromObject(obj, addin) {
+        m.safeAddinAllPropertiesOf = function safeAddinAllPropertiesOf(obj, addin) {
             /** * *
             * Adds in all the properties of *addin* onto *obj*, in a safe way.
             * @param Object The object to add properties to.

@@ -59,6 +59,16 @@ mod({
                 }
                 return vec;
             });
+            m.safeAddin(self, 'copyElementsInto', function Vector_copyElementsInto(elements) {
+                /** * *
+                * Copies this Vector's elements into an array.
+                * @param Array
+                * * **/
+                elements.length = self.elements.length;
+                for (var i = self.elements.length - 1; i >= 0; i--){
+                    elements[i] = self.elements[i];
+                }
+            });
             m.safeAddin(self, 'add', function Vector_add(vec) {
                 /** * *
                 * Adds *vec* to this vector.
@@ -112,17 +122,24 @@ mod({
                 }
                 return Math.sqrt(sqSum);
             });
-            
+            m.safeAddin(self, 'normalizeElementsInto', function Vector_n(elements) {
+                /** * *
+                * Copies this Vector's normalized elements into an array.
+                * @param Array
+                * * **/
+                self.copyElementsInto(elements);
+                var mag = self.magnitude();
+                for (var i=0; i < self.elements.length; i++) {
+                    elements[i] /= mag;
+                }
+            });
             m.safeAddin(self, 'normalized', function Vector_normalized() {
                 /** * *
                 * Returns a normalized copy of this vector.
                 * @returns - Vector
                 * * **/
                 var norm = self.copy();
-                var mag = self.magnitude();
-                for (var i=0; i < norm.elements.length; i++) {
-                    norm.elements[i] /= mag;
-                }
+                self.normalizeElementsInto(norm.elements);
                 return norm;
             });
             m.safeAddin(self, 'x', function Vector_x(x) {
@@ -185,7 +202,7 @@ mod({
             return addin({
                 elements : [x, y, z]
             });
-        }
+        };
         addin.Origin = function Vector_Origin() {
             /** * *
             * Returns the origin point in 3-space.
