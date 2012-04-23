@@ -31,26 +31,19 @@ mod({
                 return '[Stage]';
             };
             
-            // Some default values...
-            if (self.hitArea.width() === 0 || self.hitArea.height() === 0) {
-                self.hitArea = m.Rectangle.from(0,0,500,500);
-            }
             // Whether or not we clear the canvas before redrawing...
             m.safeAddin(self, 'clearCanvasOnFrameTick', true);
             // Set this view's stage reference to itself, so other views can grab it...
             self.stage = self;
-            // A reference to the 2D canvas rendering context...
-            m.safeAddin(self, 'context', undefined);
             //--------------------------------------
             //  INITILIZATION WITH DOM
             //--------------------------------------
-            m.safeAddin(self, 'canvas', function Stage_initCanvas() {
+            m.safeAddin(self, 'compositeContext', function Stage_initCanvas() {
                 var canvas = document.createElement('canvas');
                 canvas.width = self.hitArea.width();
                 canvas.height = self.hitArea.height();
                 canvas.id = 'Bang_'+Math.random().toString().substr(2);
-                self.context = canvas.getContext('2d');
-                return canvas;
+                return canvas.getContext('2d');
             }());
             // A private reference to the canvas's containing element...
             var _parentElement;
@@ -74,35 +67,20 @@ mod({
                 if (!_parentElement) {
                     throw new Error('Could not find html element '+id.toString());
                 }
-                _parentElement.appendChild(self.canvas);
+                _parentElement.appendChild(self.compositeContext.canvas);
             });
             m.safeAddin(self, 'remove', function Stage_remove() {
                 /** * *
                 * Removes the stage from its parent element and stops execution.
                 * * **/
                 m.cancelAllAnimations();
-                _parentElement.removeChild(self.canvas);
+                _parentElement.removeChild(self.compositeContext.canvas);
             });
             //--------------------------------------
-            //  DRAWING
-            //--------------------------------------
-            m.safeOverride(self, 'draw', 'viewContainer_draw', function Stage_draw() {
-                // Send out a global hitArea tick notification...
-                self.sendNotification(m.Stage.FRAME_TICK);
-                // Clear the stage...
-                if (self.clearCanvasOnFrameTick) {
-                    self.context.clearRect(0, 0, self.canvas.width, self.canvas.height);    
-                }
-                // Draw the stage...
-                self.viewContainer_draw();
-            });
-            // set up drawing
-            _animation = m.requestAnimation(self.draw);
-            //--------------------------------------
-            //  INTERESTS
+            //  DISPLAY LIST
             //--------------------------------------
             // A private, up-to-date, flattened version of the entire display list...
-            var _displayList = [];
+            var _displayList = [self];
             function compileDisplayList() {
                 /** * *
                 * Compiles a flattened display list.
@@ -129,6 +107,77 @@ mod({
                     return el;
                 });
             });
+            //--------------------------------------
+            //  TICKING/DIRTY RECTANGLES
+            //--------------------------------------
+            // A var to hold our dirty views - we make
+            // one here to save on allocation every frame...
+            var _dirtyViews = [];
+            // A var to hold our matrix transforms...
+            var _dirtyTransform = m.Matrix();
+            m.safeAddin(self, 'getGlobalDirtyRectangleForView', function Stage_getGlobalDirtyRectangleForView(view) {
+                /** * *
+                * Returns the enclosing dirty rectangle in global coordinates for a given view.
+                * @param View
+                * @return Rectangle
+                * * **/
+                var rect = dirtyView.dirtyRectangle();
+                var transform = dirtyView.getCompoundTransformMatrix();
+                // Transformed dirty rectangle...
+                var tdr = transform.transformPolygon(rect.copy());
+                var x1 = tdr.polygon_left();
+                var y1 = tdr.polygon_top();
+                var x2 = tdr.polygon_right();
+                var y2 = tdr.polyong_bottom();
+                var globalDirtyRect = m.Rectangle.from(x1, y1, x2-x1, y2-y1);
+                return globalDirtyRect;
+            });
+            m.safeAddin(self, 'tick', function Stage_tick() {
+                /** * *
+                * Called every frame.
+                * Steps all animations and other on-frame events.
+                * * **/
+                _dirtyViews.length = 0;
+                // A naive dirty rectangles implementation...
+                for (var i = _displayList.length - 1; i >= 0; i--) {
+                    var view = _displayList[i];
+                    if (view.graphics.isDirty) {
+                        _dirtyViews.push(view);
+                    }
+                    if (view === self) {
+                        _dirtyViews = [self];
+                    }
+                }
+                /*
+                while (_dirtyViews.length) {
+                    var dirtyView = _dirtyViews.shift();
+                    var rect = self.getGlobalDirtyRectangleForView(dirtyView);
+                    // Clear that rectangle...
+                    self.graphics.clearRect(rect.x(), rect.y(), rect.width(), rect.height());
+                    // Run through all the views and draw where they intersect this rect...
+                    // This would be a good place to optimize with R-trees...
+                    
+                }
+                */
+                // Just for now draw the stage...
+                if (self.compositeContext.canvas.width != self.graphics.canvas.width ||
+                    self.compositeContext.canvas.height != self.graphics.canvas.height) {
+                    self.compositeContext.canvas.width = self.graphics.canvas.width;
+                    self.compositeContext.canvas.height = self.graphics.canvas.height;
+                }
+                self.compositeContext.clearRect(0, 0, self.compositeContext.canvas.width, self.compositeContext.canvas.height);
+                self.compositeContext.drawImage(self.graphics.canvas, 0, 0);
+                // Send out a global tick notification...
+                self.sendNotification(m.Stage.FRAME_TICK);
+                
+                // !!! Full repaint every frame...
+                self.graphics.isDirty = true;
+            });
+            // set up frame tick
+            _animation = m.requestAnimation(self.tick);
+            //--------------------------------------
+            //  INTERESTS
+            //--------------------------------------
             self.addListener(undefined, m.ViewContainer.DID_ADD_SUBVIEW, compileDisplayList);
             self.addListener(undefined, m.ViewContainer.DID_REMOVE_SUBVIEW, compileDisplayList);
             //--------------------------------------
@@ -230,8 +279,8 @@ mod({
                 var mouseEventNote = createMouseNote(m.View.MOUSE_DOWN, nativeEvent);
                 if (mouseEventNote) {
                     mouseEventNote.target.dispatch(mouseEventNote);
+                    tossMouseNote(mouseEventNote);
                 }
-                tossMouseNote(mouseEventNote);
             });
             m.safeAddin(self, 'fireMouseUpEvent', function Stage_mouseUp(nativeEvent) {
                 /** * *
@@ -240,8 +289,8 @@ mod({
                 var mouseEventNote = createMouseNote(m.View.MOUSE_UP, nativeEvent);
                 if (mouseEventNote) {
                     mouseEventNote.target.dispatch(mouseEventNote);
+                    tossMouseNote(mouseEventNote);
                 }
-                tossMouseNote(mouseEventNote);
             });
             m.safeAddin(self, 'fireMouseClickEvent', function Stage_mouseUp(nativeEvent) {
                 /** * *
@@ -250,8 +299,8 @@ mod({
                 var mouseEventNote = createMouseNote(m.View.MOUSE_CLICK, nativeEvent);
                 if (mouseEventNote) {
                     mouseEventNote.target.dispatch(mouseEventNote);
+                    tossMouseNote(mouseEventNote);
                 }
-                tossMouseNote(mouseEventNote);
             });
             // A private boolean to hold whether or not ANY views have been moused over...
             m.safeAddin(self, 'fireMouseMoveEvent', function Stage_mouseMove(nativeEvent) {
@@ -268,8 +317,8 @@ mod({
                         mouseEventNote.name = m.View.MOUSE_OVER;
                     }
                     mouseEventNote.target.dispatch(mouseEventNote);
+                    mouseEventNote = tossMouseNote(mouseEventNote);
                 } 
-                mouseEventNote = tossMouseNote(mouseEventNote);
                 
                 // Fire mouseOut events for previously moused over
                 // views, as long as there are some...
@@ -301,11 +350,11 @@ mod({
                     }
                 }
             });
-            self.canvas.onmousedown = self.fireMouseDownEvent;
-            self.canvas.onmouseup = self.fireMouseUpEvent;
-            self.canvas.onclick = self.fireMouseClickEvent;
-            self.canvas.onmousemove = self.fireMouseMoveEvent;
-            self.canvas.onmouseout = function mouseOutAll(nativeEvent) {
+            self.graphics.canvas.onmousedown = self.fireMouseDownEvent;
+            self.graphics.canvas.onmouseup = self.fireMouseUpEvent;
+            self.graphics.canvas.onclick = self.fireMouseClickEvent;
+            self.graphics.canvas.onmousemove = self.fireMouseMoveEvent;
+            self.graphics.canvas.onmouseout = function mouseOutAll(nativeEvent) {
                 var globalPoint = getMousePoint(nativeEvent);
                 
                 // To save some object creation we create one event...

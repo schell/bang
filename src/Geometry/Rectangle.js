@@ -43,19 +43,29 @@ mod({
                 addin(r);
                 return r;
             });
-            m.safeAddin(self, 'left', function Rectangle_left () {
-                /**
-                 * Returns the left edge x value.
-                 * @return - Number
-                 */
+            m.safeOverride(self, 'left', 'polygon_left', function Rectangle_left (l) {
+                /** * *
+                * Gets and sets the left edge x value.
+                * @param - Number
+                * @return - Number
+                ** * */
+                if (typeof l === 'number') {
+                    self.elements[0] = l;
+                    self.elements[6] = l;
+                }
                 return self.elements[0];
             });
 
-            m.safeAddin(self, 'top', function Rectangle_top () {
-                /**
-                 * Returns the top edge y value.
-                 * @return - Number
-                 */
+            m.safeOverride(self, 'top', 'polygon_top', function Rectangle_top (t) {
+                /** * *
+                * Gets and sets the top edge y value.
+                * @param - Number
+                * @return - Number
+                ** * */
+                if (typeof t === 'number') {
+                    self.elements[1] = t;
+                    self.elements[3] = t;
+                }
                 return self.elements[1];
             });
             m.safeAddin(self, 'origin', function Rectangle_origin() {
@@ -65,18 +75,30 @@ mod({
                 * * **/
                 return m.Point.from(self.left(), self.top());
             });
-            m.safeAddin(self, 'width', function Rectangle_width() {
+            m.safeAddin(self, 'width', function Rectangle_width(w) {
                 /** * *
-                * Returns the width of this Rectangle
+                * Gets and sets the width of this Rectangle.
+                * @param - Number
                 * @return - Number
                 * * **/
+                if (typeof w === 'number') {
+                    var x = self.left() + w;
+                    self.elements[2] = x;
+                    self.elements[4] = x;
+                }
                 return self.elements[2] - self.elements[0];
             });
-            m.safeAddin(self, 'height', function Rectangle_height() {
+            m.safeAddin(self, 'height', function Rectangle_height(h) {
                 /** * *
                 * Returns the height of this Rectangle
+                * @param - Number
                 * @return - Number
                 * * **/
+                if (typeof h === 'number') {
+                    var y = self.top() + h;
+                    self.elements[5] = y;
+                    self.elements[7] = y;
+                }
                 return self.elements[5] - self.elements[1];
             });
             
@@ -84,19 +106,29 @@ mod({
                 return '[Rectangle(x:'+self.left()+' y:'+self.top()+' w:'+self.width()+' h:'+self.height()+')]';
             };
 
-            m.safeAddin(self, 'right', function Rectangle_right () {
-                /**
-                 * Returns the right edge x value.
-                 * @return - Number
-                 */
+            m.safeOverride(self, 'right', 'polygon_right', function Rectangle_right (r) {
+                /** * *
+                * Gets and sets the right edge x value.
+                * @param - Number
+                * @return - Number
+                * * **/
+                if (typeof r === 'number') {
+                    self.elements[2] = r;
+                    self.elements[4] = r;
+                }
                 return self.left() + self.width();
             });
 
-            m.safeAddin(self, 'bottom', function Rectangle_bottom () {
-                /**
-                 * Returns the bottom edge y value.
-                 * @return - Number
-                 */
+            m.safeOverride(self, 'bottom', 'polygon_bottom', function Rectangle_bottom (b) {
+                /** * *
+                * Gets and sets the bottom edge y value.
+                * @param - Number
+                * @return - Number
+                * * **/
+                if (typeof b === 'number') {
+                    self.elements[5] = b;
+                    self.elements[7] = b;
+                }
                 return self.top() + self.height();
             });
             
@@ -157,6 +189,29 @@ mod({
                     }
                 }
                 return sections;
+            });
+            
+            m.safeAddin(self, 'intersectsRectangle', function Rectangle_intersects(r) {
+                /** * *
+                * Returns whether or not this rectangle intersects rectangle r.
+                * Rectangles that share the same edge are considerend NOT intersecting.
+                * @param - Rectangle
+                * @return Boolean
+                * * **/
+                return !(self.left() >= r.right() 
+                        || r.left() >= self.right() 
+                        || self.top() >= r.bottom()
+                        || r.top() >= self.bottom());
+            });
+            
+            m.safeAddin(self, 'containsRectangle', function Rectangle_contains(r) {
+                /** * *
+                * Returns whether or not this rectangle contains rectangle r.
+                * If rectangle r is equal it is considered contained within this rectangle (and visa versa).
+                * @param - Rectangle
+                * @return Boolean
+                * * **/
+                return self.left() <= r.left() && self.top() <= r.top() && self.right() >= r.right() && self.bottom() >= r.bottom();
             });
 
             return self;

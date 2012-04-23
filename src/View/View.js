@@ -8,7 +8,7 @@
  * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * **/
 mod({
     name : 'View',
-    dependencies : [ 'bang::Global.js', 'bang::Geometry/Rectangle.js', 'bang::Geometry/Matrix.js', 'bang::Geometry/Geometry.js', 'bang::Note/Listener.js', 'bang::Note/Dispatcher.js' ],
+    dependencies : [ 'bang::Global.js', 'bang::Graphics/Graphics.js', 'bang::Geometry/Rectangle.js', 'bang::Geometry/Matrix.js', 'bang::Geometry/Geometry.js', 'bang::Note/Listener.js', 'bang::Note/Dispatcher.js' ],
     init : function initView(m) {
         /** * *
         * Initializes the View Addin
@@ -37,8 +37,8 @@ mod({
             // Addin properties of Dispatcher...
             m.Dispatcher(self);
             
-            // An array to hold draw functions...
-            m.safeAddin(self, 'drawQueue', []);
+            // This view's graphics context...
+            m.safeAddin(self, 'graphics', m.Graphics());
             
             // A Rectangle specifying the hit area of this object...
             m.safeAddin(self, 'hitArea', m.Rectangle());
@@ -59,6 +59,7 @@ mod({
             m.safeAddin(self, 'scaleX', 1.0);
             m.safeAddin(self, 'scaleY', 1.0);
             m.safeAddin(self, 'rotation', 0.0);
+            
             // A special cache of mouse settings (used by Stage.js during mouse events...)
             m.safeAddin(self, '$mouseSettings', {
                 mousedOver : false
@@ -68,30 +69,32 @@ mod({
             //--------------------------------------
             // Whether or not this view's transformations have been applied...
             var _transformApplied = false;
-            m.safeAddin(self, 'applyTransform', function View_applyTransform() {
+            m.safeAddin(self, 'applyTransform', function View_applyTransform(context) {
                 /** * *
-                * Applies this view's transform to its context.
+                * Applies this view's transform to a context. The caller must call restoreTransform
+                * before the transform can be applied to another context.
+                * @param CanvasRenderingContext2D
                 * * **/
                 if (_transformApplied) {
                     return;
                 }
                 _transformApplied = true;
                 
-                self.context.save();
+                context.save();
                 
-                self.context.translate(self.x, self.y);
-                self.context.rotate(m.Geometry.ONE_DEGREE*self.rotation);
-                self.context.scale(self.scaleX, self.scaleY);
-                self.context.globalAlpha *= self.alpha;
+                context.translate(self.x, self.y);
+                context.rotate(m.Geometry.ONE_DEGREE*self.rotation);
+                context.scale(self.scaleX, self.scaleY);
+                context.globalAlpha *= self.alpha;
             });
-            m.safeAddin(self, 'restoreTransform', function View_restoreTransform() {
+            m.safeAddin(self, 'restoreTransform', function View_restoreTransform(context) {
                 /** * *
                 * Restores the context to its state before applying the transforming
                 * operations of this view.
                 * * **/
                 if (_transformApplied) {
                     _transformApplied = false;
-                    self.context.restore();
+                    context.restore();
                 }
             });
             m.safeAddin(self, 'getTransformationElements', function View_getTransformationMatrixElements(invert) {
@@ -203,43 +206,46 @@ mod({
             //--------------------------------------
             //  DRAWING
             //--------------------------------------
-            m.safeAddin(self, 'draw', function View_draw() {
+            m.safeAddin(self, 'draw', function View_draw(context) {
                 /** * *
                 * Draws this view into the 2d context.
+                * @param CanvasRenderingContext2D
                 * * **/
-                self.applyTransform();
+                self.applyTransform(context);
                 
-                for (var i=0; i < self.drawQueue.length; i++) {
-                    var drawFunc = self.drawQueue[i];
-                    drawFunc();
-                }
+                // Now draw this element into the provided graphics context...
+                context.drawImage(self.graphics.context.canvas, 0, 0);
                 
-                self.restoreTransform();
+                self.restoreTransform(context);
             });
-            m.safeAddin(self, 'addHitAreaDrawFunction', function View_addHitAreaDrawFunction(fill, stroke) {
+            m.safeAddin(self, 'dirtyRectangle', function View_dirtyRectangle() {
+                /** * *
+                * Returns the LOCAL dirty rectangle for this view.
+                * @return Rectangle
+                * * **/
+                return m.Rectangle.from(0, 0, self.graphics.canvas.width, self.graphics.canvas.height);
+            });
+            m.safeAddin(self, 'drawPolygon', function View_addHitAreaDrawFunction(polygon, fill, stroke) {
                 /** * *
                 * Adds a draw function to the drawQueue that draws this view's hitArea.
                 * @param - color String - something like 'rgba(0, 0, 0, 0.5)'
                 * * **/
                 fill = m.ifndefInit(fill, 'rgba(0,0,0,0.5)');
                 stroke = m.ifndefInit(stroke, 'rgba(0,0,0,0.8)');
-                var drawFunc = function hitAreaDrawFunction() {
-                    self.context.save();
-                    self.context.fillStyle = fill;
-                    self.context.strokeStyle = stroke;
-                    self.context.beginPath();
-                    self.context.moveTo(self.hitArea.elements[0], self.hitArea.elements[1]);
-                    for (var i=2; i <= self.hitArea.elements.length; i+=2) {
-                        var x = self.hitArea.elements[i];
-                        var y = self.hitArea.elements[i+1];
-                        self.context.lineTo(x, y);
-                    }
-                    self.context.closePath();
-                    self.context.fill();
-                    self.context.stroke();
-                    self.context.restore();
-                };
-                self.drawQueue.push(drawFunc);
+                self.graphics.save();
+                self.graphics.fillStyle = fill;
+                self.graphics.strokeStyle = stroke;
+                self.graphics.beginPath();
+                self.graphics.moveTo(polygon.elements[0], polygon.elements[1]);
+                for (var i=2; i <= polygon.elements.length; i+=2) {
+                    var x = polygon.elements[i];
+                    var y = polygon.elements[i+1];
+                    self.graphics.lineTo(x, y);
+                }
+                self.graphics.closePath();
+                self.graphics.fill();
+                self.graphics.stroke();
+                self.graphics.restore();
             });
             //--------------------------------------
             //  EVENT/NOTIFICATION

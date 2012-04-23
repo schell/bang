@@ -67,6 +67,58 @@ mod({
                     ]
                 });
             });
+            m.safeAddin(self, 'left', function Polygon_left() {
+                /** * *
+                * Returns the left-most x coordinate.
+                * @return Number
+                * * **/
+                var x = Number.POSITIVE_INFINITY;
+                for (var i = self.elements.length - 2; i >= 0; i-=2){
+                    if (self.elements[i] < x) {
+                        x = self.elements[i];
+                    }
+                }
+                return x;
+            });
+            m.safeAddin(self, 'top', function Polygon_top() {
+                /** * *
+                * Returns the left-most x coordinate.
+                * @return Number
+                * * **/
+                var y = Number.POSITIVE_INFINITY;
+                for (var i = self.elements.length - 1; i >= 1; i-=2){
+                    if (self.elements[i] < y) {
+                        y = self.elements[i];
+                    }
+                }
+                return y;
+            });
+            m.safeAddin(self, 'right', function Polygon_right() {
+                /** * *
+                * Returns the left-most x coordinate.
+                * @return Number
+                * * **/
+                var x = Number.NEGATIVE_INFINITY;
+                for (var i = self.elements.length - 2; i >= 0; i-=2){
+                    if (self.elements[i] > x) {
+                        x = self.elements[i];
+                    }
+                }
+                return x;
+            });
+            m.safeAddin(self, 'bottom', function Polygon_bottom() {
+                /** * *
+                * Returns the left-most x coordinate.
+                * @return Number
+                * * **/
+                var y = Number.NEGATIVE_INFINITY;
+                for (var i = self.elements.length - 1; i >= 1; i-=2){
+                    if (self.elements[i] > y) {
+                        y = self.elements[i];
+                    }
+                }
+                return y;
+            });
             
             return self;
         };

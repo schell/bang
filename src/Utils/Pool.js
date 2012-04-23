@@ -103,6 +103,9 @@ mod({
                 * @param Object
                 * @return false
                 * * **/
+                if (!object) {
+                    throw new Error('Parameter is not an object.');
+                }
                 if ('$poolType' in object) {
                     var pond = self.pool[object.$poolType];
                     pond.recycle(object);
