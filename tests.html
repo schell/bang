@@ -1,254 +1,212 @@
 <html>
     <head>
         <meta http-equiv="Content-type" content="text/html; charset=utf-8">
-        <title>tests</title>
+        <title>.:!!:.</title>
+        <style type="text/css" media="screen">
+            body {
+        			margin:0px;
+        			font-family: Verdana,Geneva,Arial,sans-serif;
+        			font-size: 12px;
+        			line-height: 15px;  
+        		}
+            canvas {
+                background-color:transparent;
+            }
+        </style>
         <script src="mod.js" type="text/javascript" charset="utf-8"></script>
-        <script src="http://schell.github.com/go/go.js" type="text/javascript" charset="utf-8"></script>
         <link rel="shortcut icon" href="favicon.png" />
     </head>
-    <body id="tests">
+    <body id="body">
+        
+        <div id="bang"></div>
+        
         <script type="text/javascript" charset="utf-8">
             mod.useTagInjection = true;
             mod.expansions = {
-                bang : 'src/'
+                bang : 'src/',
             };
             mod({
-                name : 'main',
-                dependencies : [ 
-                    'bang::Global.js',
-                    'bang::View/Stage.js',
-                    'bang::Utils/Pool.js'
+                name : "main",
+                dependencies : [
+                    'bang::Utils/Assert.js',
+                    'bang::Geometry/Vector.js',
+                    'bang::Geometry/Rectangle.js',
+                    'bang::Geometry/Matrix.js',
+                    'bang::View/View.js'
                 ],
-                init : function initMain(m) {
-                    return function exporter() {
-                        return m;
-                    };
+                init : function initMain (m) {
+                    return {};
                 }
-            }).onload(function afterload(m) {
-                var assert = m.assert;
-                var src = mod.compile();
+            }).onload(function test(m) {
+                assert.suite = 'Array';
+                var t = [];
                 
-                function newBangContext() {
-                    /** * * 
-                    * Evaluates a clean version of our code and gets the
-                    * modules from our export function above..
-                    * * **/
-                    var main = eval(src);
-                    var modules = main();
-                    return modules;
-                }
+                assert.suite = 'Vector';
                 
-                var m1 = newBangContext();
-                m.assert.eq('main' in m1, true, 'Can get new bang eval.');
-                var m1stage = m1.Stage();
+                var v = m.Vector(0,1,2,3,4,5);
+                var vv = new m.Vector(0,1,2,3,4,5);
+                assert.eq(v[3], 3, 'Vector initializes with elements.');
+                assert.eq(v.length, 6, 'Vector initializes with length.');
+                var vcopy = v.copy();
+                assert.eq(vcopy.isEqualTo(v) && vv.isEqualTo(vcopy), true, 'Vector can evaluate equality.');
+                var add1 = vcopy.add(m.Vector(1,1,1,1,1,1));
+                assert.eq(add1.isEqualTo(m.Vector(1,2,3,4,5,6)), true, 'Vector can add.');
+                var sub2 = vcopy.subtract(m.Vector(2,2,2,2,2,2));
+                assert.eq(sub2.isEqualTo(m.Vector(-2,-1,0,1,2,3)), true, 'Vector can subtract.');
+                v = m.Vector(1,2,3);
+                var magv = v.magnitude();
+                assert.eq(magv >= 3.74165 && magv <= 3.74166, true, 'Vector can calc magnitude ('+magv+').');
+                var unit = v.normalize();
+                assert.eq(unit.magnitude(), 1, 'Vector can calc normal vector.');
                 
-                var m2 = newBangContext();
-                m.assert.eq('main' in m2, true, 'Can get another bang eval.');
-                var m2stage = m2.Stage();
+                assert.suite = 'Rectangle';
+                var r1 = m.Rectangle(0,0,100,100);
+                var r2 = m.Rectangle(50,50,100,100)
+                assert.eq(r1.right(10),10, 'Rectangle sets right.');
+                assert.eq(r1.width(), 10, 'Rectangle updates width after set right.');
+                r1.right(100);
+                assert.eq(r1.left(10),10, 'Rectangle sets left.');
+                r1.left(0);
+                assert.eq(r1.width(100),100,'Rectangle updates width after set left.');
+                assert.eq(r1.intersectsRectangle(r2), true, 'Rectangle knows intersection.');
+                var output = m.Rectangle.reduceRectangles([r1,r2]);
+                assert.eq(output.length, 3, 'Rectangle reduces to correct number of rects.');
+                assert.eq(output.toString(), 'Rectangle[0,0,50,100],Rectangle[50,0,50,150],Rectangle[100,50,50,100]', 'Rectangle reduces to correct rectangles.');
                 
-                m1stage.addListener(m1stage, m1.Stage.FRAME_TICK, function(note) {});
+                assert.suite = 'Matrix';
                 
-                assert.eq(m1stage.noteCenter.observers().length-1, m2stage.noteCenter.observers().length, 'Can add observers to bang context and contexts are seperate.');
-                
-                //--------------------------------------
-                //  SOME TESTING HELPERS
-                //--------------------------------------
-                function initTestAndGetStage(modulesToInit) {
-                    var b = newBangContext();
-                    b.safeAddinAllPropertiesOf(modulesToInit, b);
-                    var stage = modulesToInit.Stage();
-                    stage.setParentElement(document.body);
-                    modulesToInit.$testing = {
-                        stage : stage
-                    };
-                    return stage;
-                }
-                function cleanUpTest(modulesToCleanUp) {
-                    modulesToCleanUp.$testing.stage.remove();
-                }
-                //--------------------------------------
-                //  TESTS
-                //--------------------------------------
-                function canGetMouseOverAfterMouseLeave(cb) {
-                    console.log('canGetMouseOverAfterMouseLeave test');
-                    
-                    var b = {};
-                    var stage = initTestAndGetStage(b);
-                    assert.suite = 'canGetMouseOverAfterMouseLeave';
-                    assert.eq('Stage' in b, true, 'Can init modules in test setup.');
-                    
-                    var over = false;
-                    var moved = false;
-                    // Add an interest in mouseLeave and mouseOver...
-                    stage.addListener(stage, b.Stage.MOUSE_LEAVE, function() {
-                        over = false;
-                    });
-                    stage.addListener(stage, b.View.MOUSE_MOVE, function() {
-                        moved = true;
-                    });
-                    stage.addListener(stage, b.View.MOUSE_OVER, function() {
-                        over = true;
-                    });
-                    // Send a fake mouse event...
-                    stage.canvas.onmousemove({offsetX:1,offsetY:1});
-                    assert.eq(over, true, 'Can get mouse over event.');
-                    stage.canvas.onmousemove({offsetX:1,offsetY:1});
-                    assert.eq(moved, true, 'Can get mouse move event.');
-                    stage.canvas.onmouseout({offsetX:-100,offsetY:1});
-                    assert.eq(over, false, 'Can get mouse leave event.');
-                    stage.canvas.onmousemove({offsetX:1,offsetY:1});
-                    assert.eq(over, true, 'Can get mouse over event again.');
-                    
-                    cleanUpTest(b);
-                    cb();
-                }
-                
-                function testPools(cb) {
-                    var b = {};
-                    var stage = initTestAndGetStage(b);
-                    assert.suite = 'testPools';
-                    
-                    var creations = 0;
-                    var draws = 0;
-                    function createPoint() {
-                        creations++;
-                        return b.Matrix({
-                            elements : [
-                                Math.random()*stage.hitArea.width(),
-                                Math.random()*stage.hitArea.height()
-                            ]
-                        });
-                    }
-                    function initPoint(p) {
-                        // Do nothing...
-                        p.elements[0] = Math.random()*stage.hitArea.width();
-                        p.elements[1] = Math.random()*stage.hitArea.height();
-                    }
-                    function recyclePoint(p) {
-                        p.elements[0] = 0;
-                        p.elements[1] = 0;
-                    }
-                    
-                    var time = 0;
-                    function report() {
-                        var millis = Date.now()-time;
-                        var secs = millis/1000;
-                        var fps = draws/secs;
-                        
-                        console.log('Created',creations,'objects and drew',draws,'frames in ',secs,'seconds(',fps,'fps).');
-                        
-                        time = 0;
-                        draws = 0;
-                        creations = 0;
-                        
-                        stage.removeListener(undefined, m.Stage.FRAME_TICK);
-                        stage.drawQueue.length = 0;
-                    }
-                    
-                    function stressItOut() {
-                        /** * *
-                        * This should make lots and lots of Points in random places,
-                        * changing every frame...
-                        * * **/
-                        var points = [];
-                        for (var i=0; i < 100; i++) {
-                            points.push(createPoint());
-                        }
-                        // Reset the stage's drawQueue...
-                        stage.drawQueue.length = 0;
-                        // Push something to draw the rando points...
-                        stage.drawQueue.push(function() {
-                            draws++;
-                            points.map(function(p) {
-                                stage.context.fillRect(p.elements[0]-2,p.elements[1]-2,4,4);
-                            });
-                        });
-                    }
-                    
-                    var pool = b.Pool.sharedInstance();
-                    pool.addPond('RandomPoint', createPoint, initPoint, recyclePoint);
-                    function usePools() {
-                        /** * *
-                        * This should make 100 Points in random places,
-                        * and they will sit still...
-                        * * **/
-                        var points = [];
-                        for (var i=0; i < 100; i++) {
-                            points.push(pool.get('RandomPoint'));
-                        }
-                        // Reset the stage's drawQueue...
-                        stage.drawQueue.length = 0;
-                        // Push something to draw the rando points...
-                        stage.drawQueue.push(function() {
-                            draws++;
-                            points.map(function(p) {
-                                stage.context.fillRect(p.elements[0]-2,p.elements[1]-2,4,4);
-                                pool.toss(p);
-                            });
-                        });
-                    }
-                    
-                    stage.addListener(undefined, m.Stage.FRAME_TICK, stressItOut);
-                    time = Date.now();
-                    
-                    var chugFor = 3000;
-                    setTimeout(function() {
-                        report();
-                        
-                        // Do the pool report...
-                        stage.addListener(undefined, m.Stage.FRAME_TICK, usePools);
-                        time = Date.now();
-                        setTimeout(function() {
-                            stage.removeListener(undefined, m.Stage.FRAME_TICK);
-                            stage.drawQueue.length = 0;
-                            
-                            report();
-                        }, chugFor)
-                        
-                    }, chugFor);
-                    
-                    //cb();
-                }
-                
-                function testDirtyRectangles(cb) {
-                    /** * *
-                    * Tests bang's dirty rectangle implementation.
-                    * * **/
-                    assert.suite = 'testDirtyRectangles';
-                    console.log(assert.suite);
-                    var b = {};
-                    var stage = window.stage = initTestAndGetStage(b);
-                    stage.graphics.width = 500;
-                    stage.graphics.height = 250;
-                    stage.graphics.fillStyle = 'rgb(0, 0, 0)';
-                    stage.graphics.fillRect(0, 0, 500, 250);
-                    stage.graphics.fillStyle = 'rgb(255, 0, 0)';
-                    stage.graphics.fillRect(10, 10, 10, 10);
-                    var blue = m.View({
-                        x : 10,
-                        y : 10
-                    });
-                    blue.graphics.width = 50;
-                    blue.graphics.height = 50;
-                    blue.graphics.fillStyle = 'rgb(0,0,255)';
-                    blue.graphics.fillRect(0, 0, 50, 50);
-                    stage.addView(blue);
-                    
-                    assert.eq(stage.graphics.isDirty, true, 'Calling a draw function dirties the graphics context.');
-                    stage.addListener(stage, m.Stage.FRAME_TICK, function() {
-                        assert.eq(stage.graphics.isDirty, false, 'After frame update graphics context is not dirty.');
-                        stage.removeListener(stage, m.Stage.FRAME_TICK);
-                    });
-                }
-                
-                
-                go(
-                    testDirtyRectangles,
-                    canGetMouseOverAfterMouseLeave,
-                    testPools,
-                    m.assert.stat
-                ).start();
-            });
+                var mat = m.Matrix(
+                    0, 1, 2,
+                    3, 4, 5, 
+                    6, 7, 8
+                );
             
+                var r0 = mat.row(0);
+                var r2 = mat.row(2);
+                assert.eq(r0.toString(), '0,1,2', 'Can get matrix row.');
+                assert.eq(r2.toString(), '6,7,8', 'Can get matrix row.');
+            
+                var c0 = mat.column(0);
+                var c2 = mat.column(2);
+                assert.eq(c0.toString(), '0,3,6', 'Can get matrix column.');
+                assert.eq(c2.toString(), '2,5,8', 'Can get matrix column.');
+            
+                var A = m.Matrix(
+                    5, 9, 2, 
+                    1, 7, 6,
+                    3, 4, 8
+                );
+            
+                var B = m.Matrix(
+                    9, 1, 6, 
+                    7, 2, 4,
+                    8, 10, 3
+                );
+            
+                var AB = m.Matrix(
+                    124, 43, 72,
+                    106, 75, 52,
+                    119, 91, 58
+                );
+            
+                var BA = m.Matrix(
+                    64, 112, 72,
+                    49, 93, 58,
+                    59, 154, 100
+                );
+            
+                var resultAB = A.multiply(B);
+                var resultBA = B.multiply(A);
+            
+                assert.eq(resultAB.toString(), AB.toString(), 'Matrix can multiply');
+            
+                mat = mat.identity();
+            
+                mat = mat.translate(1, 2);
+                assert.eq(mat.x(), 1, 'Matrix can translate x');
+                assert.eq(mat.y(), 2, 'Matrix can translate y');
+            
+                mat = mat.scale(0.5, 0.3, 0.1);
+                assert.eq(mat.a(), 0.5, 'Matrix can scale x');
+                assert.eq(mat.e(), 0.3, 'Matrix can scale y');
+        
+                mat = mat.identity();
+        
+                var vec = m.Vector(2, 4);
+        
+                mat = mat.translate(1, 1);
+        
+                var tVec = mat.transform2DVector(vec);
+                assert.eq(tVec.x(), 3, 'Matrix can translate Vector in x');
+                assert.eq(tVec.y(), 5, 'Matrix can translate Vector in y');
+        
+                tVec = mat.transform2DVector(tVec);
+                assert.eq(tVec.x(), 4, 'Matrix can translate Vector in x');
+                assert.eq(tVec.y(), 6, 'Matrix can translate Vector in y');
+        
+                mat = mat.identity();
+                mat = mat.scale(0.5, 0.5, 0.5);
+                tVec = mat.transform2DVector(tVec);
+                assert.eq(tVec.x(), 2, 'Matrix can scale Vector in x');
+                assert.eq(tVec.y(), 3, 'Matrix can scale Vector in y');
+                
+                var unitSquare = m.Polygon(
+                    -1,  1,
+                     1,  1,
+                     1, -1,
+                    -1, -1
+                );
+                assert.eq(unitSquare.containsPoint(m.Vector(0,0)), true, 'Polygon unit square contains origin');
+                
+                var D = m.Matrix().translate(100, 50).scale(0.5).rotate(45);
+                var invD = D.inverse();
+                var I = D.multiply(invD);
+                I = I.map(function(el,ndx,a) {
+                    return Math.round(el);
+                });
+                assert.eq(I.isEqualTo(m.Matrix()), true, 'Matrix can return inverse.');
+            
+                var rect = m.Polygon(
+                        10, 5,
+                        10, -5,
+                        -10, -5,
+                        -10, 5
+                );
+                var transform = m.Matrix().rotate(90).scale(2, 2);
+                rect = transform.transformPolygon(rect);
+                var resultPoly = rect.map(function(el,ndx,a) {
+                    return Math.round(el);
+                });
+                var comparePoly = m.Polygon(-10,20,10,20,10,-20,-10,-20)
+                assert.eq(resultPoly.isEqualTo(comparePoly), true, 'Matrix can transform polygons.');
+                assert.eq(resultPoly.toString(), comparePoly.toString(), 'Matrix can transform polygons.');
+            
+                assert.suite = 'View';
+                var view1 = m.View();
+                var view2 = m.View();
+                
+                var bang = document.getElementById('bang');
+                bang.appendChild(view1.canvas);
+                bang.appendChild(view2.canvas);
+                
+                assert.eq(view1.isDirty, false, 'View starts clean.');
+                view1.context.fillRect(0,0,10,10);
+                view1.context.fillStyle = 'red';
+                view1.context.fillRect(10,0,10,10);
+                view1.context.fillStyle = 'green';
+                view1.context.fillRect(10,10,10,10);
+                view1.context.fillStyle = 'blue';
+                view1.context.fillRect(0,10,10,10);
+                assert.eq(view1.isDirty, true, 'View is dirty after drawing.');
+                
+                view1.drawInto(view2.context, m.Rectangle(10,10,10,10), m.Rectangle(0,0,10,10));
+                assert.eq(view2.isDirty, true, 'Receiving view is dirty after drawing into context.');
+                
+                var data = view2.context.getImageData(0,0,1,1);
+                assert.eq(data.data[1] > data.data[0] && data.data[1] > data.data[2], true, 'Receiving view gets appropriately drawn into.');
+
+                assert.stat();
+            });
         </script>
     </body>
+</html>

@@ -1,433 +1,390 @@
 /** * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * *
 * Matrix.js
-* The Matrix Addin
-* /---------------------------------------\
-* | indices     | elements   | meaning    |
-* |---------------------------------------| 
-* | 0  1  2     | a  d  g    | s/r  r   x |
-* | 3  4  5     | b  e  h    |  r  s/r  y |
-* | 6  7  8     | c  f  i    |  0   0   s |
-* |             |            |            |
-* \---------------------------------------/ 
-*
+* A 2D matrix for transformations.
 * Copyright (c) 2012 Schell Scivally. All rights reserved.
 * 
-* @author   Schell Scivally
-* @since    Wed Jan 25 09:59:05 PST 2012
+* @author    Schell Scivally
+* @since    Thu Apr 26 08:55:18 PDT 2012
 * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * **/
 mod({
     name : 'Matrix',
-    dependencies : [ 'bang::Global.js', 'bang::Geometry/Vector.js' ],
+    dependencies : [ 'bang::Geometry/Vector.js', 'bang::Geometry/Polygon.js' ],
     init : function initMatrix (m) {
-        /**
-         * Initializes the Matrix Addin
-         * @param - m Object - The mod modules object.
-         */
-        var addin = function addinMatrix (self) {
-            /**
-             * Adds Matrix properties to *self*.
-             * @param - self Object - The object to add Matrix properties to.
-             * @return self Matrix Object 
-             */
-            var defined = m.defined(self);
-            self = m.Object(self); 
-            
-            m.safeAddin(self, 'tag', 'Matrix');
-            
-            // Addin Vector
-            m.Vector(self);
-            
-            //--------------------------------------
-            //  METHODS
-            //--------------------------------------
-            m.safeOverride(self, 'copy', 'vector_copy', function Matrix_copy() {
-                /** * *
-                * Returns a copy of this matrix.
-                * @return - Matrix
-                * * **/
-                var vector = self.vector_copy();
-                addin(vector);
-                return vector;
-            });
-            m.safeAddin(self, 'toPrettyString', function Matrix_toPrettyString() {
-                /** * *
-                * Returns a pretty string value.
-                * @returns - String
-                * * **/
-                function fixed(el) {
-                    var s = el.toFixed(3);
-                    if (el >= 0) {
-                        s = ' '+s;
-                    }
-                    return s;
+        /** * *
+        * Initializes the Matrix 
+        * @param - m Object - The mod modules object.
+        * * **/
+        //--------------------------------------
+        //  CONSTANTS
+        //--------------------------------------
+        /** * *
+        * One degree in radians (export it to modules)
+        * @type {number}
+        * * **/
+        m.ONE_DEGREE = 0.0174532925;
+        //--------------------------------------
+        //  CONSTRUCTOR
+        //--------------------------------------
+        function Matrix() {
+            var v = Object.create(Matrix.prototype);
+            if (arguments.length) {
+                v.length = 0;
+                for (var i=0; i < arguments.length; i++) {
+                    v.push(arguments[i]);
                 }
-                var s = '\n' + fixed(self.elements[0]) + ' ' + fixed(self.elements[1]) + ' ' + fixed(self.elements[2]) + '\n';
-                s += fixed(self.elements[3]) + ' ' + fixed(self.elements[4]) + ' ' + fixed(self.elements[5]) + '\n';
-                s += fixed(self.elements[6]) + ' ' + fixed(self.elements[7]) + ' ' + fixed(self.elements[8]);
-                return s;
-            });
-            m.safeAddin(self, 'a', function Matrix_a() {
-                /** * *
-                * Returns the 'a' matrix component.
-                * @returns - Number
-                * * **/
-                return self.elements[0];
-            });
-            m.safeAddin(self, 'b', function Matrix_b() {
-                /** * *
-                * Returns the 'b' matrix component.
-                * @returns - Number
-                * * **/
-                return self.elements[3];
-            });
-            m.safeAddin(self, 'c', function Matrix_c() {
-                /** * *
-                * Returns the 'c' matrix component.
-                * @returns - Number
-                * * **/
-                return self.elements[6];
-            });
-            m.safeAddin(self, 'd', function Matrix_d() {
-                /** * *
-                * Returns the 'd' matrix component.
-                * @returns - Number
-                * * **/
-                return self.elements[1];
-            });
-            m.safeAddin(self, 'e', function Matrix_e() {
-                /** * *
-                * Returns the 'e' matrix component.
-                * @returns - Number
-                * * **/
-                return self.elements[4];
-            });
-            m.safeAddin(self, 'f', function Matrix_f() {
-                /** * *
-                * Returns the 'f' matrix component.
-                * @returns - Number
-                * * **/
-                return self.elements[7];
-            });
-            m.safeAddin(self, 'g', function Matrix_g() {
-                /** * *
-                * Returns the 'g' matrix component.
-                * @returns - Number
-                * * **/
-                return self.elements[2];
-            });
-            m.safeAddin(self, 'h', function Matrix_h() {
-                /** * *
-                * Returns the 'h' matrix component.
-                * @returns - Number
-                * * **/
-                return self.elements[5];
-            });
-            m.safeAddin(self, 'i', function Matrix_i() {
-                /** * *
-                * Returns the 'i' matrix component.
-                * @returns - Number
-                * * **/
-                return self.elements[8];
-            });
-            m.safeOverride(self, 'x', 'vector_x', function Vector_x(x) {
-                /** * *
-                * Returns the x element. 
-                * If *x* is supplied as a parameter, will set the x element before returning.
-                * @param - x Number
-                * @returns - x Number
-                * * **/
-                if (arguments.length) {
-                    self.elements[2] = x;
-                }
-                return self.elements[2];
-            });
-            m.safeOverride(self, 'y', 'vector_y', function Vector_y(y) {
-                /** * *
-                * Returns the y element.
-                * If *y* is supplied as a parameter, will set the y element before returning.
-                * @param - y Number
-                * @returns - y Number
-                * * **/
-                if (arguments.length) {
-                    self.elements[5] = y;
-                }
-                return self.elements[5];
-            });
-            m.safeAddin(self, 'loadIdentity', function Matrix_loadIdentity() {
-                /** * *
-                * Loads the identity projection/transformation matrix.
-                * * **/
-                self.elements = addin.identityElements();
-                return self;
-            });
-            m.safeAddin(self, 'determinant', function Matrix_determinate() {
-                /** * *
-                * Returns the determinate of this matrix.
-                * @return - Number
-                * * **/
-                var a = self.a();
-                var b = self.b();
-                var c = self.c();
-                var d = self.d();
-                var e = self.e();
-                var f = self.f();
-                var g = self.g();
-                var h = self.h();
-                var i = self.i();
-                return a*(e*i - f*h) - b*(d*i - f*g) + c*(d*h - e*g);
-            });
-            m.safeAddin(self, 'inverse', function Matrix_inverse() {
-                /** * *
-                * Returns the inverse of this matrix or false if no inverse exists.
-                * @return - Matrix
-                * * **/
-                var detM = self.determinant();
-                if (detM === 0) {
-                    // This matrix is singular and has no inverse...
-                    return false;
-                }
-                var oneOverDet = 1 / detM;
-
-                var a = self.a();
-                var b = self.b();
-                var c = self.c();
-                var d = self.d();
-                var e = self.e();
-                var f = self.f();
-                var g = self.g();
-                var h = self.h();
-                var i = self.i();
-                
-                return m.Matrix({
-                    elements : [
-                        e*i - f*h, f*g - d*i, d*h - e*g,
-                        c*h - b*i, a*i - c*g, b*g - a*h,
-                        b*f - c*e, c*d - a*f, a*e - b*d
-                    ].map(function(el,ndx,a) {
-                        return el*oneOverDet;
-                    })
-                });
-            });
-            m.safeAddin(self, 'column', function Matrix_column(n) {
-                /** * *
-                * Returns column *n* in this matrix.
-                * @return - Array
-                * * **/
-                return addin.getColumn(self.elements, n);
-            });
-            m.safeAddin(self, 'row', function Matrix_row(n) {
-                /** * *
-                * Returns row *n* in this matrix.
-                * @return - Array
-                * * **/
-                return addin.getRow(self.elements, n);
-            });
-            m.safeOverride(self, 'multiply', 'vector_multiply', function Matrix_multiply(matrix) {
-                /** * *
-                * Multiplies this matrix by another.
-                * @param - matrix Matrix
-                * * **/
-                self.elements = addin.multiplyElements(self.elements, matrix.elements);
-                
-                return self;
-            });
-            m.safeAddin(self, 'translate', function Matrix_translate(x, y) {
-                /** * *
-                * Translate this matrix by x, y.
-                * @param - x Number
-                * @param - y Number
-                * @return - self Matrix
-                * * **/
-               self.elements = addin.translateElements(self.elements, x, y);
-                return self;
-            });
-            m.safeAddin(self, 'scale', function Matrix_scale(x, y) {
-                /** * *
-                * Scale this matrix by x, y.
-                * @param - x Number
-                * @param - y Number
-                * @return - self Matrix
-                * * **/
-                self.elements = addin.scaleElements(self.elements, x, y);
-                return self;
-            });
-            m.safeAddin(self, 'rotate', function Matrix_rotate(angleDegrees) {
-                /** * *
-                * Rotates this matrix *angleDegrees* about z.
-                * @param - angleDegrees Number
-                * @return - self Matrix
-                * * **/
-                self.elements = addin.rotateElements(self.elements, angleDegrees);
-                return self;
-            });
-            m.safeAddin(self, 'transform2DVector', function Matrix_transform2DVector(vec) {
-                /** * *
-                * Transforms a 2D vector by this matrix
-                * * **/
-                // Make the 2-vector homogenous...
-                vec.elements[2] = 1; 
-                var mat = self.copy();
-                mat.multiply(vec);
-                mat.elements.length = 2;
-                vec.elements = mat.elements;
-                return vec;
-            });
-            m.safeAddin(self, 'transformPolygon', function Matrix_transformPolygon(poly) {
-                /** * *
-                * Transforms *poly*.
-                * @param - poly Polygon
-                * @return - poly Polygon
-                * * **/
-                var elements = [];
-                for (var i=0; i < poly.elements.length; i+=2) {
-                    var x = poly.elements[i];
-                    var y = poly.elements[i+1];
-                    var shim = {elements:[x,y]};
-                    var tvec = self.transform2DVector(shim);
-                    elements = elements.concat(tvec.elements);
-                }
-                poly.elements = elements;
-                return poly;
-            });
-            
-            
-            if (!defined) {
-                self.loadIdentity();
+            } else {
+                v = v.identity();
             }
-            return self;
+            return v;
+        }
+        
+        Matrix.prototype = m.Vector();
+        
+        Matrix.prototype.constructor = Matrix;
+        //--------------------------------------
+        //  METHODS
+        //--------------------------------------
+        Matrix.prototype.toString = function Matrix_toString() {
+            return 'Matrix['+Array.prototype.toString.call(this)+']';
         };
         
-        addin.getRow = function Matrix_row(a, n) {
+        Matrix.prototype.toPrettyString = function Matrix_toPrettyString() {
             /** * *
-            * Returns row *n* matrix elements *a*.
-            * @param - Array
-            * @return - Array
+            * Returns a pretty string value.
+            * @return string
+            * @nosideeffects
+            * * **/
+            function fixed(el) {
+                var s = el.toFixed(3);
+                if (el >= 0) {
+                    s = ' '+s;
+                }
+                return s;
+            }
+            var s = '\n' + fixed(this[0]) + ' ' + fixed(this[1]) + ' ' + fixed(this[2]) + '\n';
+                s += fixed(this[3]) + ' ' + fixed(this[4]) + ' ' + fixed(this[5]) + '\n';
+                s += fixed(this[6]) + ' ' + fixed(this[7]) + ' ' + fixed(this[8]);
+            return s;
+        };
+        Matrix.prototype.a = function Matrix_a() {
+            /** * *
+            * Returns the 'a' matrix component.
+            * @return number
+            * * **/
+            return this[0];
+        };
+        Matrix.prototype.b = function Matrix_b() {
+            /** * *
+            * Returns the 'b' matrix component.
+            * @return number
+            * * **/
+            return this[3];
+        };
+        Matrix.prototype.c = function Matrix_c() {
+            /** * *
+            * Returns the 'c' matrix component.
+            * @return number
+            * * **/
+            return this[6];
+        };
+        Matrix.prototype.d = function Matrix_d() {
+            /** * *
+            * Returns the 'd' matrix component.
+            * @return number
+            * * **/
+            return this[1];
+        };
+        Matrix.prototype.e = function Matrix_e() {
+            /** * *
+            * Returns the 'e' matrix component.
+            * @return number
+            * * **/
+            return this[4];
+        };
+        Matrix.prototype.f = function Matrix_f() {
+            /** * *
+            * Returns the 'f' matrix component.
+            * @return number
+            * * **/
+            return this[7];
+        };
+        Matrix.prototype.g = function Matrix_g() {
+            /** * *
+            * Returns the 'g' matrix component.
+            * @return number
+            * * **/
+            return this[2];
+        };
+        Matrix.prototype.h = function Matrix_h() {
+            /** * *
+            * Returns the 'h' matrix component.
+            * @return number
+            * * **/
+            return this[5];
+        };
+        Matrix.prototype.i = function Matrix_i() {
+            /** * *
+            * Returns the 'i' matrix component.
+            * @return number
+            * * **/
+            return this[8];
+        };
+        Matrix.prototype.x = function Matrix_x(x) {
+            /** * *
+            * Returns the x element. 
+            * If *x* is supplied as a parameter, will set the x element before returning.
+            * @param number
+            * @returns number
+            * * **/
+            if (arguments.length) {
+                this[2] = x;
+            }
+            return this[2];
+        };
+        Matrix.prototype.y = function Vector_y(y) {
+            /** * *
+            * Returns the y element.
+            * If *y* is supplied as a parameter, will set the y element before returning.
+            * @param number
+            * @returns number
+            * * **/
+            if (arguments.length) {
+                this[5] = y;
+            }
+            return this[5];
+        };
+        
+        Matrix.prototype.determinant = function Matrix_determinate() {
+            /** * *
+            * Returns the determinate of this matrix.
+            * @return number
+            * @nosideeffects
+            * * **/
+            var a = this.a();
+            var b = this.b();
+            var c = this.c();
+            var d = this.d();
+            var e = this.e();
+            var f = this.f();
+            var g = this.g();
+            var h = this.h();
+            var i = this.i();
+            return a*(e*i - f*h) - b*(d*i - f*g) + c*(d*h - e*g);
+        };
+        
+        Matrix.prototype.inverse = function Matrix_inverse() {
+            /** * *
+            * Returns the inverse of this matrix or false if no inverse exists.
+            * @return Matrix
+            * @nosideeffects
+            * * **/
+            var detM = this.determinant();
+            if (detM === 0) {
+                // This matrix is singular and has no inverse...
+                return false;
+            }
+            var oneOverDet = 1 / detM;
+
+            var a = this.a();
+            var b = this.b();
+            var c = this.c();
+            var d = this.d();
+            var e = this.e();
+            var f = this.f();
+            var g = this.g();
+            var h = this.h();
+            var i = this.i();
+                
+            return m.Matrix(
+                e*i - f*h, f*g - d*i, d*h - e*g,
+                c*h - b*i, a*i - c*g, b*g - a*h,
+                b*f - c*e, c*d - a*f, a*e - b*d
+            ).map(function(el,ndx,a) {
+                return el*oneOverDet;
+            });
+        };
+        
+        Matrix.prototype.row = function Matrix_row(n) {
+            /** * *
+            * Returns row n of this matrix.
+            * @return Vector
+            * @nosideeffects
             * * **/
             var elementsInRow = 3;
             var start = n*elementsInRow;
             var row = [];
             for (var i=0; i < elementsInRow; i++) {
-                row.push(a[start+i]);
+                row.push(this[start+i]);
             }
             return row;
         };
         
-        addin.getColumn = function Matrix_column(a, n) {
+        Matrix.prototype.column = function Matrix_column(n) {
             /** * *
-            * Returns column *n* of matrix *a*.
-            * @return - Array
+            * Returns column n of this matrix.
+            * @return Array
+            * @nosideeffects
             * * **/
             var elementsInColumn = 3;
             var start = n;
             var column = [];
             for (var i=0; i < elementsInColumn; i++) {
-                column.push(a[start+3*i]);
+                column.push(this[start+3*i]);
             }
             return column;
         };
         
-        addin.addRowAndColumn = function Matrix_addRowAndColumn(row, column) {
+        Matrix.prototype.identity = function Matrix_identity() {
             /** * *
-            * Adds a matrix element *row* and *column*.
-            * @param row Array
-            * @param column Array
-            * @return Array
+            * Returns the identity matrix.
+            * @return Matrix
+            * @nosideeffects
             * * **/
-            var combo = 0;
-            for (var i=0; i < row.length && i < column.length; i++) {
-                combo += row[i]*column[i];
-            }
-            return combo;
-        };
-        
-        addin.identityElements = function identityMatrixElements() {
-            return [
+            return Matrix(
                 1.0, 0.0, 0.0, 
                 0.0, 1.0, 0.0, 
                 0.0, 0.0, 1.0 
-            ];
-        }
+            );
+        };
         
-        addin.multiplyElements = function multiplyMatrixElements(a, b) {
+        Matrix.prototype.multiply = function Matrix_multiply(matrix) {
             /** * *
-            * Multiplies matrix elements *a* by *b*.
-            * @param a Array
-            * @param b Array
-            * @return Array
+            * Multiplies this matrix by matrix.
+            * @param Array
+            * @return Matrix
+            * @nosideeffects
             * * **/
-            var elements = [];
+            function addRowAndColumn(row, column) {
+                /** * *
+                * Adds a matrix element *row* and *column*.
+                * @param Array
+                * @param Array
+                * @return number
+                * @nosideeffects
+                * * **/
+                var combo = 0;
+                for (var i=0; i < row.length && i < column.length; i++) {
+                    combo += row[i]*column[i];
+                }
+                return combo;
+            }
+            
+            var elements = Matrix();
+            elements.length = 0;
                 
-            var resultRows = a.length/3;
-            var resultCols = b.length/3;
+            var resultRows = this.length/3;
+            var resultCols = matrix.length/3;
             for (var i=0; i < resultRows; i++) {
                 for (var j=0; j < resultCols; j++) {
-                    var row = addin.getRow(a, i);
+                    var row = this.row(i);
                     var column;
                     if (resultCols === 1) {
                         // This is a vector we are multiplying...
-                        column = b;
+                        column = matrix;
                     } else {
-                        column = addin.getColumn(b, j); // bj - haha
+                        column = matrix.column(j);
                     }
-                    elements.push(addin.addRowAndColumn(row, column));
+                    elements.push(addRowAndColumn(row, column));
                 }
             }
             return elements;
         };
         
-        addin.translateElements = function translateMatrixElements(elements, x, y) {
+        Matrix.prototype.translate = function Matrix_translate(x, y) {
             /** * *
             * Translate this matrix by x, y.
-            * @param - x Number
-            * @param - y Number
-            * @return - self Matrix
+            * @param number
+            * @param number
+            * @return Matrix
+            * @nosideeffects
             * * **/
-            x = m.ifndefInitNum(x, 0);
-            y = m.ifndefInitNum(y, 0);
-            var transElements = [
+            x = x || 0;
+            y = y || 0;
+            var translate = Matrix(
                 1, 0, x,
                 0, 1, y,
                 0, 0, 1
-            ];
-            return addin.multiplyElements(elements, transElements);
+            );
+            return this.multiply(translate);
         };
         
-        addin.scaleElements = function scaleMatrixElements(elements, x, y) {
+        Matrix.prototype.scale = function Matrix_scale(x, y) {
             /** * *
-            * Scale this matrix by x, y.
-            * @param - x Number
-            * @param - y Number
-            * @return - self Matrix
+            * Return this matrix scaled by x, y.
+            * @param number
+            * @param number
+            * @return Matrix
             * * **/
             x = x || 1;
             y = y || 1;
-            var scaleElements = [
+            var scale = Matrix(
                 x, 0, 0,
                 0, y, 0,
                 0, 0, 1
-            ];
-            return addin.multiplyElements(elements, scaleElements);
+            );
+            return this.multiply(scale);
         };
-        addin.rotateElements = function rotateMatrixElements(elements, angleDegrees) {
+        
+        Matrix.prototype.rotate = function Matrix_rotate(angleDegrees) {
             /** * *
             * Rotates this matrix *angleDegrees* about z.
-            * @param - angleDegrees Number
-            * @return - self Matrix
+            * @param number
+            * @return Matrix
             * * **/
             // Invert theta (matrix rotation is counter-clockwise)...
             angleDegrees = angleDegrees || 0;
             // Convert to radians
-            var radians = angleDegrees*m.Geometry.ONE_DEGREE;    
+            var radians = angleDegrees*m.ONE_DEGREE;    
                 
-            var rotationElements = [
+            var rotation = Matrix(
                 Math.cos(radians), -Math.sin(radians), 0,
                 Math.sin(radians), Math.cos(radians), 0,
                 0, 0, 1
-            ];
-            return addin.multiplyElements(elements, rotationElements);
+            );
+            return this.multiply(rotation);
         };
         
-        return addin;
+        Matrix.prototype.transform2DVector = function Matrix_transform2DVector(vec) {
+            /** * *
+            * Transforms a 2D vector by this matrix
+            * @param Vector
+            * @return Vector
+            * @nosideeffects
+            * * **/
+            // Make the 2-vector homogenous...
+            vec = vec.copy();
+            vec[2] = 1; 
+            vec.length = 3;
+            return this.multiply(vec).foldl(function (acc, el) {
+                if (acc.length < 2) {
+                    acc.push(el);
+                }
+                return acc;
+            }, m.Vector());
+        };
+        
+        Matrix.prototype.transformPolygon = function Matrix_transformPolygon(input) {
+            /** * *
+            * Transforms polygon input using this matrix.
+            * @param Polygon
+            * @return Polygon
+            * @nosideeffects
+            * * **/
+            var polygon = input.constructor();
+            var i = 0;
+            for (i; i < input.length; i+=2) {
+                var x = input[i];
+                var y = input[i+1];
+                var shim = m.Vector(x,y);
+                var tvec = this.transform2DVector(shim);
+                polygon[i] = tvec.x();
+                polygon[i+1] = tvec.y();
+            }
+            polygon.length = i;
+            return polygon;
+        };
+        
+        
+        return Matrix;
     }
 });
-

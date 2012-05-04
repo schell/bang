@@ -1,289 +1,184 @@
 /** * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * *
- * Rectangle.js
- * The Rectangle Addin
- * 
- * p0-p1
- * |  |
- * p3-p2
- * Copyright (c) 2012 Schel Scivally. All rights reserved.
- * 
- * @author    Schell Scivally
- * @since    Thu Jan 12 13:07:30 PST 2012
- * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * **/
+* Rectangle.js
+* The Rectangle type.
+*
+* p0-p1
+* |  |
+* p3-p2
+*
+* Copyright (c) 2012 Schell Scivally. All rights reserved.
+* 
+* @author    Schell Scivally
+* @since    Tue Apr 24 20:18:08 PDT 2012
+* * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * **/
 mod({
     name : 'Rectangle',
-    dependencies : [ 'bang::Geometry/Polygon.js', 'bang::Geometry/Point.js', 'bang::Geometry/Size.js' ],
+    dependencies : [ 'bang::Geometry/Polygon.js' ],
     init : function initRectangle (m) {
-        /**
-         * Initializes the Rectangle Addin
-         * @param - m Object - The mod modules object.
-         */
+        /** * *
+        * Initializes the Rectangle type.
+        * @param - m Object - The mod modules object.
+        * * **/
         
-        var addin = function addinRectangle (self) {
-            /**
-             * Adds Rectangle properties to *self*.
-             * @param - self Object - The object to add Rectangle properties to.
-             * @return self Rectangle 
-             */
-            // Addin Polygon
-            self = m.Polygon(self); 
-            
-            if (self.elements.length === 0) {
-                self.elements = addin.from(0, 0, 0, 0).elements;
-            }
-            //--------------------------------------
-            //  FUNCTIONS
-            //--------------------------------------
-            m.safeOverride(self, 'copy', 'polygon_copy', function Rectangle_copy() {
-                /**
-                 * Returns a copy of self.
-                 * @return - Rectangle
-                 */
-                var r = self.polygon_copy();
-                addin(r);
-                return r;
-            });
-            m.safeOverride(self, 'left', 'polygon_left', function Rectangle_left (l) {
-                /** * *
-                * Gets and sets the left edge x value.
-                * @param - Number
-                * @return - Number
-                ** * */
-                if (typeof l === 'number') {
-                    self.elements[0] = l;
-                    self.elements[6] = l;
-                }
-                return self.elements[0];
-            });
-
-            m.safeOverride(self, 'top', 'polygon_top', function Rectangle_top (t) {
-                /** * *
-                * Gets and sets the top edge y value.
-                * @param - Number
-                * @return - Number
-                ** * */
-                if (typeof t === 'number') {
-                    self.elements[1] = t;
-                    self.elements[3] = t;
-                }
-                return self.elements[1];
-            });
-            m.safeAddin(self, 'origin', function Rectangle_origin() {
-                /** * *
-                * Returns a Point at the upper left of the rectangle.
-                * @return - Point
-                * * **/
-                return m.Point.from(self.left(), self.top());
-            });
-            m.safeAddin(self, 'width', function Rectangle_width(w) {
-                /** * *
-                * Gets and sets the width of this Rectangle.
-                * @param - Number
-                * @return - Number
-                * * **/
-                if (typeof w === 'number') {
-                    var x = self.left() + w;
-                    self.elements[2] = x;
-                    self.elements[4] = x;
-                }
-                return self.elements[2] - self.elements[0];
-            });
-            m.safeAddin(self, 'height', function Rectangle_height(h) {
-                /** * *
-                * Returns the height of this Rectangle
-                * @param - Number
-                * @return - Number
-                * * **/
-                if (typeof h === 'number') {
-                    var y = self.top() + h;
-                    self.elements[5] = y;
-                    self.elements[7] = y;
-                }
-                return self.elements[5] - self.elements[1];
-            });
-            
-            self.toString = function Rectangle_toString () {
-                return '[Rectangle(x:'+self.left()+' y:'+self.top()+' w:'+self.width()+' h:'+self.height()+')]';
-            };
-
-            m.safeOverride(self, 'right', 'polygon_right', function Rectangle_right (r) {
-                /** * *
-                * Gets and sets the right edge x value.
-                * @param - Number
-                * @return - Number
-                * * **/
-                if (typeof r === 'number') {
-                    self.elements[2] = r;
-                    self.elements[4] = r;
-                }
-                return self.left() + self.width();
-            });
-
-            m.safeOverride(self, 'bottom', 'polygon_bottom', function Rectangle_bottom (b) {
-                /** * *
-                * Gets and sets the bottom edge y value.
-                * @param - Number
-                * @return - Number
-                * * **/
-                if (typeof b === 'number') {
-                    self.elements[5] = b;
-                    self.elements[7] = b;
-                }
-                return self.top() + self.height();
-            });
-            
-            m.safeAddin(self, 'area', function Rectangle_area () {
-                /**
-                 * Returns the area (in pixels^2) of this rectangle
-                 * @return - Number
-                 */
-                return self.width() * self.height();
-            });
-
-            m.safeAddin(self, 'union', function Rectangle_union (rectangle) {
-                /**
-                 * Returns a rectangle that is a union between *self* and *rectangle*.
-                 * @param - rectangle Rectangle - a rectangle to add to self.
-                 * @return - Rectangle
-                 */
-                var left = Math.min(self.left(), rectangle.left());
-                var top = Math.min(self.top(), rectangle.top());
-                var width = Math.max(self.right(), rectangle.right()) - left;
-                var height = Math.max(self.bottom(), rectangle.bottom()) - top;
-                
-                return addin.from(left, top, width, height);
-            });
-
-            m.safeAddin(self, 'section', function Rectangle_section (cutObj) {
-                /**
-                 * Sections self into sub-rectangles, cut vertically at
-                 * x-positions listed in *cutObj.verticallyAt* and y-positions
-                 * listed in *cutObj.horizontallyAt*
-                 * 
-                 * @param cutObj - an object, {
-                 *     verticallyAt : [],
-                 *     horizontallyAt : []
-                 * }
-                 * @return - Array - An array of rectangles representing the resulting sections.
-                 */
-                cutObj = m.ifndefInitObj(cutObj, {
-                    verticallyAt : [],
-                    horizontallyAt : []
-                });
-                cutObj.verticallyAt.unshift(0);
-                cutObj.verticallyAt.push(self.width());
-                cutObj.horizontallyAt.unshift(0);
-                cutObj.horizontallyAt.push(self.height());
-                var verticals = (cutObj.verticallyAt.length - 1);
-                var horizontals = (cutObj.horizontallyAt.length - 1);
-                var sections = [];
-                var x, y, w, h;
-                for (var j = 0; j < horizontals; j++) {
-                    for (var i = 0; i < verticals; i++) {
-                        x = self.left() + cutObj.verticallyAt[i];
-                        y = self.top() + cutObj.horizontallyAt[j];
-                        w = cutObj.verticallyAt[i+1] - cutObj.verticallyAt[i];
-                        h = cutObj.horizontallyAt[j+1] - cutObj.horizontallyAt[j];
-                        var section = addin.from(x, y, w, h);
-                        sections.push(section);
-                    }
-                }
-                return sections;
-            });
-            
-            m.safeAddin(self, 'intersectsRectangle', function Rectangle_intersects(r) {
-                /** * *
-                * Returns whether or not this rectangle intersects rectangle r.
-                * Rectangles that share the same edge are considerend NOT intersecting.
-                * @param - Rectangle
-                * @return Boolean
-                * * **/
-                return !(self.left() >= r.right() || 
-                         r.left() >= self.right() || 
-                         self.top() >= r.bottom() || 
-                         r.top() >= self.bottom());
-            });
-            
-            m.safeAddin(self, 'containsRectangle', function Rectangle_contains(r) {
-                /** * *
-                * Returns whether or not this rectangle contains rectangle r.
-                * If rectangle r is equal it is considered contained within this rectangle (and visa versa).
-                * @param - Rectangle
-                * @return Boolean
-                * * **/
-                return self.left() <= r.left() && self.top() <= r.top() && self.right() >= r.right() && self.bottom() >= r.bottom();
-            });
-
-            return self;
-        };
-        
-        addin.from = function Rectangle_from (x, y, w, h) {
+        function Rectangle(x,y,w,h) {
             /** * *
-            * Returns a new Rectangle with dimensions *x*,*y*,*w*,*h*.
-            * @param - x Number - The x position.
-            * @param - y Number - The y position.
-            * @param - w Number - The width.
-            * @param - h Number - The height
-            * @return - Rectangle
+            * Creates a new rectangle at (x,y) with width w and height h.
+            * @param number
+            * @param number
+            * @param number
+            * @param number
+            * @return Rectangle
+            * @nosideeffects
+            * * **/
+            x = x || 0;
+            y = y || 0;
+            w = w || 0;
+            h = h || 0;
+            
+            var r = Object.create(Rectangle.prototype);
+            r.left(x);
+            r.top(y);
+            r.width(w);
+            r.height(h);
+            r.length = 8;
+            return r;
+        }
+        
+        Rectangle.prototype = m.Polygon();
+        
+        Rectangle.prototype.constructor = Rectangle;
+        
+        Rectangle.prototype.toString = function Rectangle_toString() {
+            return 'Rectangle['+this.left()+','+this.top()+','+this.width()+','+this.height()+']';
+        };
+        
+        Rectangle.prototype.left = function Rectangle_left(l) {
+            /** * *
+            * Gets and sets the left edge x value.
+            * @param number
+            * @return number
             ** * */
-            x = m.ifndefInitNum(x, 0);
-            y = m.ifndefInitNum(y, 0);
-            w = m.ifndefInitNum(w, 0);
-            h = m.ifndefInitNum(h, 0);
-             
-            return addin({
-                elements : [
-                    x,   y,
-                    x+w, y,
-                    x+w, y+h,
-                    x,   y+h
-                ]
-            });
+            if (typeof l === 'number') {
+                this[0] = l;
+                this[6] = l;
+            }
+            return this[0];
         };
         
-        addin.fromTwoPoints = function Rectangle_fromTwoPoints(p1, p2) {
-            /**
-             * Creates a Rectangle using two points as opposing corners of the rectangle.
-             * @param - p1 Point - The first point defining the rectangle.
-             * @param - p2 Point - The second point defining the rectangle.
-             * @return - Rectangle
-             */
-            p1 = m.ifndefInitObj(p1, m.Point());
-            p2 = m.ifndefInitObj(p2, m.Point());
-            
-            var x, y, w, h;
-            x = 0;
-            y = 0;
-            w = 0;
-            h = 0;
-            if (p1.x() < p2.x()) {
-                x = p1.x();
-                w = p2.x() - p1.x();
-            } else {
-                x = p2.x();
-                w = p1.x() - p2.x();
+        Rectangle.prototype.top = function Rectangle_top(t) {
+            /** * *
+            * Gets and sets the top edge y value.
+            * @param number
+            * @return number
+            ** * */
+            if (typeof t === 'number') {
+                this[1] = t;
+                this[3] = t;
             }
-            if (p1.y() < p2.y()) {
-                y = p1.y();
-                h = p2.y() - p1.y();
-            } else {
-                y = p2.y();
-                h = p1.y() - p2.y();
-            }
-            
-            return addin.from(x, y, w, h);
+            return this[1];
         };
         
-        addin.reduceRectangles = function Rectangle_reduceRectangles(rectangles) {
+        Rectangle.prototype.right = function Rectangle_right(r) {
+            /** * *
+            * Gets and sets the right edge x value.
+            * @param number
+            * @return number
+            * * **/
+            if (typeof r === 'number') {
+                this[2] = r;
+                this[4] = r;
+            }
+            return this.left() + this.width();
+        };
+
+        Rectangle.prototype.bottom = function Rectangle_bottom(b) {
+            /** * *
+            * Gets and sets the bottom edge y value.
+            * @param number
+            * @return number
+            * * **/
+            if (typeof b === 'number') {
+                this[5] = b;
+                this[7] = b;
+            }
+            return this.top() + this.height();
+        };
+        
+        Rectangle.prototype.width = function Rectangle_width(w) {
+            /** * *
+            * Gets and sets the width of this Rectangle.
+            * @param number
+            * @return number
+            * * **/
+            if (typeof w === 'number') {
+                var x = this.left() + w;
+                this[2] = x;
+                this[4] = x;
+            }
+            return this[2] - this[0];
+        };
+        
+        Rectangle.prototype.height = function Rectangle_height(h) {
+            /** * *
+            * Returns the height of this Rectangle
+            * @param number
+            * @return number
+            * * **/
+            if (typeof h === 'number') {
+                var y = this.top() + h;
+                this[5] = y;
+                this[7] = y;
+            }
+            return this[5] - this[1];
+        };
+        
+        Rectangle.prototype.area = function Rectangle_area () {
+            /** * *
+            * Returns the area (in pixels^2) of this rectangle
+            * @return number
+            * @nosideeffects
+            * * **/
+            return this.width() * this.height();
+        };
+        
+        Rectangle.prototype.intersectsRectangle = function Rectangle_intersectsRectangle(r) {
+            /** * *
+            * Returns whether or not this rectangle intersects rectangle r.
+            * Rectangles that share the same edge are considerend NOT intersecting.
+            * @param - Rectangle
+            * @return boolean
+            * @nosideeffects
+            * * **/
+            return !(this.left() >= r.right() || 
+                     r.left() >= this.right() || 
+                     this.top() >= r.bottom() || 
+                     r.top() >= this.bottom());
+        };
+            
+        Rectangle.prototype.containsRectangle = function Rectangle_contains(r) {
+            /** * *
+            * Returns whether or not this rectangle contains rectangle r.
+            * If rectangle r is equal it is considered contained within this rectangle (and visa versa).
+            * @param Rectangle
+            * @return boolean
+            * @nosideeffects
+            * * **/
+            return this.left() <= r.left() && this.top() <= r.top() && this.right() >= r.right() && this.bottom() >= r.bottom();
+        };
+        
+        Rectangle.reduceRectangles = function Rectangle_reduceRectangles(rectangles) {
             /** * *
             * Returns a new set of rectangles that do not intersect, that occupy the
             * same space as the original.
+            * @param Array
             * @return Array
+            * @nosideeffects
             * * **/
             function bundleRectangles(rectangles) {
                 /** * *
                 * Bundles and sorts rectangles by vertical edges.
                 * @param Array
+                * @nosideeffects
                 * * **/
                 var output = [];
                 for (var i=0; i < rectangles.length; i++) {
@@ -316,7 +211,7 @@ mod({
                     
             // We're going to need this function during end events...
             function mapIntersectionToScan(el) {
-                var newScan = m.Rectangle.from(e.x, el.top(), 0, el.height());
+                var newScan = m.Rectangle(e.x, el.top(), 0, el.height());
                 newScan.intersects = [el];
                 return newScan;
             }
@@ -376,7 +271,7 @@ mod({
                                     intersected.bottom(Math.max(intersected.bottom(), b));
                                     intersected.intersects = intersected.intersects.concat(scan.intersects);
                                 } else {
-                                    intersected = m.Rectangle.from(e.x, t, 0, b - t);
+                                    intersected = m.Rectangle(e.x, t, 0, b - t);
                                     intersected.intersects = scan.intersects.concat([e.rectangle]);
                                 }
                                 // Get rid of the current scan...
@@ -431,7 +326,7 @@ mod({
                                         var intersection = newScans[newScanNdx++];
                                         for (l=0; l < newScans.length; l++) {
                                             if (l === newScanNdx-1) {
-                                                // We don't want to compare a scan to itself...
+                                                // We don't want to compare a scan to itthis...
                                                 continue;
                                             }
                                             var newScan = newScans[l];
@@ -460,6 +355,6 @@ mod({
             return output.concat(scans);
         };
         
-        return addin;
+        return Rectangle;
     }
 });

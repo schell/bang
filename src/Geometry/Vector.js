@@ -1,246 +1,212 @@
 /** * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * *
 * Vector.js
-* The Vector Addin
+* The vector addin.
 * Copyright (c) 2012 Schell Scivally. All rights reserved.
 * 
 * @author    Schell Scivally
-* @since    Wed Jan 25 10:02:52 PST 2012
+* @since    Tue Apr 24 12:32:51 PDT 2012
 * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * **/
 mod({
     name : 'Vector',
-    dependencies : [  ],
+    dependencies : [ ],
     init : function initVector (m) {
-        /**
-         * Initializes the Vector Addin
-         * @param - m Object - The mod modules object.
-         */
+        /** * *
+        * Initializes the Vector array extension.
+        * @param - m Object - The mod modules object.
+        * * **/
         
-        var addin = function addinVector (self) {
-            /**
-             * Adds Vector properties to *self*.
-             * @param - self Object - The object to add Vector properties to.
-             * @return self Vector Object 
-             */
-            self = m.Object(self); 
-            //--------------------------------------
-            //  PROPERTIES
-            //--------------------------------------
+        function Vector() {
+            var v = Object.create(Vector.prototype);
+            v.length = 0;
+            for (var i=0; i < arguments.length; i++) {
+                v.push(arguments[i]);
+            }
+            return v;
+        }
+        
+        Vector.prototype = [];
+        
+        Vector.prototype.constructor = Vector;
+        
+        Vector.prototype.toString = function() {
+            return 'Vector['+Array.prototype.toString.call(this)+']';
+        };
+        
+        //--------------------------------------
+        //  METHODS
+        //--------------------------------------
+        Vector.prototype.foldl = function Vector_foldl(f, acc) {
             /** * *
-            * An array for holding our vector elements.
-            * @var Array
+            * Folds left (starting at zero) along this array using function f, 
+            * which takes an accumulator and an element and returns
+            * a new accumulator value - acc is the initial accumulator
+            * value. Returns the resulting accumulator.
+            * @param function (accumulator, element)
+            * @param object
+            * @nosideeffects
             * * **/
-            m.safeAddin(self, 'elements', []);
-            //--------------------------------------
-            //  METHODS
-            //--------------------------------------
-            m.safeAddin(self, 'isEqualTo', function Vector_isEqualTo(vec) {
-                /** * *
-                * Returns whether or not *vec* is equal to self.
-                * @param - vec Vector
-                * @returns - Boolean
-                * * **/
-                if (self.elements.length !== vec.elements.length) {
-                    return false;
+            for (var i=0; i < this.length; i++) {
+                acc = f(acc, this[i]);
+            }
+            return acc;
+        };
+        
+        Vector.prototype.foldr = function Vector_foldr(f, acc) {
+            /** * *
+            * Folds right (starting at this.length) along this array 
+            * using function f, which takes an element and an accumulator
+            * and returns a new accumulator value - acc is the initial accumulator
+            * value. Returns the resulting accumulator.
+            * @param function (element, accumulator)
+            * @param object
+            * @nosideeffects
+            * * **/
+            for (var i = this.length - 1; i >= 0; i--){
+                acc = f(this[i], acc);
+            }
+            return acc;
+        };
+        
+        Vector.prototype.map = function Vector_map(f) {
+            /** * *
+            * Maps a function over the vector, creating a new vector
+            * with the return values.
+            * @param {function(*, number, Array.<*>)}
+            * @return {Vector}
+            * @nosideeffects
+            * * **/
+            var copy = this.constructor();
+            for (var i = this.length - 1; i >= 0; i--){
+                copy[i] = f(this[i],i,this);
+            }
+            copy.length = this.length;
+            return copy;
+        };
+        
+        Vector.prototype.takeWhile = function Vector_takeWhile(f) {
+            /** * *
+            * Maps function f over all elements, collecting elements
+            * in a new array that return true when fed to f, until f returns false.
+            * @param {function(*, number): *}
+            * @return {Vector}
+            * @nosideeffects
+            * * **/
+            var a = this.constructor();
+            var i = 0;
+            for (i; i < this.length; i++) {
+                var element = this[i];
+                if (f(element, i)) {
+                    a[i] = this[i];
+                } else {
+                    break;
                 }
-                for (var i = self.elements.length - 1; i >= 0; i--){
-                    if (self.elements[i] !== vec.elements[i]) {
-                        return false;
-                    }
-                }
+            }
+            a.length = i;
+            return a;
+        };
+        
+        Vector.prototype.isEqualTo = function Vector_isEqualTo(a) {
+            /** * *
+            * Returns whether or not array a is equal to this.
+            * @param {Vector}
+            * @return {boolean}
+            * @nosideeffects
+            * * **/
+            if (this.length !== a.length) {
+                return false;
+            }
+            var b = this.takeWhile(function (el, ndx) {
+                return el === a[ndx];
+            });
+            return this.length === b.length;
+        };
+        
+        Vector.prototype.copy = function Vector_copy() {
+            /** * *
+            * Returns a copy of this vector.
+            * @return {Vector}
+            * @nosideeffects
+            * * **/
+            return this.takeWhile(function (el) {
                 return true;
             });
-            m.safeAddin(self, 'copy', function Vector_copy() {
-                /** * *
-                * Returns a copy of this vector.
-                * * **/
-                var vec = addin();
-                for (var i=0; i < self.elements.length; i++) {
-                    vec.elements.push(self.elements[i]);
-                }
-                return vec;
-            });
-            m.safeAddin(self, 'copyElementsInto', function Vector_copyElementsInto(elements) {
-                /** * *
-                * Copies this Vector's elements into an array.
-                * @param Array
-                * * **/
-                elements.length = self.elements.length;
-                for (var i = self.elements.length - 1; i >= 0; i--){
-                    elements[i] = self.elements[i];
-                }
-            });
-            m.safeAddin(self, 'add', function Vector_add(vec) {
-                /** * *
-                * Adds *vec* to this vector.
-                * @param - vec Vector
-                * * **/
-                var n = vecWithMinElements(self, vec).elements.length;
-                for (var i=0; i < n; i++) {
-                    self.elements[i] += vec.elements[i];
-                }
-            });
-            m.safeAddin(self, 'subtract', function Vector_subtract(vec) {
-                /** * *
-                * Subtracts *vec* from this vector.
-                * @param - vec Vector
-                * * **/
-                var n = vecWithMinElements(self, vec).elements.length;
-                for (var i=0; i < n; i++) {
-                    self.elements[i] -= vec.elements[i];
-                }
-            });
-            m.safeAddin(self, 'multiply', function Vector_multiply(vec) {
-                /** * *
-                * Multiplies this vector by *vec*.
-                * @param - vec Vector    
-                * * **/
-                var n = vecWithMinElements(self, vec).elements.length;
-                for (var i=0; i < n; i++) {
-                    self.elements[i] *= vec.elements[i];
-                }
-            });
-            
-            m.safeAddin(self, 'divide', function Vector_divide(vec) {
-                /** * *
-                * Divides this vector by *vec*.
-                * @param - vector Vector
-                * * **/
-                var n = vecWithMinElements(self, vec).elements.length;
-                for (var i=0; i < n; i++) {
-                    self.elements[i] /= vec.elements[i];
-                }
-            });
-            
-            m.safeAddin(self, 'magnitude', function Vector_magnitude() {
-                /** * *
-                * Returns the magnitude of this vector.
-                * @returns - Number
-                * * **/
-                var sqSum = 0;
-                for (var i=0; i < self.elements.length; i++) {
-                    sqSum += self.elements[i]*self.elements[i];
-                }
-                return Math.sqrt(sqSum);
-            });
-            m.safeAddin(self, 'normalizeElementsInto', function Vector_n(elements) {
-                /** * *
-                * Copies this Vector's normalized elements into an array.
-                * @param Array
-                * * **/
-                self.copyElementsInto(elements);
-                var mag = self.magnitude();
-                for (var i=0; i < self.elements.length; i++) {
-                    elements[i] /= mag;
-                }
-            });
-            m.safeAddin(self, 'normalized', function Vector_normalized() {
-                /** * *
-                * Returns a normalized copy of this vector.
-                * @returns - Vector
-                * * **/
-                var norm = self.copy();
-                self.normalizeElementsInto(norm.elements);
-                return norm;
-            });
-            m.safeAddin(self, 'x', function Vector_x(x) {
-                /** * *
-                * Returns the x element. 
-                * If *x* is supplied as a parameter, will set the x element before returning.
-                * @param - x Number
-                * @returns - x Number
-                * * **/
-                if (arguments.length) {
-                    self.elements[0] = x;
-                }
-                return self.elements[0];
-            });
-            m.safeAddin(self, 'y', function Vector_y(y) {
-                /** * *
-                * Returns the y element.
-                * If *y* is supplied as a parameter, will set the y element before returning.
-                * @param - y Number
-                * @returns - y Number
-                * * **/
-                if (arguments.length) {
-                    self.elements[1] = y;
-                }
-                return self.elements[1];
-            });
-            //--------------------------------------
-            //  HELPERS
-            //--------------------------------------
-            function vecWithMinElements(vec1, vec2) {
-                /** * *
-                * Returns the vector with the least number of elements.
-                * * **/
-                return vec1.elements.length < vec2.elements.length ? vec1 : vec2;
+        };
+        
+        Vector.prototype.add = function Vector_add(v) {
+            /** * *
+            * Returns the addition of Vector v and this.
+            * @param {Vector}
+            * @return {Vector}
+            * @nosideeffects
+            * * **/
+            return this.foldl(function (acc, element) {
+                acc.push(element + v[acc.length]);
+                return acc;
+            }, this.constructor());
+        };
+        
+        Vector.prototype.subtract = function Vector_subtract(v) {
+            /** * *
+            * Returns the subtraction of Vector v from this.
+            * @param {Vector}
+            * @return {Vector}
+            * @nosideeffects
+            * * **/
+            return this.foldl(function (acc, element) {
+                acc.push(element - v[acc.length]);
+                return acc;
+            }, this.constructor());
+        };
+        
+        Vector.prototype.x = function Vector_x(x) {
+            /** * *
+            * Gets and sets the x value.
+            * @param {number}
+            * @return {number}
+            * * **/
+            if (arguments.length) {
+                this[0] = x;
             }
-            //--------------------------------------
-            //  STRING
-            //--------------------------------------
-            self.toString = function() {
-                var s = '[Vector(';
-                for (var i=0; i < self.elements.length; i++) {
-                    s += self.elements[i].toFixed(3);
-                    if (i !== self.elements.length-1) {
-                        s += ', ';
-                    }
-                }
-                s+=')]';
-                return s;
-            };
-            return self;
-        };
-        addin.from = function Vector_from(x, y, z) {
-            /** * *
-            * Returns a 3-space vector <x,y,z>
-            * * **/
-            x = m.ifndefInitNum(x, 0);
-            y = m.ifndefInitNum(y, 0);
-            z = m.ifndefInitNum(z, 0);
-            
-            return addin({
-                elements : [x, y, z]
-            });
-        };
-        addin.Origin = function Vector_Origin() {
-            /** * *
-            * Returns the origin point in 3-space.
-            * @returns - Vector
-            * * **/
-            return addin({
-                elements : [0.0, 0.0, 0.0]
-            });
-        };
-        addin.X = function Vector_X() {
-            /** * *
-            * Returns the X axis Vector.
-            * @returns - Vector
-            * * **/
-            return addin({
-                elements : [ 1.0, 0.0, 0.0]
-            });
-        };
-        addin.Y = function Vector_Y() {
-            /** * *
-            * Returns the Y axis Vector.
-            * @returns - Vector
-            * * **/
-            return addin({
-                elements : [ 0.0, 1.0, 0.0]
-            });
-        };
-        addin.Z = function Vector_Z() {
-            /** * *
-            * Returns the Z axis Vector.
-            * @returns - Vector
-            * * **/
-            return addin({
-                elements : [ 0.0, 0.0, 1.0]
-            });
+            return this[0];
         };
         
-        return addin;
+        Vector.prototype.y = function Vector_y(y) {
+            /** * *
+            * Gets and sets the y value.
+            * @param {number}
+            * @return {number}
+            * * **/
+            if (arguments.length) {
+                this[1] = y;
+            }
+            return this[1];
+        };
         
+        Vector.prototype.magnitude = function Vector_magnitude() {
+            /** * *
+            * Returns the magnitude of this vector.
+            * @return {number}
+            * @nosideeffects
+            * * **/
+            var total = this.foldr(function (element, acc) {
+                return element*element+acc;
+            }, 0);
+            return Math.sqrt(total);
+        };
+        
+        Vector.prototype.normalize = function Vector_normalize() {
+            /** * *
+            * Returns the unit vector of this vector.
+            * @return {Vector}
+            * @nosideeffects
+            * * **/
+            var magnitude = this.magnitude();
+            return this.foldr(function (element, acc) {
+                acc.unshift(element/magnitude);
+                return acc;
+            }, this.constructor());
+        };
+        
+        return Vector;
     }
 });
