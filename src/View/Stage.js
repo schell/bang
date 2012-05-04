@@ -112,61 +112,38 @@ mod({
             //--------------------------------------
             // A var to hold our dirty views - we make
             // one here to save on allocation every frame...
-            var _dirtyViews = [];
+            var _dirtyRects = []; // Haha...
+            // A var to hold our reduced (non-overlapping) rectangles...
+            var _reducedRects = [];
             // A var to hold our matrix transforms...
             var _dirtyTransform = m.Matrix();
-            m.safeAddin(self, 'getGlobalDirtyRectangleForView', function Stage_getGlobalDirtyRectangleForView(view) {
-                /** * *
-                * Returns the enclosing dirty rectangle in global coordinates for a given view.
-                * @param View
-                * @return Rectangle
-                * * **/
-                var rect = dirtyView.dirtyRectangle();
-                var transform = dirtyView.getCompoundTransformMatrix();
-                // Transformed dirty rectangle...
-                var tdr = transform.transformPolygon(rect.copy());
-                var x1 = tdr.polygon_left();
-                var y1 = tdr.polygon_top();
-                var x2 = tdr.polygon_right();
-                var y2 = tdr.polyong_bottom();
-                var globalDirtyRect = m.Rectangle.from(x1, y1, x2-x1, y2-y1);
-                return globalDirtyRect;
-            });
             m.safeAddin(self, 'tick', function Stage_tick() {
                 /** * *
                 * Called every frame.
                 * Steps all animations and other on-frame events.
                 * * **/
-                _dirtyViews.length = 0;
-                // A naive dirty rectangles implementation...
+                _dirtyRects.length = 0;
                 for (var i = _displayList.length - 1; i >= 0; i--) {
                     var view = _displayList[i];
                     if (view.graphics.isDirty) {
-                        _dirtyViews.push(view);
+                        _dirtyRects.push(view.dirtyRectangle());
                     }
                     if (view === self) {
                         _dirtyViews = [self];
                     }
                 }
-                /*
-                while (_dirtyViews.length) {
-                    var dirtyView = _dirtyViews.shift();
-                    var rect = self.getGlobalDirtyRectangleForView(dirtyView);
-                    // Clear that rectangle...
-                    self.graphics.clearRect(rect.x(), rect.y(), rect.width(), rect.height());
-                    // Run through all the views and draw where they intersect this rect...
-                    // This would be a good place to optimize with R-trees...
-                    
+                // Reduce the rectangles to a set of non-overlapping ones...
+                _reducedRects = m.Rectangle.reduceRectangles(_dirtyRects);
+                // TODO: I think I could use quadtrees here to improve this, but
+                // this will have to do for now...
+                for (var j=0; j < _dirtyRects.length; j++) {
+                    var dirtyRect = _dirtyRects[j];
+                    // Clear that dirty area...
+                    stage.compositeContext.clearRect(dirtyRect.left(), dirtyRect.right(), dirtyRect.width(), dirtyRect.height());
+                    // Run through the immediate children and see what needs to be blitted...
+                    var subviews = self.subviews();
                 }
-                */
-                // Just for now draw the stage...
-                if (self.compositeContext.canvas.width != self.graphics.canvas.width ||
-                    self.compositeContext.canvas.height != self.graphics.canvas.height) {
-                    self.compositeContext.canvas.width = self.graphics.canvas.width;
-                    self.compositeContext.canvas.height = self.graphics.canvas.height;
-                }
-                self.compositeContext.clearRect(0, 0, self.compositeContext.canvas.width, self.compositeContext.canvas.height);
-                self.compositeContext.drawImage(self.graphics.canvas, 0, 0);
+                
                 // Send out a global tick notification...
                 self.sendNotification(m.Stage.FRAME_TICK);
                 

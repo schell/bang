@@ -206,13 +206,15 @@ mod({
             //--------------------------------------
             //  DRAWING
             //--------------------------------------
-            m.safeAddin(self, 'draw', function View_draw(context) {
+            m.safeAddin(self, 'draw', function View_draw(context, globalRectangle) {
                 /** * *
-                * Draws this view into the 2d context.
+                * Draws a portion of this view into the 2d context.
                 * @param CanvasRenderingContext2D
+                * @param Rectangle
                 * * **/
                 self.applyTransform(context);
                 
+                var localRectangle = self.convertPolygonToLocal(globalRectangle.copy());
                 // Now draw this element into the provided graphics context...
                 context.drawImage(self.graphics.context.canvas, 0, 0);
                 
@@ -220,10 +222,24 @@ mod({
             });
             m.safeAddin(self, 'dirtyRectangle', function View_dirtyRectangle() {
                 /** * *
-                * Returns the LOCAL dirty rectangle for this view.
+                * Returns the GLOBAL dirty rectangle for this view.
                 * @return Rectangle
                 * * **/
-                return m.Rectangle.from(0, 0, self.graphics.canvas.width, self.graphics.canvas.height);
+                return self.convertPolygonToGlobal(m.Rectangle.from(0, 0, self.graphics.canvas.width, self.graphics.canvas.height));
+            });
+            m.safeAddin(self, 'blitOnto', function View_blitOnto(context, x,y,w,h) {
+                /** * *
+                * Blits a portion of this view into the given context after applying this view's transform
+                * to the context.
+                * @param CanvasRenderingContext2D
+                * @param Number
+                * @param Number
+                * @param Number
+                * @param Number
+                * * **/
+                if (x > self.x + self.graphics.canvas.width) {}
+                self.applyTransform(context);
+                
             });
             m.safeAddin(self, 'drawPolygon', function View_addHitAreaDrawFunction(polygon, fill, stroke) {
                 /** * *

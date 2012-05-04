@@ -198,10 +198,10 @@ mod({
                 * @param - Rectangle
                 * @return Boolean
                 * * **/
-                return !(self.left() >= r.right() 
-                        || r.left() >= self.right() 
-                        || self.top() >= r.bottom()
-                        || r.top() >= self.bottom());
+                return !(self.left() >= r.right() || 
+                         r.left() >= self.right() || 
+                         self.top() >= r.bottom() || 
+                         r.top() >= self.bottom());
             });
             
             m.safeAddin(self, 'containsRectangle', function Rectangle_contains(r) {
@@ -241,7 +241,7 @@ mod({
             });
         };
         
-        addin.fromTwoPoints = function Rectangle_fromTwoPoints (p1, p2) {
+        addin.fromTwoPoints = function Rectangle_fromTwoPoints(p1, p2) {
             /**
              * Creates a Rectangle using two points as opposing corners of the rectangle.
              * @param - p1 Point - The first point defining the rectangle.
@@ -273,6 +273,193 @@ mod({
             
             return addin.from(x, y, w, h);
         };
+        
+        addin.reduceRectangles = function Rectangle_reduceRectangles(rectangles) {
+            /** * *
+            * Returns a new set of rectangles that do not intersect, that occupy the
+            * same space as the original.
+            * @return Array
+            * * **/
+            function bundleRectangles(rectangles) {
+                /** * *
+                * Bundles and sorts rectangles by vertical edges.
+                * @param Array
+                * * **/
+                var output = [];
+                for (var i=0; i < rectangles.length; i++) {
+                    var rect = rectangles[i];
+                    output.push({
+                        id : i,
+                        type : 's',
+                        x : rect.left(),
+                        intersections : [],
+                        rectangle : rect
+                    });
+                    output.push({
+                        id : i,
+                        type : 'e',
+                        x : rect.right(),
+                        intersections : [],
+                        rectangle : rect
+                    });
+                }
+                function compareX(n1, n2) {
+                    var diff = n1.x - n2.x;
+                    if (diff === 0) {
+                        return n1.top - n2.top;
+                    }
+                    return diff;
+                }
+                output.sort(compareX);
+                return output;
+            }
+                    
+            // We're going to need this function during end events...
+            function mapIntersectionToScan(el) {
+                var newScan = m.Rectangle.from(e.x, el.top(), 0, el.height());
+                newScan.intersects = [el];
+                return newScan;
+            }
+                        
+            var input = rectangles.slice();
+            var events = bundleRectangles(input);
+            var current = [];
+            var scans = [];
+            var output = [];
+            var i,j,k,l,scan,currentRect;
+                        
+            for (i=0; i < events.length; i++) {
+                var e = events[i];
+                            
+                // Update the current scans...
+                for (j=0; j < scans.length; j++) {
+                    scan = scans[j];
+                    scan.right(e.x);
+                }
+                            
+                if (e.type === 's') {
+                    var contained = false;
+                    for (j=0; j < current.length; j++) {
+                        currentRect = current[j];
+                        if (currentRect.containsRectangle(e.rectangle)) {
+                            contained = true;
+                            break;
+                        }
+                    }
+                    if (!contained) {
+                        // This event should start a new rectangle (at some point)...
+                        current.push(e.rectangle);
+                        var intersected = false;
+                        for (j=0; j < scans.length; j++) {
+                            scan = scans[j];
+                            if (!(e.rectangle.top() >= scan.bottom() || scan.top() >= e.rectangle.bottom())) {
+                                // The scan and event intersect in y...
+                                if ((e.rectangle.top() >= scan.top() && e.rectangle.bottom() <= scan.bottom())) {
+                                    // This scan contains the event's rectangle, so we don't need to make a new scan
+                                    // but we will need to know that it intersects...
+                                    scan.intersects.push(e.rectangle);
+                                    contained = true;
+                                    continue;
+                                }
+                                // We have to check if it has a width, if not, it was added by an earlier intersection
+                                // during this event...
+                                if (scan.width()) {
+                                    // This scan was from an earlier event, so output a rectangle...
+                                    output.push(scan);
+                                }
+                                // Replace this scan with a scan that represents the intersection...
+                                var t = Math.min(e.rectangle.top(), scan.top());
+                                var b = Math.max(e.rectangle.bottom(), scan.bottom());
+                                if (intersected) {
+                                    // We've already created one intersection, so group it with this one...
+                                    intersected.top(Math.min(intersected.top(), t));
+                                    intersected.bottom(Math.max(intersected.bottom(), b));
+                                    intersected.intersects = intersected.intersects.concat(scan.intersects);
+                                } else {
+                                    intersected = m.Rectangle.from(e.x, t, 0, b - t);
+                                    intersected.intersects = scan.intersects.concat([e.rectangle]);
+                                }
+                                // Get rid of the current scan...
+                                scans.splice(j--, 1);
+                            }
+                        }
+                        if (!contained) {
+                            // This rectangle is not contained by a current scan either...
+                            if (!intersected) {
+                                // This event starts a new non-overlapping rectangle...
+                                var r = e.rectangle.copy();
+                                r.intersects = [e.rectangle];
+                                scans.push(r);
+                            } else {
+                                scans.push(intersected);
+                            }
+                        }
+                    }
+                } else {
+                    // This is an end event...
+                    for (j=0; j < current.length; j++) {
+                        currentRect = current[j];
+                        if (currentRect.isEqualTo(e.rectangle)) {
+                            current.splice(j, 1);
+                            break;
+                        }
+                    }
+                    
+                    for (j=0; j < scans.length; j++) {
+                        scan = scans[j];
+                        // Find the scan that intersects this end event...
+                        if (scan.intersects.length === 1 && scan.top() === e.rectangle.top() && scan.bottom() === e.rectangle.bottom()) {
+                            // This end event corresponds specifically to this scan, so output it...
+                            output.push(scan);
+                            scans.splice(j--, 1);
+                        } else {
+                            // We're going to have to break this scan up into subscans...
+                            var ndx = scan.intersects.indexOf(e.rectangle);
+                            if (ndx !== -1) {
+                                // Output the scan, because we have to change it...
+                                output.push(scan);
+                                // Remove this rectangle from the intersecting scan...
+                                scan.intersects.splice(ndx, 1);
+                                // Remove the scan from our scans...
+                                scans.splice(j, 1);
+                                if (scan.intersects.length) {
+                                    // Make some new scans to replace the old one...
+                                    var newScans = scan.intersects.map(mapIntersectionToScan);
+                                    // Iterate through the new scans and collect them together if they overlap...
+                                    var newScanNdx = 0;
+                                    while (newScans.length > 1 && newScanNdx < newScans.length) {
+                                        var intersection = newScans[newScanNdx++];
+                                        for (l=0; l < newScans.length; l++) {
+                                            if (l === newScanNdx-1) {
+                                                // We don't want to compare a scan to itself...
+                                                continue;
+                                            }
+                                            var newScan = newScans[l];
+                                            if (!(newScan.top() > intersection.bottom() || intersection.top() > newScan.bottom())) {
+                                                // The two overlap, so absorb the intersection scan into this scan...
+                                                intersection.top(Math.min(newScan.top(), intersection.top()));
+                                                intersection.bottom(Math.max(newScan.bottom(), intersection.bottom()));
+                                                intersection.intersects = newScan.intersects.concat(intersection.intersects);
+                                                // Now we have to test this scan against the others again, since it has changed...
+                                                newScans.splice(l, 1);
+                                                newScanNdx = 0;
+                                                break;
+                                            }
+                                        }
+                                    }
+                                    // Add the new scans to scans...
+                                    scans = scans.concat(newScans);
+                                }
+                                break;
+                            }
+                        }
+                    }
+                }
+            }
+            // Concat the remaining scans in there...
+            return output.concat(scans);
+        };
+        
         return addin;
     }
 });
