@@ -155,7 +155,7 @@ mod({
                 
             if (invert) {
                 // Let's just provide them with an inverse instead of
-                // making them take the inverse afterwards, this should
+                // making them take the inverse afterwards, it should
                 // save some cycles...
                 matrix = m.Matrix.scale(1/this.scaleX, 1/this.scaleY);
                 matrix = m.Matrix.rotate(-this.rotation);
