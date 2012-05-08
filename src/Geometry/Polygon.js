@@ -16,15 +16,10 @@ mod({
         * * **/
         
         function Polygon() {
-            var v = Object.create(Polygon.prototype);
-            v.length = 0;
-            for (var i=0; i < arguments.length; i++) {
-                v.push(arguments[i]);
-            }
-            return v;
+            m.Vector.apply(this, Array.prototype.slice.call(arguments));
         }
         
-        Polygon.prototype = m.Vector();
+        Polygon.prototype = new m.Vector();
         
         Polygon.prototype.constructor = Polygon;
         

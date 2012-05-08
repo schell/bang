@@ -43,25 +43,25 @@
                 
                 assert.suite = 'Vector';
                 
-                var v = m.Vector(0,1,2,3,4,5);
+                var v = new m.Vector(0,1,2,3,4,5);
                 var vv = new m.Vector(0,1,2,3,4,5);
                 assert.eq(v[3], 3, 'Vector initializes with elements.');
                 assert.eq(v.length, 6, 'Vector initializes with length.');
                 var vcopy = v.copy();
                 assert.eq(vcopy.isEqualTo(v) && vv.isEqualTo(vcopy), true, 'Vector can evaluate equality.');
-                var add1 = vcopy.add(m.Vector(1,1,1,1,1,1));
-                assert.eq(add1.isEqualTo(m.Vector(1,2,3,4,5,6)), true, 'Vector can add.');
-                var sub2 = vcopy.subtract(m.Vector(2,2,2,2,2,2));
-                assert.eq(sub2.isEqualTo(m.Vector(-2,-1,0,1,2,3)), true, 'Vector can subtract.');
-                v = m.Vector(1,2,3);
+                var add1 = vcopy.add(new m.Vector(1,1,1,1,1,1));
+                assert.eq(add1.isEqualTo(new m.Vector(1,2,3,4,5,6)), true, 'Vector can add.');
+                var sub2 = vcopy.subtract(new m.Vector(2,2,2,2,2,2));
+                assert.eq(sub2.isEqualTo(new m.Vector(-2,-1,0,1,2,3)), true, 'Vector can subtract.');
+                v = new m.Vector(1,2,3);
                 var magv = v.magnitude();
                 assert.eq(magv >= 3.74165 && magv <= 3.74166, true, 'Vector can calc magnitude ('+magv+').');
                 var unit = v.normalize();
                 assert.eq(unit.magnitude(), 1, 'Vector can calc normal vector.');
                 
                 assert.suite = 'Rectangle';
-                var r1 = m.Rectangle(0,0,100,100);
-                var r2 = m.Rectangle(50,50,100,100)
+                var r1 = new m.Rectangle(0,0,100,100);
+                var r2 = new m.Rectangle(50,50,100,100)
                 assert.eq(r1.right(10),10, 'Rectangle sets right.');
                 assert.eq(r1.width(), 10, 'Rectangle updates width after set right.');
                 r1.right(100);
@@ -69,13 +69,13 @@
                 r1.left(0);
                 assert.eq(r1.width(100),100,'Rectangle updates width after set left.');
                 assert.eq(r1.intersectsRectangle(r2), true, 'Rectangle knows intersection.');
-                var output = m.Rectangle.reduceRectangles([r1,r2]);
+                var output = new m.Rectangle.reduceRectangles([r1,r2]);
                 assert.eq(output.length, 3, 'Rectangle reduces to correct number of rects.');
                 assert.eq(output.toString(), 'Rectangle[0,0,50,100],Rectangle[50,0,50,150],Rectangle[100,50,50,100]', 'Rectangle reduces to correct rectangles.');
                 
                 assert.suite = 'Matrix';
                 
-                var mat = m.Matrix(
+                var mat = new m.Matrix(
                     0, 1, 2,
                     3, 4, 5, 
                     6, 7, 8
@@ -91,25 +91,25 @@
                 assert.eq(c0.toString(), '0,3,6', 'Can get matrix column.');
                 assert.eq(c2.toString(), '2,5,8', 'Can get matrix column.');
             
-                var A = m.Matrix(
+                var A = new m.Matrix(
                     5, 9, 2, 
                     1, 7, 6,
                     3, 4, 8
                 );
             
-                var B = m.Matrix(
+                var B = new m.Matrix(
                     9, 1, 6, 
                     7, 2, 4,
                     8, 10, 3
                 );
             
-                var AB = m.Matrix(
+                var AB = new m.Matrix(
                     124, 43, 72,
                     106, 75, 52,
                     119, 91, 58
                 );
             
-                var BA = m.Matrix(
+                var BA = new m.Matrix(
                     64, 112, 72,
                     49, 93, 58,
                     59, 154, 100
@@ -132,7 +132,7 @@
         
                 mat = mat.identity();
         
-                var vec = m.Vector(2, 4);
+                var vec = new m.Vector(2, 4);
         
                 mat = mat.translate(1, 1);
         
@@ -150,40 +150,40 @@
                 assert.eq(tVec.x(), 2, 'Matrix can scale Vector in x');
                 assert.eq(tVec.y(), 3, 'Matrix can scale Vector in y');
                 
-                var unitSquare = m.Polygon(
+                var unitSquare = new m.Polygon(
                     -1,  1,
                      1,  1,
                      1, -1,
                     -1, -1
                 );
-                assert.eq(unitSquare.containsPoint(m.Vector(0,0)), true, 'Polygon unit square contains origin');
+                assert.eq(unitSquare.containsPoint(new m.Vector(0,0)), true, 'Polygon unit square contains origin');
                 
-                var D = m.Matrix().translate(100, 50).scale(0.5).rotate(45);
+                var D = new m.Matrix().translate(100, 50).scale(0.5).rotate(45);
                 var invD = D.inverse();
                 var I = D.multiply(invD);
                 I = I.map(function(el,ndx,a) {
                     return Math.round(el);
                 });
-                assert.eq(I.isEqualTo(m.Matrix()), true, 'Matrix can return inverse.');
+                assert.eq(I.isEqualTo(new m.Matrix()), true, 'Matrix can return inverse.');
             
-                var rect = m.Polygon(
+                var rect = new m.Polygon(
                         10, 5,
                         10, -5,
                         -10, -5,
                         -10, 5
                 );
-                var transform = m.Matrix().rotate(90).scale(2, 2);
+                var transform = new m.Matrix().rotate(90).scale(2, 2);
                 rect = transform.transformPolygon(rect);
                 var resultPoly = rect.map(function(el,ndx,a) {
                     return Math.round(el);
                 });
-                var comparePoly = m.Polygon(-10,20,10,20,10,-20,-10,-20)
+                var comparePoly = new m.Polygon(-10,20,10,20,10,-20,-10,-20)
                 assert.eq(resultPoly.isEqualTo(comparePoly), true, 'Matrix can transform polygons.');
                 assert.eq(resultPoly.toString(), comparePoly.toString(), 'Matrix can transform polygons.');
             
                 assert.suite = 'View';
-                var view1 = m.View();
-                var view2 = m.View();
+                var view1 = new m.View();
+                var view2 = new m.View();
                 
                 var bang = document.getElementById('bang');
                 bang.appendChild(view1.canvas);
@@ -199,7 +199,7 @@
                 view1.context.fillRect(0,10,10,10);
                 assert.eq(view1.isDirty, true, 'View is dirty after drawing.');
                 
-                view1.drawInto(view2.context, m.Rectangle(10,10,10,10), m.Rectangle(0,0,10,10));
+                view1.drawInto(view2.context, new m.Rectangle(10,10,10,10), new m.Rectangle(0,0,10,10));
                 assert.eq(view2.isDirty, true, 'Receiving view is dirty after drawing into context.');
                 
                 var data = view2.context.getImageData(0,0,1,1);

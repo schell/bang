@@ -25,27 +25,26 @@ mod({
         * @nosideeffects
         * * **/
         function View(x, y, w, h) {
-            var view = Object.create(View.prototype);
-            view.canvas = document.createElement('canvas');
+            this.canvas = document.createElement('canvas');
             
             switch (arguments.length) {
                 case 4:
-                    view.canvas.width = w;
-                    view.width = w;
-                    view.canvas.height = h;
-                    view.height = h;
+                    this.canvas.width = w;
+                    this.width = w;
+                    this.canvas.height = h;
+                    this.height = h;
                 break;
                 
                 case 2:
-                    view.canvas.width = x;
-                    view.width = x;
-                    view.canvas.height = y;
-                    view.height = y;
+                    this.canvas.width = x;
+                    this.width = x;
+                    this.canvas.height = y;
+                    this.height = y;
                 break;
                 
                 default:
-                    view.width = view.canvas.width;
-                    view.height = view.canvas.height;
+                    this.width = this.canvas.width;
+                    this.height = this.canvas.height;
             }
             
             // Here we do a little hack to alias the drawing functions 
@@ -67,16 +66,16 @@ mod({
                 };
             }
             
-            view.context = view.canvas.getContext('2d');
-            view.context.view = view;
-            for (var key in view.context) {
-                if (typeof view.context[key] === 'function') {
+            this.context = this.canvas.getContext('2d');
+            this.context.view = this;
+            for (var key in this.context) {
+                if (typeof this.context[key] === 'function') {
                     // Alias that function...
-                    view.context[key] = makeAlias(view.context[key]);
+                    this.context[key] = makeAlias(this.context[key]);
                 }
             }
             
-            return view;
+            return this;
         }
         
         View.prototype = {};
@@ -123,7 +122,7 @@ mod({
         * * **/
         View.prototype.scaleY = 1;
         /** * *
-        * The rotation (in degrees) of this view.
+        * The rotation (in radians) of this view.
         * @type {number}
         * * **/
         View.prototype.rotation = 0;
@@ -151,19 +150,19 @@ mod({
         * @nosideeffects
         * * **/
         View.prototype.localTransformation = function View_localTransformation(invert) {
-            var matrix = m.Matrix();
+            var matrix = new m.Matrix();
                 
             if (invert) {
                 // Let's just provide them with an inverse instead of
                 // making them take the inverse afterwards, it should
                 // save some cycles...
-                matrix = m.Matrix.scale(1/this.scaleX, 1/this.scaleY);
-                matrix = m.Matrix.rotate(-this.rotation);
-                matrix = m.Matrix.translate(-this.x, -this.y);
+                matrix = matrix.scale(1/this.scaleX, 1/this.scaleY);
+                matrix = matrix.rotate(-this.rotation);
+                matrix = matrix.translate(-this.x, -this.y);
             } else {
-                matrix = m.Matrix.translate(this.x, this.y);
-                matrix = m.Matrix.rotate(this.rotation);
-                matrix = m.Matrix.scale(this.scaleX, this.scaleY);
+                matrix = matrix.translate(this.x, this.y);
+                matrix = matrix.rotate(this.rotation);
+                matrix = matrix.scale(this.scaleX, this.scaleY);
             }
             return matrix;
         };
@@ -173,7 +172,7 @@ mod({
         * * **/
         View.prototype.transformContext = function View_transformContext(context) {
             context.translate(this.x, this.y);
-            context.rotate(m.ONE_DEGREE*this.rotation);
+            context.rotate(this.rotation);
             context.scale(this.scaleX, this.scaleY);
             context.globalAlpha *= this.alpha;
         };

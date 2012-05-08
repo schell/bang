@@ -35,16 +35,14 @@ mod({
             w = w || 0;
             h = h || 0;
             
-            var r = Object.create(Rectangle.prototype);
-            r.left(x);
-            r.top(y);
-            r.width(w);
-            r.height(h);
-            r.length = 8;
-            return r;
+            this.left(x);
+            this.top(y);
+            this.width(w);
+            this.height(h);
+            this.length = 8;
         }
         
-        Rectangle.prototype = m.Polygon();
+        Rectangle.prototype = new m.Polygon();
         
         Rectangle.prototype.constructor = Rectangle;
         
@@ -52,6 +50,9 @@ mod({
             return 'Rectangle['+this.left()+','+this.top()+','+this.width()+','+this.height()+']';
         };
         
+        //--------------------------------------
+        //  METHODS
+        //--------------------------------------
         Rectangle.prototype.left = function Rectangle_left(l) {
             /** * *
             * Gets and sets the left edge x value.
@@ -166,6 +167,19 @@ mod({
             return this.left() <= r.left() && this.top() <= r.top() && this.right() >= r.right() && this.bottom() >= r.bottom();
         };
         
+        Rectangle.prototype.intersectionWith = function Rectangle_intersectionWith(r) {
+            /** * *
+            * Returns the intersection of this rectangle with rectangle r. If the rectangles
+            * Returns false if r does not intersect.
+            * @param {Rectangle}
+            * @return {Rectangle|false}
+            * * **/
+            if (this.intersectsRectangle(r)) {
+                return new m.Rectangle();
+            }
+            return false;
+        };
+        
         Rectangle.reduceRectangles = function Rectangle_reduceRectangles(rectangles) {
             /** * *
             * Returns a new set of rectangles that do not intersect, that occupy the
@@ -211,7 +225,7 @@ mod({
                     
             // We're going to need this function during end events...
             function mapIntersectionToScan(el) {
-                var newScan = m.Rectangle(e.x, el.top(), 0, el.height());
+                var newScan = new m.Rectangle(e.x, el.top(), 0, el.height());
                 newScan.intersects = [el];
                 return newScan;
             }
@@ -271,7 +285,7 @@ mod({
                                     intersected.bottom(Math.max(intersected.bottom(), b));
                                     intersected.intersects = intersected.intersects.concat(scan.intersects);
                                 } else {
-                                    intersected = m.Rectangle(e.x, t, 0, b - t);
+                                    intersected = new m.Rectangle(e.x, t, 0, b - t);
                                     intersected.intersects = scan.intersects.concat([e.rectangle]);
                                 }
                                 // Get rid of the current scan...

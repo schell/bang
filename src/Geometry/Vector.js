@@ -16,19 +16,17 @@ mod({
         * * **/
         
         function Vector() {
-            var v = Object.create(Vector.prototype);
-            v.length = 0;
+            this.length = arguments.length;
             for (var i=0; i < arguments.length; i++) {
-                v.push(arguments[i]);
+                this[i] = arguments[i];
             }
-            return v;
         }
         
         Vector.prototype = [];
         
         Vector.prototype.constructor = Vector;
         
-        Vector.prototype.toString = function() {
+        Vector.prototype.toString = function Vector_toString() {
             return 'Vector['+Array.prototype.toString.call(this)+']';
         };
         
@@ -75,7 +73,7 @@ mod({
             * @return {Vector}
             * @nosideeffects
             * * **/
-            var copy = this.constructor();
+            var copy = new this.constructor();
             for (var i = this.length - 1; i >= 0; i--){
                 copy[i] = f(this[i],i,this);
             }
@@ -91,7 +89,7 @@ mod({
             * @return {Vector}
             * @nosideeffects
             * * **/
-            var a = this.constructor();
+            var a = new this.constructor();
             var i = 0;
             for (i; i < this.length; i++) {
                 var element = this[i];
@@ -142,7 +140,7 @@ mod({
             return this.foldl(function (acc, element) {
                 acc.push(element + v[acc.length]);
                 return acc;
-            }, this.constructor());
+            }, new this.constructor());
         };
         
         Vector.prototype.subtract = function Vector_subtract(v) {
@@ -155,7 +153,7 @@ mod({
             return this.foldl(function (acc, element) {
                 acc.push(element - v[acc.length]);
                 return acc;
-            }, this.constructor());
+            }, new this.constructor());
         };
         
         Vector.prototype.x = function Vector_x(x) {
@@ -204,7 +202,7 @@ mod({
             return this.foldr(function (element, acc) {
                 acc.unshift(element/magnitude);
                 return acc;
-            }, this.constructor());
+            }, new this.constructor());
         };
         
         return Vector;

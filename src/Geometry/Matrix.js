@@ -26,28 +26,27 @@ mod({
         //  CONSTRUCTOR
         //--------------------------------------
         function Matrix() {
-            var v = Object.create(Matrix.prototype);
             if (arguments.length) {
-                v.length = 0;
+                this.length = 0;
                 for (var i=0; i < arguments.length; i++) {
-                    v.push(arguments[i]);
+                    this.push(arguments[i]);
                 }
             } else {
-                v = v.identity();
+                this.loadIdentity();
             }
-            return v;
+            this.length = 9;
         }
         
-        Matrix.prototype = m.Vector();
+        Matrix.prototype = new m.Vector();
         
         Matrix.prototype.constructor = Matrix;
-        //--------------------------------------
-        //  METHODS
-        //--------------------------------------
+        
         Matrix.prototype.toString = function Matrix_toString() {
             return 'Matrix['+Array.prototype.toString.call(this)+']';
         };
-        
+        //--------------------------------------
+        //  METHODS
+        //--------------------------------------
         Matrix.prototype.toPrettyString = function Matrix_toPrettyString() {
             /** * *
             * Returns a pretty string value.
@@ -195,7 +194,7 @@ mod({
             var h = this.h();
             var i = this.i();
                 
-            return m.Matrix(
+            return new m.Matrix(
                 e*i - f*h, f*g - d*i, d*h - e*g,
                 c*h - b*i, a*i - c*g, b*g - a*h,
                 b*f - c*e, c*d - a*f, a*e - b*d
@@ -240,11 +239,26 @@ mod({
             * @return Matrix
             * @nosideeffects
             * * **/
-            return Matrix(
+            return new Matrix(
                 1.0, 0.0, 0.0, 
                 0.0, 1.0, 0.0, 
                 0.0, 0.0, 1.0 
             );
+        };
+        
+        Matrix.prototype.loadIdentity = function Matrix_loadIdentity() {
+            /** * *
+            * Loads the elements of the identity matrix.
+            * * **/
+            this[0] = 1;
+            this[1] = 0;
+            this[2] = 0;
+            this[3] = 0;
+            this[4] = 1;
+            this[5] = 0;
+            this[6] = 0;
+            this[7] = 0;
+            this[8] = 1;
         };
         
         Matrix.prototype.multiply = function Matrix_multiply(matrix) {
@@ -269,7 +283,7 @@ mod({
                 return combo;
             }
             
-            var elements = Matrix();
+            var elements = new Matrix();
             elements.length = 0;
                 
             var resultRows = this.length/3;
@@ -300,7 +314,7 @@ mod({
             * * **/
             x = x || 0;
             y = y || 0;
-            var translate = Matrix(
+            var translate = new Matrix(
                 1, 0, x,
                 0, 1, y,
                 0, 0, 1
@@ -317,7 +331,7 @@ mod({
             * * **/
             x = x || 1;
             y = y || 1;
-            var scale = Matrix(
+            var scale = new Matrix(
                 x, 0, 0,
                 0, y, 0,
                 0, 0, 1
@@ -336,7 +350,7 @@ mod({
             // Convert to radians
             var radians = angleDegrees*m.ONE_DEGREE;    
                 
-            var rotation = Matrix(
+            var rotation = new Matrix(
                 Math.cos(radians), -Math.sin(radians), 0,
                 Math.sin(radians), Math.cos(radians), 0,
                 0, 0, 1
@@ -360,7 +374,7 @@ mod({
                     acc.push(el);
                 }
                 return acc;
-            }, m.Vector());
+            }, new m.Vector());
         };
         
         Matrix.prototype.transformPolygon = function Matrix_transformPolygon(input) {
@@ -370,12 +384,12 @@ mod({
             * @return Polygon
             * @nosideeffects
             * * **/
-            var polygon = input.constructor();
+            var polygon = new input.constructor();
             var i = 0;
             for (i; i < input.length; i+=2) {
                 var x = input[i];
                 var y = input[i+1];
-                var shim = m.Vector(x,y);
+                var shim = new m.Vector(x,y);
                 var tvec = this.transform2DVector(shim);
                 polygon[i] = tvec.x();
                 polygon[i+1] = tvec.y();
