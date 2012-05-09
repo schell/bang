@@ -25,7 +25,64 @@ mod({
         * @nosideeffects
         * * **/
         function View(x, y, w, h) {
-            this.canvas = document.createElement('canvas');
+            x = x || 0;
+            y = y || 0;
+            /** * *
+            * A reference to this view's canvas.
+            * @type {HTMLCanvasElement}
+            * * **/
+            this.canvas = document.createElement('canvas');;
+            /** * *
+            * A reference to this view's canvas's context.
+            * @type {CanvasRenderingContext2D}
+            * * **/
+            this.context = this.canvas.getContext('2d');
+            /** * *
+            * Whether or not this view needs redisplaying.
+            * @type {boolean}
+            * * **/
+            this.isDirty = false;
+            /** * *
+            * The x coordinate of this view.
+            * @type {number}
+            * * **/
+            this.x = 0;
+            /** * *
+            * The y coordinate of this view.
+            * @type {number}
+            * * **/
+            this.y = 0;
+            /** * *
+            * The x scale of this view.
+            * @type {number}
+            * * **/
+            this.scaleX = 1;
+            /** * *
+            * The y scale of this view.
+            * @type {number}
+            * * **/
+            this.scaleY = 1;
+            /** * *
+            * The rotation (in radians) of this view.
+            * @type {number}
+            * * **/
+            this.rotation = 0;
+            /** * *
+            * The alpha value of this view.
+            * @type {number}
+            * * **/
+            this.alpha = 1;
+            /** * *
+            * The parent view of this view.
+            * False if this view has no parent.
+            * @type {View|false}
+            * * **/
+            this.parent = false;
+            /** * *
+            * A list of children of this view.
+            * @type {Array.<View>}
+            * * **/
+            this.displayList = [];
             
             switch (arguments.length) {
                 case 4:
@@ -66,7 +123,6 @@ mod({
                 };
             }
             
-            this.context = this.canvas.getContext('2d');
             this.context.view = this;
             for (var key in this.context) {
                 if (typeof this.context[key] === 'function') {
@@ -74,63 +130,11 @@ mod({
                     this.context[key] = makeAlias(this.context[key]);
                 }
             }
-            
-            return this;
         }
         
         View.prototype = {};
-        //--------------------------------------
-        //  PROPERTIES
-        //--------------------------------------
-        /** * *
-        * Creates a new instance.
-        * * **/
+        
         View.prototype.constructor = View;
-        /** * *
-        * A reference to this view's canvas.
-        * @type {HTMLCanvasElement}
-        * * **/
-        View.prototype.canvas = undefined;
-        /** * *
-        * A reference to this view's canvas's context.
-        * @type {CanvasRenderingContext2D}
-        * * **/
-        View.prototype.context = undefined;
-        /** * *
-        * Whether or not this view needs redisplaying.
-        * @type {boolean}
-        * * **/
-        View.prototype.isDirty = false;
-        /** * *
-        * The x coordinate of this view.
-        * @type {number}
-        * * **/
-        View.prototype.x = 0;
-        /** * *
-        * The y coordinate of this view.
-        * @type {number}
-        * * **/
-        View.prototype.y = 0;
-        /** * *
-        * The x scale of this view.
-        * @type {number}
-        * * **/
-        View.prototype.scaleX = 1;
-        /** * *
-        * The y scale of this view.
-        * @type {number}
-        * * **/
-        View.prototype.scaleY = 1;
-        /** * *
-        * The rotation (in radians) of this view.
-        * @type {number}
-        * * **/
-        View.prototype.rotation = 0;
-        /** * *
-        * The alpha value of this view.
-        * @type {number}
-        * * **/
-        View.prototype.alpha = 1;
         //--------------------------------------
         //  METHODS
         //--------------------------------------
@@ -143,7 +147,7 @@ mod({
             return 'View('+[this.x,this.y,this.width,this.height]+')';
         };
         /** * *
-        * Returns the local transformation matrix.
+        * Returns this view's transformation in local coordinates.
         * If invert is true, will return the inverse of the
         * local tranformation matrix.
         * @param {boolean=}
@@ -167,6 +171,53 @@ mod({
             return matrix;
         };
         /** * *
+        * Returns this view's transformation in global coordinates.
+        * If invert is true, will return the inverse of the
+        * global tranformation matrix.
+        * @param {boolean=}
+        * @nosideeffects
+        * * **/
+        View.prototype.globalTransformation = function View_globalTransformation(invert) {
+            invert = invert || false;
+            var i = invert ? -1 : 1;
+                
+            // Get this view's transformation matrix...
+            var transform = this.localTransformation(invert);
+
+            if (!this.parent) {
+                // There is no parent view, so either this view does not
+                // belong to a display list, or we've hit the root of the tree...
+                return transform;
+            }
+                
+            // Recurse up the tree and get the compound transfor..
+            var compound = this.parent.globalTransformation(invert);
+                
+            if (invert) {
+                return transform.multiply(compound);
+            }
+            return compound.multiply(transform);
+        };
+        /** * *
+        * Returns a copy of the given local vector converted into global coordinates.
+        * @param {Vector}
+        * @return {Vector}
+        * @nosideeffects
+        * * **/
+        View.prototype.vectorToGlobal = function View_vectorToGlobal(vector) {
+            return this.globalTransformation().transformPolygon(vector);
+        };
+        /** * *
+        * Returns a copy of the given global vector converted into local coordinates.
+        * @param {Vector}
+        * @return {Vector}
+        * @nosideeffects
+        * * **/
+        View.prototype.vectorToLocal = function View_vectorToLocal(vector) {
+            var inverse = true;
+            return this.globalTransformation(inverse).transformPolygon(vector);
+        };
+        /** * *
         * Applies this view's transformation to a context.  
         * @param {CanvasRenderingContext2D} 
         * * **/
@@ -177,13 +228,41 @@ mod({
             context.globalAlpha *= this.alpha;
         };
         /** * *
-        * Draws a portion of this view into a context.
-        * @param {CanvasRenderingContext2D}
-        * @param {Rectangle}
-        * @param {Rectangle}   
+        * Adds a subview to this view.
+        * @param {View}
         * * **/
-        View.prototype.drawInto = function View_drawInto(context, sourceRect, destRect) {
-            context.drawImage(this.canvas, sourceRect.x(), sourceRect.y(), sourceRect.width(), sourceRect.height(), destRect.x(), destRect.y(), destRect.width(), destRect.height());
+        View.prototype.addView = function View_addView(subView) {
+            if (subView.parent) {
+                subView.parent.removeView(subView);
+            }
+            this.displayList.push(subView);
+            subView.parent = this;
+        };
+        /** * *
+        * Adds a subview to this view at a given index.
+        * @param {View}
+        * @param {number}
+        * * **/
+        View.prototype.addViewAt = function View_addViewAt(subView, insertNdx) {
+            insertNdx = insertNdx || 0;
+            
+            if (subView.parent) {
+                subView.parent.removeView(subView);
+            }
+            this.displayList.splice(insertNdx, 0, subView);
+            subView.parent = this;
+        };
+        /** * *
+        * Removes a subview of this view.
+        * * **/
+        View.prototype.removeView = function View_removeView(subView) {
+            var ndx = this.displayList.indexOf(subView);
+            if (ndx !== -1) {
+                this.displayList.splice(ndx, 1);
+            } else {
+                throw new Error('subview must be a child of the caller.');
+            }
+            subView.parent = false;
         };
         
         return View;
