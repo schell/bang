@@ -31,7 +31,7 @@ mod({
             * A reference to this view's canvas.
             * @type {HTMLCanvasElement}
             * * **/
-            this.canvas = document.createElement('canvas');;
+            this.canvas = document.createElement('canvas');
             /** * *
             * A reference to this view's canvas's context.
             * @type {CanvasRenderingContext2D}
@@ -264,7 +264,23 @@ mod({
             }
             subView.parent = false;
         };
-        
+        /** * *
+        * Draws this view and its subviews into the given context.
+        * @param {CanvasRenderingContext2D}
+        * * **/
+        View.prototype.draw = function View_draw(context) {
+            context.save();
+            // Apply the transform for subviews...
+            this.transformContext(context);
+            // Draw these pixels into the context...
+            context.drawImage(this.canvas, 0, 0);
+    
+            for (var i=0; i < this.displayList.length; i++) {
+                var subView = this.displayList[i];
+                subView.draw(context);
+            }
+            context.restore();
+        };
         return View;
     }
 });

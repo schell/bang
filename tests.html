@@ -32,7 +32,8 @@
                     'bang::Geometry/Vector.js',
                     'bang::Geometry/Rectangle.js',
                     'bang::Geometry/Matrix.js',
-                    'bang::View/View.js'
+                    'bang::View/View.js',
+                    'bang::View/Stage.js'
                 ],
                 init : function initMain (m) {
                     return {};
@@ -190,21 +191,37 @@
                 bang.appendChild(view2.canvas);
                 
                 assert.eq(view1.isDirty, false, 'View starts clean.');
-                view1.context.fillRect(0,0,10,10);
+                view1.context.fillRect(0,0,20,20);
                 view1.context.fillStyle = 'red';
-                view1.context.fillRect(10,0,10,10);
+                view1.context.fillRect(20,0,20,20);
                 view1.context.fillStyle = 'green';
-                view1.context.fillRect(10,10,10,10);
+                view1.context.fillRect(20,20,20,20);
                 view1.context.fillStyle = 'blue';
-                view1.context.fillRect(0,10,10,10);
+                view1.context.fillRect(0,20,20,20);
                 assert.eq(view1.isDirty, true, 'View is dirty after drawing.');
                 
-                view1.drawInto(view2.context, new m.Rectangle(10,10,10,10), new m.Rectangle(0,0,10,10));
+                view2.context.drawImage(view1.canvas, 20,20,20,20, 0,0,20,20);
                 assert.eq(view2.isDirty, true, 'Receiving view is dirty after drawing into context.');
                 
                 var data = view2.context.getImageData(0,0,1,1);
                 assert.eq(data.data[1] > data.data[0] && data.data[1] > data.data[2], true, 'Receiving view gets appropriately drawn into.');
-
+                
+                bang.removeChild(view1.canvas);
+                bang.removeChild(view2.canvas);
+                
+                var container = new m.Stage(250, 250);
+                assert.eq(container.canvas.width, 250, 'Stage constructor sets width.');
+                assert.eq(container.canvas.height, 250, 'Stage constructor sets height.');
+                container.addView(view1);
+                view1.addView(view2);
+                bang.appendChild(container.canvas);
+                
+                view2.x = 40;
+                container.draw(container.context);
+                
+                view2.x = 80;
+                container.draw(container.context);
+                
                 assert.stat();
             });
         </script>
