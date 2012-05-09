@@ -1,6 +1,14 @@
 /** * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * *
 * Matrix.js
 * A 2D matrix for transformations.
+* /---------------------------------------\
+* | indices     | elements   | meaning    |
+* |---------------------------------------| 
+* | 0  1  2     | a  d  g    | s/r  r   x |
+* | 3  4  5     | b  e  h    |  r  s/r  y |
+* | 6  7  8     | c  f  i    |  0   0   s |
+* |             |            |            |
+* \---------------------------------------/ 
 * Copyright (c) 2012 Schell Scivally. All rights reserved.
 * 
 * @author    Schell Scivally
@@ -14,17 +22,7 @@ mod({
         * Initializes the Matrix 
         * @param - m Object - The mod modules object.
         * * **/
-        //--------------------------------------
-        //  CONSTANTS
-        //--------------------------------------
-        /** * *
-        * One degree in radians (export it to modules)
-        * @type {number}
-        * * **/
-        m.ONE_DEGREE = 0.0174532925;
-        //--------------------------------------
-        //  CONSTRUCTOR
-        //--------------------------------------
+        
         function Matrix() {
             if (arguments.length) {
                 this.length = 0;
@@ -339,17 +337,12 @@ mod({
             return this.multiply(scale);
         };
         
-        Matrix.prototype.rotate = function Matrix_rotate(angleDegrees) {
+        Matrix.prototype.rotate = function Matrix_rotate(radians) {
             /** * *
-            * Rotates this matrix *angleDegrees* about z.
-            * @param number
-            * @return Matrix
-            * * **/
-            // Invert theta (matrix rotation is counter-clockwise)...
-            angleDegrees = angleDegrees || 0;
-            // Convert to radians
-            var radians = angleDegrees*m.ONE_DEGREE;    
-                
+            * Rotates this matrix about z.
+            * @param {number}
+            * @return {Matrix}
+            * * **/    
             var rotation = new Matrix(
                 Math.cos(radians), -Math.sin(radians), 0,
                 Math.sin(radians), Math.cos(radians), 0,

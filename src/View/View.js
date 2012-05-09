@@ -16,6 +16,12 @@ mod({
     * * **/
     init : function initView (m) {
         /** * *
+        * A private variable for holding the number
+        * of instantiated View objects.
+        * @type {number}
+        * * **/
+        var _instances = 0;
+        /** * *
         * Creates a new View object.
         * @param {number}
         * @param {number}
@@ -46,12 +52,12 @@ mod({
             * The x coordinate of this view.
             * @type {number}
             * * **/
-            this.x = 0;
+            this.x = x;
             /** * *
             * The y coordinate of this view.
             * @type {number}
             * * **/
-            this.y = 0;
+            this.y = y;
             /** * *
             * The x scale of this view.
             * @type {number}
@@ -83,31 +89,30 @@ mod({
             * @type {Array.<View>}
             * * **/
             this.displayList = [];
+            /** * *
+            * A string that identifies this view.
+            * @type {string}
+            * * **/
+            this.tag = (_instances++).toString();
             
-            switch (arguments.length) {
-                case 4:
-                    this.canvas.width = w;
-                    this.width = w;
-                    this.canvas.height = h;
-                    this.height = h;
-                break;
-                
-                case 2:
-                    this.canvas.width = x;
-                    this.width = x;
-                    this.canvas.height = y;
-                    this.height = y;
-                break;
-                
-                default:
-                    this.width = this.canvas.width;
-                    this.height = this.canvas.height;
+            // Set the width and height...
+            if (typeof w === 'number') {
+                this.canvas.width = w;
+            } else {
+                w = this.canvas.width;
             }
+            this.width = w;
+            if (typeof h === 'number') {
+                this.canvas.height = h;
+            } else {
+                h = this.canvas.height;
+            }
+            this.height = w;
             
             // Here we do a little hack to alias the drawing functions 
-            // of the CanvasRenderingContext2D...
+            // of CanvasRenderingContext2D...
             /** * *
-            * Creates an aliased version of original.
+            * Creates an aliased version of a function.
             * @param {function}
             * @return {function}
             * @nosideeffects
@@ -144,7 +149,7 @@ mod({
         * @nosideeffects
         * * **/
         View.prototype.toString = function View_toString() {
-            return 'View('+[this.x,this.y,this.width,this.height]+')';
+            return 'View("'+this.tag+'"['+[this.x,this.y,this.width,this.height]+'])';
         };
         /** * *
         * Returns this view's transformation in local coordinates.
@@ -153,7 +158,7 @@ mod({
         * @param {boolean=}
         * @nosideeffects
         * * **/
-        View.prototype.localTransformation = function View_localTransformation(invert) {
+        View.prototype.localTransform = function View_localTransform(invert) {
             var matrix = new m.Matrix();
                 
             if (invert) {
@@ -177,12 +182,12 @@ mod({
         * @param {boolean=}
         * @nosideeffects
         * * **/
-        View.prototype.globalTransformation = function View_globalTransformation(invert) {
+        View.prototype.globalTransform = function View_globalTransform(invert) {
             invert = invert || false;
             var i = invert ? -1 : 1;
                 
             // Get this view's transformation matrix...
-            var transform = this.localTransformation(invert);
+            var transform = this.localTransform(invert);
 
             if (!this.parent) {
                 // There is no parent view, so either this view does not
@@ -191,7 +196,7 @@ mod({
             }
                 
             // Recurse up the tree and get the compound transfor..
-            var compound = this.parent.globalTransformation(invert);
+            var compound = this.parent.globalTransform(invert);
                 
             if (invert) {
                 return transform.multiply(compound);
@@ -205,7 +210,7 @@ mod({
         * @nosideeffects
         * * **/
         View.prototype.vectorToGlobal = function View_vectorToGlobal(vector) {
-            return this.globalTransformation().transformPolygon(vector);
+            return this.globalTransform().transformPolygon(vector);
         };
         /** * *
         * Returns a copy of the given global vector converted into local coordinates.
@@ -215,7 +220,7 @@ mod({
         * * **/
         View.prototype.vectorToLocal = function View_vectorToLocal(vector) {
             var inverse = true;
-            return this.globalTransformation(inverse).transformPolygon(vector);
+            return this.globalTransform(inverse).transformPolygon(vector);
         };
         /** * *
         * Applies this view's transformation to a context.  
