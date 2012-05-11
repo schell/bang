@@ -223,6 +223,13 @@ mod({
             return this.globalTransform(inverse).transformPolygon(vector);
         };
         /** * *
+        * Returns the local bounds of this view.
+        * @return {Rectangle}
+        * * **/
+        View.prototype.localBoundary = function View_localBoundary() {
+            return new m.Rectangle(0, 0, this.width, this.height);
+        };
+        /** * *
         * Applies this view's transformation to a context.  
         * @param {CanvasRenderingContext2D} 
         * * **/
