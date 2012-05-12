@@ -39,7 +39,6 @@
             }
             data.push(imageData.data[i]);
         }
-            
         function unpackStringFromArray(data) {
             var stream = bitStream(data, 8);
             var string = '';
@@ -94,11 +93,13 @@
     }
     // The actual initializer...
     window.bang = function() {
-        Array.prototype.map.call(document.getElementsByClassName('bang'), function (el,ndx) {
+        var bangElements = Array.prototype.slice.call(document.getElementsByClassName('bang'));
+        for(var i = 0; i < bangElements.length; i++) {
+            var el = bangElements[i];
             var src = el.dataset.source;
-            var id = el.id || 'bang_'+ndx;
+            var id = el.id || 'bang_'+i;
             el.id = id;
             var context = initElementWithSrcImage(el, src);
-        });
+        }
     };
 }(window));
