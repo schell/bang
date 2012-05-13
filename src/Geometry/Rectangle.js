@@ -179,6 +179,119 @@ mod({
             }
             return false;
         };
+        /** * *
+        * Returns whether or not this rectangle contains point.
+        * @param {Vector}
+        * @return {boolean}
+        * * **/
+        Rectangle.prototype.containsPoint = function Rectangle_containsPoint(point) {
+            return (this.left() <= point.x() && this.right() >= point.x() &&
+                this.top() <= point.y() && this.bottom() >= point.y());
+        };
+        /** * *
+        * Returns a polygon clipped by this rectangle using a Sutherland-Hodgeman Algorithm.
+        * https://en.wikipedia.org/wiki/Sutherland%E2%80%93Hodgman_algorithm
+        * http://www.aftermath.net/articles/clippoly/index.html
+        * @param {Polygon}
+        * @return {Polygon}
+        * * **/
+        Rectangle.prototype.clipPolygon = function Rectangle_clipPolygon(polygon) {
+            var CP_LEFT = 0;
+            var CP_RIGHT = 1;
+            var CP_TOP = 2;
+            var CP_BOTTOM = 3;
+            
+            function cp_inside(p, r, side) {
+                switch(side) {
+                    case CP_LEFT:
+                        return p.x() >= r.left();
+                    case CP_RIGHT:
+                        return p.x() <= r.right();
+                    case CP_TOP:
+                        return p.y() >= r.top();
+                    case CP_BOTTOM:
+                        return p.y() <= r.bottom();
+                }
+            }
+            
+            function cp_intersect(p, q, r, side) {
+                function isfinite(n) {
+                    return Math.abs(n) !== Number.POSITIVE_INFINITY;
+                }
+                
+                var t = new m.Vector(0, 0);
+                var a, b;
+
+                /* find slope and intercept of segment pq */
+                a = ( q.y() - p.y() ) / ( q.x() - p.x() );
+                b = p.y() - p.x() * a;
+
+                switch(side) {
+                    case CP_LEFT:
+                        t.x(r.left());
+                        t.y(t.x() * a + b);
+                        break;
+                    case CP_RIGHT:
+                        t.x(r.right());
+                        t.y(t.x() * a + b);
+                        break;
+                    case CP_TOP:
+                        t.y(r.top());
+                        t.x(isfinite(a) ? ( t.y() - b ) / a : p.x());
+                        break;
+                    case CP_BOTTOM:
+                        t.y(r.bottom());
+                        t.x(isfinite(a) ? ( t.y() - b ) / a : p.x());
+                        break;
+                }
+
+                return t;
+            }
+            
+            function cp_clipplane(vec, r, side) {
+                var n, i, j=0, s, p, out, intersection;
+                
+                n = vec.length/2;
+                out = new m.Polygon();
+                s = vec.pointAt(n-1);
+                
+                for(i = 0 ; i < n; i++ ) {
+                    p = vec.pointAt(i);
+
+                    if( cp_inside( p, r, side ) ) {
+                        // Point p is inside...
+                        if( !cp_inside( s, r, side ) ) {
+                            // p is inside and s is outside
+                            intersection = cp_intersect( p, s, r, side );
+                            if (!intersection.isEqualTo(p)) {
+                                // We don't want doubles in our output set...
+                                out.push(intersection[0]);
+                                out.push(intersection[1]);
+                            }
+                        }
+                        out.push(p[0]);
+                        out.push(p[1]);
+                    } else if( cp_inside( s, r, side ) ) {
+                        // s is inside and p is outside
+                        intersection = cp_intersect( p, s, r, side );
+                        out.push(intersection[0]);
+                        out.push(intersection[1]);
+                    }
+                    s = p;
+                }
+                return out;
+            }
+            
+            function clippoly(poly, r) {
+                poly = cp_clipplane(poly, r, CP_LEFT);
+                poly = cp_clipplane(poly, r, CP_RIGHT);
+                poly = cp_clipplane(poly, r, CP_TOP);
+                poly = cp_clipplane(poly, r, CP_BOTTOM);
+                return poly;
+            }
+            
+            return clippoly(polygon, this);
+        };
         
         Rectangle.reduceRectangles = function Rectangle_reduceRectangles(rectangles) {
             /** * *

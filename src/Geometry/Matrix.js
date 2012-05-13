@@ -126,6 +126,14 @@ mod({
             * * **/
             return this[8];
         };
+        Matrix.prototype.abdegh = function Matrix_abdegh() {
+            /** * *
+            * Returns an array consisting of the a, b, d, e, g, and h elements.
+            * Used for easily setting the transform of a CanvasRenderingContext2D.
+            * @return {Array.<number>}
+            * * **/
+            return [this.a(),this.b(),this.d(),this.e(),this.g(),this.h()];
+        };
         Matrix.prototype.x = function Matrix_x(x) {
             /** * *
             * Returns the x element. 

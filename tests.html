@@ -4,11 +4,10 @@
         <title>.:!!:.</title>
         <style type="text/css" media="screen">
             body {
-        			margin:0px;
-        			font-family: Verdana,Geneva,Arial,sans-serif;
-        			font-size: 12px;
-        			line-height: 15px;  
-        		}
+    			font-family: Verdana,Geneva,Arial,sans-serif;
+    			font-size: 12px;
+    			line-height: 15px;  
+    		}
             canvas {
                 background-color:transparent;
             }
@@ -181,6 +180,12 @@
                 var comparePoly = new m.Polygon(-10,20,10,20,10,-20,-10,-20)
                 assert.eq(resultPoly.isEqualTo(comparePoly), true, 'Matrix can transform polygons.');
                 assert.eq(resultPoly.toString(), comparePoly.toString(), 'Matrix can transform polygons.');
+                
+                var clipRectangle = new m.Rectangle(10,10,20,40);
+                var polyToClip = new m.Polygon(0,0, 40,0, 0,40);
+                var clippedPoly = clipRectangle.clipPolygon(polyToClip);
+                var checkPoly = new m.Polygon(10,10,30,10,10,30);
+                assert.eq(checkPoly.toString(), clippedPoly.toString(), 'Rectangle can clip polygon.');
             
                 assert.suite = 'View';
                 var view1 = new m.View(0, 0, 40, 40);
@@ -220,30 +225,35 @@
                 bang.appendChild(container.canvas);
                 
                 view2.x = 40;
-                container.draw(container.context);
+                container.draw();
                 
                 view2.x = 80;
-                container.draw(container.context);
+                container.draw();
                 
-                var view3 = new m.View(20,40, 40, 40);
+                var view3 = new m.View(40,40, 40, 40);
                 view3.tag = 'view3';
                 view3.rotation = Math.PI/4;
                 view3.context.fillStyle = 'cyan';
                 view3.context.fillRect(0,0,40,40);
                 container.addView(view3);
-                container.draw(container.context);
+                container.draw();
                 
                 var children = container.children();
-                assert.eq(children.toString(), 'View("stage"[0,0,250,250]),View("view1"[0,0,40,40]),View("view2"[80,0,40,40]),View("view3"[0,40,40,40])', 'Stage flattens display list (and toString works the way we expect).');
-                debugger;
+                assert.eq(children.toString(), 'View("stage"[0,0,250,250]),View("view1"[0,0,40,40]),View("view2"[80,0,40,40]),View("view3"[40,40,40,40])', 'Stage flattens display list (and toString works the way we expect).');
+                
                 assert.eq(container.viewPackages.length, 4, "Draw updates list of clean view states.");
-                container.viewPackages.map(function (viewPackage) {  
-                    var boundary = viewPackage.boundary;
+                
+                view3.x = 60;
+                
+                container.redraw();
+                
+                container.redraws.map(function (r) {  
                     container.context.save();  
-                    container.context.strokeStyle = 'rgba(255,0,255,0.5)';  
-                    container.context.strokeRect(boundary.x(),boundary.y(),boundary.width(),boundary.height());  
+                    container.context.strokeStyle = 'rgb(255,0,0)';  
+                    container.context.strokeRect(r.x(),r.y(),r.width(),r.height());  
                     container.context.restore();
                 });
+                
                 assert.stat();
             });
         </script>

@@ -195,6 +195,71 @@ mod({
                 return acc;
             }, new this.constructor());
         };
+        /** * *
+        * Returns the point at a given index. Zero indexed.
+        * For example, pointAt(1) would return the second point.
+        * @param {number}
+        * @return {Vector}
+        * * **/
+        Vector.prototype.pointAt = function Vector_pointAt(n) {
+            var ndx = 2*n;
+            return new m.Vector(this[ndx], this[ndx+1]);
+        };
+        
+        /** * *
+        * Returns the intersection point of two lines or false
+        * if they do not intersect.
+        * @param {Vector}
+        * @param {Vector}
+        * @return {Vector|false}
+        * * **/
+        Vector.lineIntersection = function Vector_lineIntersection(vec1, vec2) {
+            var p1 = vec1.pointAt(0);
+            var p2 = vec1.pointAt(1);
+            var p3 = vec2.pointAt(0);
+            var p4 = vec2.pointAt(1);
+            /** * *
+            * Returns the equation of a line segment formed by p1->p2.
+            * @return {object}
+            * * **/
+            function getLineEquation(p1, p2) {
+                // y = mx + b
+                // b = y - mx
+                // x = (y - b) / m
+                var m = (p2.y() - p1.y()) / (p2.x() - p1.x());
+                var b = p2.y() - m*p2.x();
+                return {
+                    // slope, rise over run...
+                    m : m,
+                    b : b,
+                    xAty : function(y) {
+                        return (y - b) / m;
+                    },
+                    yAtx : function(x) {
+                        return m*x + b;
+                    }
+                };
+            }
+                
+            var e1,e2,x,y;
+            e1 = getLineEquation(p1, p2);
+            e2 = getLineEquation(p3, p4);
+                
+            if (e1.m === e2.m) {
+                // These lines are co-linear and do not intersect...
+                return false;
+            } else if (Math.abs(e1.m) === Number.POSITIVE_INFINITY) {
+                x = p2.x();
+                y = e2.yAtx(x);
+            } else if (Math.abs(e2.m) === Number.POSITIVE_INFINITY) {
+                x = p4.x();
+                y = e1.yAtx(x);
+            } else {
+                x = e2.b / (e1.m + e1.b - e2.m);
+                y = e2.yAtx(x);
+            }
+            return new m.Vector(x, y);
+        };
         
         return Vector;
     }
