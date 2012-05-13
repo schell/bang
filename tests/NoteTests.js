@@ -12,7 +12,7 @@ mod({
     init : function initNoteCenterTests (m) {
         /**
          * Initializes the NoteCenterTests 
-         * @param - m Object - The mod modules object.
+         * @param {Object} The mod modules object.
          */
         return function runNoteCenterTests(callback) {
             // aliases

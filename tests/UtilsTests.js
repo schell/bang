@@ -12,7 +12,7 @@ mod({
     init : function initUtilsTests (m) {
         /** * *
         * Initializes the UtilsTests Addin
-        * @param - m Object - The mod modules object.
+        * @param {Object} The mod modules object.
         * * **/ 
         return function runUtilsTests(callback) {
             var assert = m.assert;

@@ -12,7 +12,7 @@
      init : function initRectangleTests (m) {
          /**
          * Initializes the RectangleTests 
-         * @param - m Object - The mod modules object.
+         * @param {Object} The mod modules object.
          */
          return function runGeomTests(callback) { 
              // aliases

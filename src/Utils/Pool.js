@@ -16,7 +16,7 @@ mod({
     init : function initPool (m) {
         /** * *
         * Initializes the Pool Addin
-        * @param - m Object - The mod modules object.
+        * @param {Object} The mod modules object.
         * * **/
         function createPond(type, create, init, recycle) {
             /** * *

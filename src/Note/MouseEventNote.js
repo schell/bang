@@ -12,7 +12,7 @@ mod({
     init : function initMouseEventNote (m) {
         /** * *
         * Initializes the MouseEventNote Addin
-        * @param - m Object - The mod modules object.
+        * @param {Object} The mod modules object.
         * * **/
         
         var addin = function addinMouseEventNote (self) {

@@ -12,7 +12,7 @@ mod({
     init : function initNoteCenter (m) {
         /**
          * Initializes the NoteCenter Addin
-         * @param - m Object - The mod modules object.
+         * @param {Object} The mod modules object.
          */
         
         var addin = function addinNoteCenter (self) {

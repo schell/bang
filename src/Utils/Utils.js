@@ -12,7 +12,7 @@ mod({
     init : function initUtils (m) {
         /** * *
         * Initializes the utilities object.
-        * @param - m Object - The mod modules object.
+        * @param {Object} The mod modules object.
         * * **/
         
         var utils = {};

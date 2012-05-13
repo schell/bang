@@ -12,7 +12,7 @@ mod({
     init : function initViewTests (m) {
         /** * *
         * Initializes the ViewTests
-        * @param - m Object - The mod modules object.
+        * @param {Object} The mod modules object.
         * * **/
         return function runViewTests(callback) {
             var assert = m.assert;

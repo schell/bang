@@ -12,7 +12,7 @@ mod({
     init : function initDispatcher (m) {
         /** * *
         * Initializes the Dispatcher Addin
-        * @param - m Object - The mod modules object.
+        * @param {Object} The mod modules object.
         * * **/
         
         var addin = function addinDispatcher (self) {

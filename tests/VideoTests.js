@@ -12,7 +12,7 @@ mod({
     init : function initVideoTests (m) {
         /**
          * Initializes the VideoTests 
-         * @param - m Object - The mod modules object.
+         * @param {Object} The mod modules object.
          */
         
         return function(callback) {

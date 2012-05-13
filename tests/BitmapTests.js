@@ -12,7 +12,7 @@ mod({
     init : function initBitmapTests (m) {
         /**
          * Initializes the BitmapTests 
-         * @param - m Object - The mod modules object.
+         * @param {Object} The mod modules object.
          */
         return function runBitmapTests(callback) {
             var assert = m.assert;

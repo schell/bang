@@ -17,7 +17,7 @@ mod({
     init : function initRectangle (m) {
         /** * *
         * Initializes the Rectangle type.
-        * @param - m Object - The mod modules object.
+        * @param {Object} The mod modules object.
         * * **/
         
         function Rectangle(x,y,w,h) {

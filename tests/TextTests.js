@@ -12,7 +12,7 @@ mod({
     init : function initTextTests (m) {
         /**
          * Initializes the TextTests 
-         * @param - m Object - The mod modules object.
+         * @param {Object} The mod modules object.
          */
         // aliases
         var ifndefInit = m.ifndefInit;

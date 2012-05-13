@@ -12,7 +12,7 @@ mod({
     init : function initEase (m) {
         /** * *
         * Initializes the Ease Addin
-        * @param - m Object - The mod modules object.
+        * @param {Object} The mod modules object.
         * * **/
         
         var addin = function addinEase (self) {

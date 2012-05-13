@@ -12,7 +12,7 @@ mod({
     init : function initNote (m) {
         /**
          * Initializes the Note Addin
-         * @param - m Object - The mod modules object.
+         * @param {Object} The mod modules object.
          */
 
         var addin = function addinNote (self) {

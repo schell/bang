@@ -13,7 +13,7 @@ mod({
     init : function initNotePasser (m) {
         /** * *
         * Initializes the NotePasser Addin
-        * @param - m Object - The mod modules object.
+        * @param {Object} The mod modules object.
         * * **/
         
         var defaultNoteCenter;
