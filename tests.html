@@ -32,7 +32,8 @@
                     'bang::Geometry/Rectangle.js',
                     'bang::Geometry/Matrix.js',
                     'bang::View/View.js',
-                    'bang::View/Stage.js'
+                    'bang::View/Stage.js',
+                    'bang::Utils/Animation.js'
                 ],
                 init : function initMain (m) {
                     return {};
@@ -239,22 +240,28 @@
                 container.draw();
                 
                 var children = container.children();
-                assert.eq(children.toString(), 'View("stage"[0,0,250,250]),View("view1"[0,0,40,40]),View("view2"[80,0,40,40]),View("view3"[40,40,40,40])', 'Stage flattens display list (and toString works the way we expect).');
+                assert.eq(children.toString(), 'View{"stage"[0,0,250,250]},View{"view1"[0,0,40,40]},View{"view2"[80,0,40,40]},View{"view3"[40,40,40,40]}', 'Stage flattens display list (and toString works the way we expect).');
                 
                 assert.eq(container.viewPackages.length, 4, "Draw updates list of clean view states.");
                 
                 view3.x = 60;
-                
                 container.redraw();
                 
-                container.redraws.map(function (r) {  
-                    container.context.save();  
-                    container.context.strokeStyle = 'rgb(255,0,0)';  
-                    container.context.strokeRect(r.x(),r.y(),r.width(),r.height());  
-                    container.context.restore();
-                });
+                assert.suite = 'Animation';
+                var calls = 0;
+                var timer = new m.Animation();
+                var animation;
+                var animate = function (time) {
+                    calls++;
+                    timer.cancelAnimation(animation);
+                    assert.eq(calls, 1, 'Can cancel animation.');
+                };
+                animation = timer.requestAnimation(animate);
+                setTimeout(function () {
+                    assert.eq(calls, 1, 'Can start and cancel animation.');
                 
-                assert.stat();
+                    assert.stat();
+                }, 500);
             });
         </script>
     </body>

@@ -220,7 +220,7 @@ mod({
             var p4 = vec2.pointAt(1);
             /** * *
             * Returns the equation of a line segment formed by p1->p2.
-            * @return {object}
+            * @return {Object}
             * * **/
             function getLineEquation(p1, p2) {
                 // y = mx + b

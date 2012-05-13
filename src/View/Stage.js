@@ -80,7 +80,7 @@ mod({
         /** * *
         * Packages a view and its current (hopefully clean) state.
         * @param {View}
-        * @return {object}
+        * @return {Object}
         * * **/
         function packageView(view) {
             var pkg = {};

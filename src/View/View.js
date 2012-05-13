@@ -11,7 +11,7 @@ mod({
     dependencies : [ 'bang::Geometry/Rectangle.js', 'bang::Geometry/Matrix.js' ],
     /** * *
     * Initializes the View type.
-    * @param {object}
+    * @param {Object}
     * @nosideeffects
     * * **/
     init : function initView (m) {
@@ -149,7 +149,7 @@ mod({
         * @nosideeffects
         * * **/
         View.prototype.toString = function View_toString() {
-            return 'View("'+this.tag+'"['+[this.x,this.y,this.width,this.height]+'])';
+            return 'View{"'+this.tag+'"['+[this.x,this.y,this.width,this.height]+']}';
         };
         /** * *
         * Returns this view's transformation in local coordinates.
