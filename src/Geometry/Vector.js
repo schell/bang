@@ -12,6 +12,7 @@ mod({
     /** * *
     * Initializes the Vector array extension.
     * @param {Object}
+    * @return {function(...)}
     * * **/
     init : function initVector (m) {
         /** * *
@@ -27,16 +28,18 @@ mod({
         Vector.prototype = [];
         
         Vector.prototype.constructor = Vector;
-        
-        Vector.prototype.toString = function Vector_toString() {
-            return 'Vector['+Array.prototype.toString.call(this)+']';
-        };
-        
         //--------------------------------------
         //  METHODS
         //--------------------------------------
         /** * *
-        * Folds left (starting at zero) along this array using function f, 
+        * Returns the string representation of the Vector.
+        * @return {string}
+        * * **/
+        Vector.prototype.toString = function Vector_toString() {
+            return 'Vector['+Array.prototype.toString.call(this)+']';
+        };
+        /** * *
+        * Folds left (starting at zero) along the vector using function f, 
         * which takes an accumulator and an element and returns
         * a new accumulator value - acc is the initial accumulator
         * value. Returns the resulting accumulator.
@@ -51,7 +54,7 @@ mod({
             return acc;
         };
         /** * *
-        * Folds right (starting at this.length) along this array 
+        * Folds right (starting at this.length) along the vector 
         * using function f, which takes an element and an accumulator
         * and returns a new accumulator value - acc is the initial accumulator
         * value. Returns the resulting accumulator.

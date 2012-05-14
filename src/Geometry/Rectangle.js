@@ -23,10 +23,10 @@ mod({
         function Rectangle(x,y,w,h) {
             /** * *
             * Creates a new rectangle at (x,y) with width w and height h.
-            * @param number
-            * @param number
-            * @param number
-            * @param number
+            * @param {number}
+            * @param {number}
+            * @param {number}
+            * @param {number}
             * @return Rectangle
             * @nosideeffects
             * * **/
@@ -46,71 +46,70 @@ mod({
         
         Rectangle.prototype.constructor = Rectangle;
         
-        Rectangle.prototype.toString = function Rectangle_toString() {
-            return 'Rectangle['+this.left()+','+this.top()+','+this.width()+','+this.height()+']';
-        };
-        
         //--------------------------------------
         //  METHODS
         //--------------------------------------
+        /** * *
+        * Returns the string representation of this Rectangle.
+        * @return {string}
+        * * **/
+        Rectangle.prototype.toString = function Rectangle_toString() {
+            return 'Rectangle['+this.left()+','+this.top()+','+this.width()+','+this.height()+']';
+        };
+        /** * *
+        * Gets and sets the left edge x value.
+        * @param {number}
+        * @return {number}
+        ** * */
         Rectangle.prototype.left = function Rectangle_left(l) {
-            /** * *
-            * Gets and sets the left edge x value.
-            * @param number
-            * @return number
-            ** * */
             if (typeof l === 'number') {
                 this[0] = l;
                 this[6] = l;
             }
             return this[0];
         };
-        
+        /** * *
+        * Gets and sets the top edge y value.
+        * @param {number}
+        * @return {number}
+        ** * */
         Rectangle.prototype.top = function Rectangle_top(t) {
-            /** * *
-            * Gets and sets the top edge y value.
-            * @param number
-            * @return number
-            ** * */
             if (typeof t === 'number') {
                 this[1] = t;
                 this[3] = t;
             }
             return this[1];
         };
-        
+        /** * *
+        * Gets and sets the right edge x value.
+        * @param {number}
+        * @return {number}
+        * * **/
         Rectangle.prototype.right = function Rectangle_right(r) {
-            /** * *
-            * Gets and sets the right edge x value.
-            * @param number
-            * @return number
-            * * **/
             if (typeof r === 'number') {
                 this[2] = r;
                 this[4] = r;
             }
             return this.left() + this.width();
         };
-
+        /** * *
+        * Gets and sets the bottom edge y value.
+        * @param {number}
+        * @return {number}
+        * * **/
         Rectangle.prototype.bottom = function Rectangle_bottom(b) {
-            /** * *
-            * Gets and sets the bottom edge y value.
-            * @param number
-            * @return number
-            * * **/
             if (typeof b === 'number') {
                 this[5] = b;
                 this[7] = b;
             }
             return this.top() + this.height();
         };
-        
+        /** * *
+        * Gets and sets the width of this Rectangle.
+        * @param {number}
+        * @return {number}
+        * * **/
         Rectangle.prototype.width = function Rectangle_width(w) {
-            /** * *
-            * Gets and sets the width of this Rectangle.
-            * @param number
-            * @return number
-            * * **/
             if (typeof w === 'number') {
                 var x = this.left() + w;
                 this[2] = x;
@@ -118,13 +117,12 @@ mod({
             }
             return this[2] - this[0];
         };
-        
+        /** * *
+        * Returns the height of this Rectangle
+        * @param {number}
+        * @return {number}
+        * * **/
         Rectangle.prototype.height = function Rectangle_height(h) {
-            /** * *
-            * Returns the height of this Rectangle
-            * @param number
-            * @return number
-            * * **/
             if (typeof h === 'number') {
                 var y = this.top() + h;
                 this[5] = y;
@@ -132,48 +130,44 @@ mod({
             }
             return this[5] - this[1];
         };
-        
+        /** * *
+        * Returns the area (in pixels^2) of this rectangle
+        * @return {number}
+        * @nosideeffects
+        * * **/
         Rectangle.prototype.area = function Rectangle_area () {
-            /** * *
-            * Returns the area (in pixels^2) of this rectangle
-            * @return number
-            * @nosideeffects
-            * * **/
             return this.width() * this.height();
         };
-        
+        /** * *
+        * Returns whether or not this rectangle intersects rectangle r.
+        * Rectangles that share the same edge are considerend NOT intersecting.
+        * @param {Rectangle}
+        * @return {boolean}
+        * @nosideeffects
+        * * **/
         Rectangle.prototype.intersectsRectangle = function Rectangle_intersectsRectangle(r) {
-            /** * *
-            * Returns whether or not this rectangle intersects rectangle r.
-            * Rectangles that share the same edge are considerend NOT intersecting.
-            * @param - Rectangle
-            * @return boolean
-            * @nosideeffects
-            * * **/
             return !(this.left() >= r.right() || 
                      r.left() >= this.right() || 
                      this.top() >= r.bottom() || 
                      r.top() >= this.bottom());
         };
-            
+        /** * *
+        * Returns whether or not this rectangle contains rectangle r.
+        * If rectangle r is equal it is considered contained within this rectangle (and visa versa).
+        * @param {Rectangle}
+        * @return {boolean}
+        * @nosideeffects
+        * * **/
         Rectangle.prototype.containsRectangle = function Rectangle_contains(r) {
-            /** * *
-            * Returns whether or not this rectangle contains rectangle r.
-            * If rectangle r is equal it is considered contained within this rectangle (and visa versa).
-            * @param Rectangle
-            * @return boolean
-            * @nosideeffects
-            * * **/
             return this.left() <= r.left() && this.top() <= r.top() && this.right() >= r.right() && this.bottom() >= r.bottom();
         };
-        
+        /** * *
+        * Returns the intersection of this rectangle with rectangle r. If the rectangles
+        * Returns false if r does not intersect.
+        * @param {Rectangle}
+        * @return {Rectangle|false}
+        * * **/
         Rectangle.prototype.intersectionWith = function Rectangle_intersectionWith(r) {
-            /** * *
-            * Returns the intersection of this rectangle with rectangle r. If the rectangles
-            * Returns false if r does not intersect.
-            * @param {Rectangle}
-            * @return {Rectangle|false}
-            * * **/
             if (this.intersectsRectangle(r)) {
                 return new m.Rectangle();
             }
@@ -292,21 +286,20 @@ mod({
             
             return clippoly(polygon, this);
         };
-        
+        /** * *
+        * Returns a new set of rectangles that do not intersect, that occupy the
+        * same space as the original.
+        * @param {Array}
+        * @return {Array}
+        * @nosideeffects
+        * * **/
         Rectangle.reduceRectangles = function Rectangle_reduceRectangles(rectangles) {
             /** * *
-            * Returns a new set of rectangles that do not intersect, that occupy the
-            * same space as the original.
-            * @param Array
-            * @return Array
+            * Bundles and sorts rectangles by vertical edges.
+            * @param {Array}
             * @nosideeffects
             * * **/
             function bundleRectangles(rectangles) {
-                /** * *
-                * Bundles and sorts rectangles by vertical edges.
-                * @param Array
-                * @nosideeffects
-                * * **/
                 var output = [];
                 for (var i=0; i < rectangles.length; i++) {
                     var rect = rectangles[i];

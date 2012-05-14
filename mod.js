@@ -180,19 +180,20 @@ var mod = function (module) {
          * Returns the modules.main.
          */
         mod.sortPackages();
-        var output = '(function initBangCompilation(){';
-        output += ('var modules = {};');
+        var output = '(function initBangCompilation() {';
+        output += ('\n    var modules = {};');
         for (var i = 0; i < mod.packages.length; i++) {
             if (isModule(mod.packages[i])) {
                 var module = mod.packages[i];
                 output += ('\n\n/// '+module.name);
-                output += ('\nmodules.'+module.name+' = ('+module.init.toString()+')(modules);\n');
+                output += ('\n    modules.'+module.name+' = ('+module.init.toString()+')(modules);\n');
                 if ('callback' in module) {
                     output += ('('+module.callback.toString()+')(modules);\n');
                 }
             }
         }
-        output += 'return modules.main;}())';
+        output += '    return modules.main;';
+        output += '}());';
         return output;
     };
     mod.printCompilation = function () {

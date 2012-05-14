@@ -9,12 +9,18 @@
 mod({
     name : 'Polygon',
     dependencies : [ 'bang::Geometry/Vector.js' ],
+    /** * *
+    * Initializes the Polygon type.
+    * @param {object} The modules object.
+    * @return {function}
+    * * **/
     init : function initPolygon (m) {
         /** * *
-        * Initializes the Polygon type.
-        * @param object
+        * Creates a new polygon
+        * @param ...
+        * @return {Polygon}
+        * @constructor
         * * **/
-        
         function Polygon() {
             m.Vector.apply(this, Array.prototype.slice.call(arguments));
         }
@@ -22,18 +28,23 @@ mod({
         Polygon.prototype = new m.Vector();
         
         Polygon.prototype.constructor = Polygon;
-        
+        //--------------------------------------
+        //  METHODS
+        //--------------------------------------
+        /** * *
+        * Returns the string representation of the polygon.
+        * @return {string}
+        * * **/
         Polygon.prototype.toString = function() {
             return 'Polygon['+Array.prototype.toString.call(this)+']';
         };
-        
+        /** * *
+        * Returns whether or not the polygon contains the point p.
+        * @param {Vector}
+        * @returns {boolean}
+        * @nosideeffects
+        * * **/
         Polygon.prototype.containsPoint = function Polygon_containsPoint(p) {
-            /** * *
-            * Returns whether or not this polygon contains the point p.
-            * @param Vector
-            * @returns boolean
-            * @nosideeffects
-            * * **/
             var x = p[0];
             var y = p[1];
             var xp = [];

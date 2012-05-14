@@ -32,7 +32,7 @@ mod({
             this.cleanViews = [];
             /** * *
             * A list of objects that store the clean state of a view.
-            * @type {Array.<object>}
+            * @type {Array.<Object>}
             * * **/
             this.viewPackages = [];
             /** * *

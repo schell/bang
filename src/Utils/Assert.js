@@ -12,18 +12,31 @@ mod({
     init : function initType (m) {
         /** * *
         * Initializes the assert object.
-        * @param {Object} The mod modules object.
+        * @param m {Object} The mod modules object.
         * * **/
         //--------------------------------------
         //  ADDITIONS TO WINDOW
         //--------------------------------------
-        window.assert = (function () {
-            /**
-             * An object that facilitates unit tests.
-             */
+        /**
+        *    Logs a message to console (if available)
+        */
+        (function Animation_setupLogging() {
+            if (window.console) {
+                return;
+            }
+            window.console = {};
+            window.console.log = function () {};
+            window.console.trace = function () {};
+        })();
+
+        /**
+        * An object that facilitates unit tests.
+        */
+        var assert = window.assert = (function () {
             var passes = 0, fails = 0;
             var failStrings = [];
             var tests = [];
+            var console = window.console;
             return {
                 eq : function (uno, dos, statement) {
                     var testFunc = function test(testObj) {

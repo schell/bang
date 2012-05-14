@@ -133,18 +133,6 @@ mod({
             }
         };
 
-        (function Animation_setupLogging() {
-            /**
-             *    Logs a message to console (if available)
-             */
-            if (window.console) {
-                return;
-            }
-            window.console = {};
-            window.console.log = function () {};
-            window.console.trace = function () {};
-        })();
-
         return Animation;
     }
 });
