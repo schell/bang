@@ -8,17 +8,19 @@
 * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * **/
 mod({
     name : 'Stage',
-    dependencies : [ 'bang::View/View.js' ],
+    dependencies : [ 'bang::View/View.js', 'bang::Geometry/Rectangle.js', 'bang::Utils/Animation.js' ],
     /** * *
     * Initializes Stage type
-    * @param {Object} 
+    * @param m {Object} 
     * @return {function(number, number)}
     * * **/
     init : function initStage (m) {
         /** * *
         * Creates a new Stage view object.
-        * @param {number=}
-        * @param {number=}
+        * @param width {number=}
+        * @param height {number=}
+        * @constructor
+        * @extends View
         * * **/
         function Stage(width, height) {
             m.View.call(this, 0, 0, width, height);
@@ -40,6 +42,22 @@ mod({
             * @type {Array.<Rectangle>}
             * * **/
             this.redraws = [];
+            /** * *
+            * Whether or not this Stage should redraw itself.
+            * Subviews set this variable in markAsDirty() when changes are made to them.
+            * @type {boolean}
+            * * **/
+            this.shouldRedraw = false;
+            /** * *
+            * An animation timer for scheduling redraws.
+            * @type {Animation}
+            * * **/
+            this.timer = new m.Animation();
+            /** * *
+            * An object that identifies the Stage's step animation in the Stage's timer.
+            * @type {Object}
+            * * **/
+            this.stepAnimation = this.timer.requestAnimation(this.step);
         }
         
         Stage.prototype = new m.View();
@@ -79,7 +97,7 @@ mod({
         ];
         /** * *
         * Packages a view and its current (hopefully clean) state.
-        * @param {View}
+        * @param view {View}
         * @return {Object}
         * * **/
         function packageView(view) {
@@ -122,7 +140,7 @@ mod({
         }
         /** * *
         * Draws this stage and its subviews into the given context.
-        * @param {CanvasRenderingContext2D}
+        * @param context {CanvasRenderingContext2D}
         * * **/
         Stage.prototype.draw = function Stage_draw(context) {
             context = context || this.context;
@@ -154,7 +172,7 @@ mod({
         /** * *
         * Redraws portions of this view and its subviews that have changed
         * since the last draw or redraw into the given context.
-        * @param {CanvasRenderingContext2D}
+        * @param context {CanvasRenderingContext2D}
         * * **/
         Stage.prototype.redraw = function Stage_redraw(context) {
             context = context || this.context;
@@ -212,7 +230,7 @@ mod({
                 // for now we're just brute forcing and running through
                 // the entire list...
                 for (j=0; j < this.viewPackages.length; j++) {
-                    viewPkg = this.viewPackages[j];
+                    var viewPkg = this.viewPackages[j];
                     view = viewPkg.view;
                     if (viewPkg.boundary.intersectsRectangle(r)) {
                         // A portion of this rectangle needs to be redrawn...
@@ -245,6 +263,15 @@ mod({
             context.restore();
             
             this.isDirty = false;
+            this.shouldRedraw = false;
+        };
+        /** * *
+        * This is the main step of the display list.
+        * * **/
+        Stage.prototype.step = function Stage_step(time) {
+            if (this.shouldRedraw) {
+                this.redraw();
+            }
         };
         
         return Stage;

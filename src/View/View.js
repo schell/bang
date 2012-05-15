@@ -123,7 +123,7 @@ mod({
                 * view as dirty (needing redisplay).
                 * * **/
                 return function aliasedDrawFunction() {
-                    this.view.isDirty = true;
+                    this.view.markAsDirty();
                     return original.apply(this, arguments);
                 };
             }
@@ -240,6 +240,22 @@ mod({
             context.globalAlpha *= this.alpha;
         };
         /** * *
+        * Sets this view as being dirty. Causes the stage to redraw.
+        * * **/
+        View.prototype.markAsDirty = function View_markAsDirty() {
+            this.isDirty = true;
+            var parent = this;
+            // Traverse up the display list and tell the root it should redraw.
+            while (parent) {
+                if (!parent.parent) {
+                    parent.shouldRedraw = true;
+                    parent = false;
+                } else {
+                    parent = parent.parent;
+                }
+            }
+        };
+        /** * *
         * Adds a subview to this view.
         * @param {View}
         * * **/
@@ -249,6 +265,7 @@ mod({
             }
             this.displayList.push(subView);
             subView.parent = this;
+            this.markAsDirty();
         };
         /** * *
         * Adds a subview to this view at a given index.
@@ -263,6 +280,7 @@ mod({
             }
             this.displayList.splice(insertNdx, 0, subView);
             subView.parent = this;
+            this.markAsDirty();
         };
         /** * *
         * Removes a subview of this view.
@@ -275,6 +293,7 @@ mod({
                 throw new Error('subview must be a child of the caller.');
             }
             subView.parent = false;
+            this.markAsDirty();
         };
         /** * *
         * Draws this view and its subviews into the given context.

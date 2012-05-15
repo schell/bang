@@ -262,6 +262,29 @@
                 
                     assert.stat();
                 }, 500);
+                
+                var milliseconds = 10000;
+                var time = Date.now();
+                var redrawCounter = 0;
+                var redrawAnimation = timer.requestAnimation(function() {
+                    container.draw();
+                    redrawCounter++;
+                });
+                setTimeout(function() {
+                    timer.cancelAnimation(redrawAnimation);
+                    console.log((redrawCounter*1000)/milliseconds,'fps.');
+                    
+                    time = Date.now();
+                    redrawCounter = 0;
+                    var drawAnimation = timer.requestAnimation(function() {
+                        container.redraw();
+                        redrawCounter++;
+                    });
+                    setTimeout(function() {
+                        timer.cancelAnimation(drawAnimation);
+                        console.log((redrawCounter*1000)/milliseconds,'fps.');
+                    }, milliseconds);
+                }, milliseconds);
             });
         </script>
     </body>
