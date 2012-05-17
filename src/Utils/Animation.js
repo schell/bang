@@ -72,21 +72,24 @@ mod({
         /** * *
         * Creates an animation package.
         * Animation packages are used for keeping track of specific animations.
+        * @param context {Object} The context of this animation package.
         * @return {Object}
         * * **/
-        Animation.prototype.createPackage = function Animation_createPackage() {
+        Animation.prototype.createPackage = function Animation_createPackage(context) {
             return {
                 id : 0,
-                cancelled : false
+                cancelled : false,
+                context : context
             };
         };
         /** * *
         * Calls animationFunction over and over again.
-        * @param {function(number=)} The function to call over and over, repeatedly.
+        * @param animationFunction {function(number=)} The function to call over and over, repeatedly.
+        * @param context {Object} The object to use as the 'this' property with calling animationFunction.
         * @return {Object.<string, string|number|false>}
         * * **/
-        Animation.prototype.requestAnimation = function (animationFunction) {
-            var animation = this.createPackage();
+        Animation.prototype.requestAnimation = function (animationFunction, context) {
+            var animation = this.createPackage(context);
             // Store a reference to the animation...
             this.animations.push(animation);
             /** * *
@@ -104,7 +107,7 @@ mod({
                 // Update the animation id...
                 animation.id = request(animate);
                 // Animate...
-                animationFunction(time);
+                animationFunction.call(animation.context, time);
             };
 
             animation.id = request(animate);
@@ -116,6 +119,7 @@ mod({
         * * **/
         Animation.prototype.cancelAnimation = function Animation_cancelAnimation(animation) {
             animation.cancelled = true;
+            animation.context = null;
             cancel(animation.id);
             
             // Remove the animation from our list...

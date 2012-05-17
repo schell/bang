@@ -57,7 +57,22 @@ mod({
             * An object that identifies the Stage's step animation in the Stage's timer.
             * @type {Object}
             * * **/
-            this.stepAnimation = this.timer.requestAnimation(this.step);
+            this.stepAnimation = this.timer.requestAnimation(this.step, this);
+            /** * *
+            * A canvas for drawing the display list into.
+            * Since the Stage is also a View, we need to separate the canvas's
+            * into the Stage as a View's canvas and the entire display list's canvas.
+            * @type {HTMLCanvasElement}
+            * * **/
+            this.compositeCanvas = document.createElement('canvas');
+            this.compositeCanvas.width = this.width;
+            this.compositeCanvas.height = this.height;
+            /** * *
+            * Whether or not to draw the redraw regions into the composite context
+            * after each redraw.
+            * @type {boolean}
+            * * **/
+            this.showRedrawRegions = false;
         }
         
         Stage.prototype = new m.View();
@@ -143,7 +158,7 @@ mod({
         * @param context {CanvasRenderingContext2D}
         * * **/
         Stage.prototype.draw = function Stage_draw(context) {
-            context = context || this.context;
+            context = context || this.compositeCanvas.getContext('2d');
             
             context.save();
             // Clear the entire stage...
@@ -175,7 +190,7 @@ mod({
         * @param context {CanvasRenderingContext2D}
         * * **/
         Stage.prototype.redraw = function Stage_redraw(context) {
-            context = context || this.context;
+            context = context || this.compositeCanvas.getContext('2d');
             
             if (this.isDirty || this.viewPackages.length <= 1) {
                 // Just draw the whole thing over again...
@@ -219,7 +234,6 @@ mod({
             this.redraws = m.Rectangle.reduceRectangles(redraws);
             
             // Now go through and actually do some drawing!
-            context.save();
             for (i=0; i < this.redraws.length; i++) {
                 var r = this.redraws[i];
                 // Clear the draw area...
@@ -242,6 +256,7 @@ mod({
                             // This is not a polygon...
                             continue;
                         }
+                        context.save();
                         // Apply the global transform to the drawing context, so now
                         // we're in this view's local coordinates, which match our
                         // redraw polygon...
@@ -257,10 +272,16 @@ mod({
                         }
                         context.closePath();
                         context.fill();
+                        context.restore();
                     }
                 }
+                if (this.showRedrawRegions) {
+                    context.save();
+                    context.strokeStyle = 'limegreen';
+                    context.strokeRect(r.x(),r.y(),r.width(),r.height());
+                    context.restore();
+                }
             }
-            context.restore();
             
             this.isDirty = false;
             this.shouldRedraw = false;
@@ -269,9 +290,7 @@ mod({
         * This is the main step of the display list.
         * * **/
         Stage.prototype.step = function Stage_step(time) {
-            if (this.shouldRedraw) {
-                this.redraw();
-            }
+            m.View.prototype.draw.call(this, this.compositeCanvas.getContext('2d'));
         };
         
         return Stage;

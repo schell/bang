@@ -247,6 +247,8 @@
                 view3.x = 60;
                 container.redraw();
                 
+                bang.removeChild(container.canvas);
+                
                 assert.suite = 'Animation';
                 var calls = 0;
                 var timer = new m.Animation();
@@ -259,32 +261,32 @@
                 animation = timer.requestAnimation(animate);
                 setTimeout(function () {
                     assert.eq(calls, 1, 'Can start and cancel animation.');
-                
+                    
                     assert.stat();
                 }, 500);
                 
-                var milliseconds = 10000;
-                var time = Date.now();
-                var redrawCounter = 0;
-                var redrawAnimation = timer.requestAnimation(function() {
-                    container.draw();
-                    redrawCounter++;
-                });
-                setTimeout(function() {
-                    timer.cancelAnimation(redrawAnimation);
-                    console.log((redrawCounter*1000)/milliseconds,'fps.');
-                    
-                    time = Date.now();
-                    redrawCounter = 0;
-                    var drawAnimation = timer.requestAnimation(function() {
-                        container.redraw();
-                        redrawCounter++;
-                    });
-                    setTimeout(function() {
-                        timer.cancelAnimation(drawAnimation);
-                        console.log((redrawCounter*1000)/milliseconds,'fps.');
-                    }, milliseconds);
-                }, milliseconds);
+                var stage = new m.Stage(300, 300);
+                stage.context.fillStyle = 'black';
+                stage.context.fillRect(0, 0, 300, 300);
+                stage.showRedrawRegions = true;
+                
+                var block = new m.View(0, 0, 50, 50);
+                block.context.fillStyle = 'red';
+                block.context.fillRect(0, 0, 50, 50);
+                stage.addView(block);
+                bang.appendChild(stage.compositeCanvas);
+                
+                var theta = 0;
+                function move() {
+                    block.x = 150+Math.cos(theta)*100;
+                    block.y = 150+Math.sin(theta)*100;
+                    theta += Math.PI/360;
+                    setTimeout(move, 1);
+                }
+                
+                window.stage = stage;
+                window.block = block;
+                window.move = move;
             });
         </script>
     </body>
