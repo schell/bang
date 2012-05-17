@@ -121,7 +121,7 @@
                                 if (image) {
                                     output.removeChild(image);
                                 }
-                                image = m.Utils.StringToImage(json.compiledCode);
+                                image =Utils.StringToImage(json.compiledCode);
                                 output.appendChild(image);
                             }
                         };  
@@ -135,7 +135,7 @@
                     }
                 }
             }).onload(function(m) {
-                m.main(document.getElementById('entrypoint'));
+               main(document.getElementById('entrypoint'));
             });
         </script>
     </body>

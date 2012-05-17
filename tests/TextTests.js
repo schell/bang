@@ -15,33 +15,33 @@ mod({
          * @param {Object} The mod modules object.
          */
         // aliases
-        var ifndefInit = m.ifndefInit;
-        var ifndefInitObj = m.ifndefInitObj;
-        var safeAddin = m.safeAddin;
+        var ifndefInit =ifndefInit;
+        var ifndefInitObj =ifndefInitObj;
+        var safeAddin =safeAddin;
         
         return function runTextTests(callback) {
-            var assert = m.assert;
+            var assert =assert;
             assert.suite = 'Text Tests';
             
-            var stage = m.Stage();
+            var stage =Stage();
             stage.setParentElement('bang');
             stage.addHitAreaDrawFunction('rgba(255, 255, 255, 0.5)');
             
             var string = 'Hey, this is a text field. It should wrap and the bounding box will autosize vertically.';
             string += '\n\nIt also supports newlines!\n\nBOOOOOM!\n\nOh, and it has a lineHeight property that defaults to 12px.';
             string += '\nRight now we are tweening between a lineHeight of 18 (font-size) and 27 (1.5x font-size), you can see the bounding box autosizing...';
-            var text = m.Text({
+            var text =Text({
                 text : string,
                 font : 'bold italic 18px serif',
                 lineHeight : 18,
                 fillStyle : 'rgba(0, 0, 0, 1.0)',
                 strokeStyle : 'rgba(0, 0, 0, 0.3)',
-                hitArea : m.Rectangle.from(10, 10, 300, 100)
+                hitArea :Rectangle.from(10, 10, 300, 100)
             });
             text.addHitAreaDrawFunction('rgba(0,0,0,0)','rgba(0,0,0,0.5)');
             
             var tween;
-            tween = m.Ease({
+            tween =Ease({
                 target : text,
                 duration : 1000,
                 equation : 'easeOut',

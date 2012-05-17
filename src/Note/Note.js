@@ -21,7 +21,7 @@ mod({
              * @param - self Object - The object to add Note properties to.
              * @return self Note 
              */
-            self = m.Object(self); 
+            self =Object(self); 
             
             self.toString = function() {
                 var dispatcher = (self.dispatcher || 'undefined').toString();
@@ -30,17 +30,17 @@ mod({
                 return '[Note(dispatcher:'+dispatcher+' name:'+name+' body:'+body+')]';
             };
 
-            m.safeAddin(self, 'dispatcher', undefined);
-            m.safeAddin(self, 'name', undefined);
-            m.safeAddin(self, 'body', undefined);
+           safeAddin(self, 'dispatcher', undefined);
+           safeAddin(self, 'name', undefined);
+           safeAddin(self, 'body', undefined);
             
             return self;
         };
         
         addin.from = function Note_from (dispatcher, name, body) {
-            dispatcher = m.ifndefInitObj(dispatcher, undefined);
-            name = m.ifndefInit(name, undefined);
-            body = m.ifndefInit(body, undefined);
+            dispatcher =ifndefInitObj(dispatcher, undefined);
+            name =ifndefInit(name, undefined);
+            body =ifndefInit(body, undefined);
             return addin({dispatcher:dispatcher, name:name, body:body});
         };
         

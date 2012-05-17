@@ -16,14 +16,14 @@ mod({
          */
         
         return function runSpriteTests(callback) {
-            var assert = m.assert;
+            var assert =assert;
             assert.suite = 'Sprite Tests';
             
-            var stage = m.Stage();
+            var stage =Stage();
             stage.setParentElement('bang');
             
             var sheet = 'images/walkingRabbit.png';
-            var frames = m.Rectangle.from(0,0,269,371);
+            var frames =Rectangle.from(0,0,269,371);
             var w = 44.5;
             var t = 269/w;
             var verticallyAt = [];
@@ -34,7 +34,7 @@ mod({
                 verticallyAt : verticallyAt
             });
             
-            var sprite = m.Sprite({
+            var sprite =Sprite({
                 frames : frames
             });
             sprite.load(sheet);

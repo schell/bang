@@ -11,10 +11,10 @@ mod({
     dependencies : [ 'bang::Geometry/Vector.js' ],
     /** * *
     * Initializes the Polygon type.
-    * @param {object} The modules object.
+    * @param {function} Vector The Vector constructor function.
     * @return {function}
     * * **/
-    init : function initPolygon (m) {
+    init : function initPolygon (Vector) {
         /** * *
         * Creates a new polygon
         * @param ...
@@ -22,10 +22,10 @@ mod({
         * @constructor
         * * **/
         function Polygon() {
-            m.Vector.apply(this, Array.prototype.slice.call(arguments));
+           Vector.apply(this, Array.prototype.slice.call(arguments));
         }
         
-        Polygon.prototype = new m.Vector();
+        Polygon.prototype = new Vector();
         
         Polygon.prototype.constructor = Polygon;
         //--------------------------------------

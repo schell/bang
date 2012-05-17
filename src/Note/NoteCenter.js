@@ -21,9 +21,9 @@ mod({
              * @param - self Object - The object to add NoteCenter properties to.
              * @return self NoteCenter Object 
              */
-            self = m.Object(self); 
+            self =Object(self); 
             
-            m.safeAddin(self, 'tag', 'NoteCenter');
+           safeAddin(self, 'tag', 'NoteCenter');
             
             // protected observers array
             var _observers = [];
@@ -32,7 +32,7 @@ mod({
                 /**
                  * Packs up a listener, note and callback.
                  */
-                var observer = m.Object({
+                var observer =Object({
                     listener : listener,
                     dispatcher : dispatcher,
                     name : noteName,
@@ -41,14 +41,14 @@ mod({
                 return observer;
             }
             
-            m.safeAddin(self, 'totalListeners', function NoteCenter_totalListeners() {
+           safeAddin(self, 'totalListeners', function NoteCenter_totalListeners() {
                 /**
                  * Returns the total number of stored interests.
                  * @return Number
                  */
                 return _observers.length;
             });
-            m.safeAddin(self, 'observers', function NoteCenter_observers() {
+           safeAddin(self, 'observers', function NoteCenter_observers() {
                 /** * *
                 * Returns an array of all the observers.
                 * @return Array
@@ -57,21 +57,21 @@ mod({
                     return el;
                 });
             });
-            m.safeAddin(self, 'dispatchersOfNoteWithName', function NoteCenter_getDispatchersWithName(name) {
+           safeAddin(self, 'dispatchersOfNoteWithName', function NoteCenter_getDispatchersWithName(name) {
                 /** * *
                 * Returns an array of dispatchers associated with notifications of *name*
                 * * **/
                 var list = [];
                 for (var i=0; i < _observers.length; i++) {
                     var observer = _observers[i];
-                    if (m.defined(observer.name) && observer.name === name && m.defined(observer.dispatcher)) {
+                    if (m.defined(observer.name) && observer.name === name &&defined(observer.dispatcher)) {
                         list.push(observer.dispatcher);
                     }
                 }
                 return list;
             });
             
-            m.safeAddin(self, 'addListener', function NoteCenter_addListener(listener, dispatcher, name, callback) {
+           safeAddin(self, 'addListener', function NoteCenter_addListener(listener, dispatcher, name, callback) {
                 /**
                  * Registers *listener* as interested in receiving notifications of *name*, 
                  * coming from *dispatcher*. Calls *callback* when notes of this type get dispatched.
@@ -96,7 +96,7 @@ mod({
                  */
                 observer.callback.call(observer.listener, note);
             };
-            m.safeAddin(self, 'dispatch', function NoteCenter_dispatch (note) {
+           safeAddin(self, 'dispatch', function NoteCenter_dispatch (note) {
                 /**
                  * Dispatches *note* to listening observers.
                  * @param - note Note
@@ -134,7 +134,7 @@ mod({
                 }
             });
             
-            m.safeAddin(self, 'removeListener', function NoteCenter_removeListener(listener, dispatcher, name, callback) {
+           safeAddin(self, 'removeListener', function NoteCenter_removeListener(listener, dispatcher, name, callback) {
                 if (!m.defined(listener)) {
                     throw new Error('Listener must be defined.');
                 } else if (!m.defined(dispatcher) && !m.defined(name)) {
@@ -145,7 +145,7 @@ mod({
                     var observer = _observers[i];
                     if (observer.listener === listener) {
                         // We found an observer with this listener...
-                        if (m.defined(dispatcher) && m.defined(name)) {
+                        if (m.defined(dispatcher) &&defined(name)) {
                             // We want to remove interests with this dispatcher and a specific name...
                             if (m.defined(observer.dispatcher) && observer.dispatcher === dispatcher) {
                                 // This observer is listening to this dispatcher...
@@ -163,12 +163,12 @@ mod({
                                     continue;
                                 }
                             }
-                        } else if (m.defined(dispatcher) && m.defined(observer.dispatcher) && dispatcher === observer.dispatcher) {
+                        } else if (m.defined(dispatcher) &&defined(observer.dispatcher) && dispatcher === observer.dispatcher) {
                             // We want to remove all interests from this listener with this dispatcher...
                             _observers.splice(i, 1);
                             i--;
                             continue;
-                        } else if (m.defined(name) && m.defined(observer.name) && name === observer.name) {
+                        } else if (m.defined(name) &&defined(observer.name) && name === observer.name) {
                             // We want to remove all interests from this listener with this note name...
                             _observers.splice(i, 1);
                             i--;

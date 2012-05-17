@@ -21,19 +21,19 @@ mod({
              * @param - self Object - The object to add Dispatcher properties to.
              * @return self Dispatcher Object 
              */
-            self = m.Object(self); 
+            self =Object(self); 
             
-            m.safeAddin(self, 'tag', 'Dispatcher');
+           safeAddin(self, 'tag', 'Dispatcher');
             // Add in NotePasser properties
-            m.NotePasser(self);
+           NotePasser(self);
             //--------------------------------------
             //  NOTIFICATION POOLING
             //--------------------------------------
-            var pool = m.Pool.sharedInstance();
+            var pool =Pool.sharedInstance();
             var pond = 'DispatcherNotes';
             if (!pool.pondExists(pond)) {
                 pool.addPond(pond,function() {
-                    return m.Note();
+                    returnNote();
                 },function() {}, function() {});
             }
             function getNote() {
@@ -45,14 +45,14 @@ mod({
             //--------------------------------------
             //  DISPATCHING
             //--------------------------------------
-            m.safeAddin(self, 'dispatch', function Dispatcher_dispatch(note) {
+           safeAddin(self, 'dispatch', function Dispatcher_dispatch(note) {
                 /**
                  * Dispatches *note* to this dispatcher's note center.
                  */
                 note.dispatcher = self;
                 self.noteCenter.dispatch(note);
             });
-            m.safeAddin(self, 'sendNotification', function Dispatcher_sendNotification(name, body) {
+           safeAddin(self, 'sendNotification', function Dispatcher_sendNotification(name, body) {
                 /**
                  * Dispatches a note with *name* and *body* to this dispatcher's note center.
                  */

@@ -15,10 +15,10 @@ mod({
         * @param {Object} The mod modules object.
         * * **/ 
         return function runUtilsTests(callback) {
-            var assert = m.assert;
+            var assert =assert;
             assert.suite = 'Utilities Tests';
                 
-            var stage = m.Stage();
+            var stage =Stage();
             stage.setParentElement('bang');
             stage.addHitAreaDrawFunction('rgb(255,255,255)');
             
@@ -32,23 +32,23 @@ mod({
                     
                     var message = "A Troll stood by sadly for hours Near where'd been two shiny bright towers With hot tears in his eye He could not understand why Yet he hurt with the world's greatest powers.   Trolls come from lands far and near Through legends and myth they appear But right now, Today! To the GREAT USA They wish comfort and love without fear!";
                     
-                    var msgImageData = m.Utils.packStringIntoImageData(message);
+                    var msgImageData =Utils.packStringIntoImageData(message);
                     c.width = msgImageData.width;
                     c.height = msgImageData.height;
                     
                     ctx.putImageData(msgImageData, 0, 0);
                     
                     var dataOut = ctx.getImageData(0, 0, c.width, c.height);
-                    var msgOut = m.Utils.unpackImageDataToString(dataOut);
+                    var msgOut =Utils.unpackImageDataToString(dataOut);
                     
                     assert.eq(message, msgOut, 'Can encode data to canvas and back.');
                     
                     var src = mod.compile();
-                    var png = m.Utils.StringToImage(src);
+                    var png =Utils.StringToImage(src);
                     document.body.appendChild(png);
-                    var bm = m.Bitmap();
-                    bm.addListener(bm, m.Bitmap.DID_LOAD, function() {
-                        var string = m.Utils.ImageToString(bm.image);
+                    var bm =Bitmap();
+                    bm.addListener(bm,Bitmap.DID_LOAD, function() {
+                        var string =Utils.ImageToString(bm.image);
                         assert.eq(src.length, string.length, 'Can encode lots of data to png and back without loosing data.');
                         cb();
                     });
@@ -57,10 +57,10 @@ mod({
                 function JSEncodeTest(cb) {
                     var a = 666;
                     var string = 'var b = 24; var c = 16; var d = b/c; var s = "This is a string with the number one point five after some dots..."; a = s+(b/c).toString();for(var i=0;i<s.length;i++){d+=s.charCodeAt(i);}';
-                    var png = m.Utils.StringToImage(string);
-                    var pngBM = m.Bitmap();
-                    pngBM.addListener(pngBM, m.Bitmap.DID_LOAD, function() {
-                        var srcString = m.Utils.ImageToString(pngBM.image);
+                    var png =Utils.StringToImage(string);
+                    var pngBM =Bitmap();
+                    pngBM.addListener(pngBM,Bitmap.DID_LOAD, function() {
+                        var srcString =Utils.ImageToString(pngBM.image);
                         if (srcString !== string) {
                             console.log(string);
                             console.log('\n');
@@ -71,8 +71,8 @@ mod({
                         assert.eq(d, 6035.5, 'Can correctly evaluate data stored in PNG format.');
                         
                         var projectCompilation = mod.compile();
-                        var PNG = m.Utils.StringToImage(projectCompilation);
-                        var GIF = m.Utils.StringToImage(projectCompilation, 'image/gif');
+                        var PNG =Utils.StringToImage(projectCompilation);
+                        var GIF =Utils.StringToImage(projectCompilation, 'image/gif');
                         document.body.innerHTML = '';
                         function h3(string) {
                             var h3 = document.createElement('h3');

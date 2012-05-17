@@ -14,7 +14,7 @@ mod({
     * @param m {Object} 
     * @return {function(number, number)}
     * * **/
-    init : function initStage (m) {
+    init : function initStage (View, Rectangle, Animation) {
         /** * *
         * Creates a new Stage view object.
         * @param width {number=}
@@ -23,7 +23,7 @@ mod({
         * @extends View
         * * **/
         function Stage(width, height) {
-            m.View.call(this, 0, 0, width, height);
+           View.call(this, 0, 0, width, height);
             
             /** * *
             * A flattened version of the display list at its last
@@ -52,7 +52,7 @@ mod({
             * An animation timer for scheduling redraws.
             * @type {Animation}
             * * **/
-            this.timer = new m.Animation();
+            this.timer = new Animation();
             /** * *
             * An object that identifies the Stage's step animation in the Stage's timer.
             * @type {Object}
@@ -75,7 +75,7 @@ mod({
             this.showRedrawRegions = false;
         }
         
-        Stage.prototype = new m.View();
+        Stage.prototype = new View();
         
         Stage.prototype.constructor = Stage;
         //--------------------------------------
@@ -129,7 +129,7 @@ mod({
             // The view may be rotated, and we want a rectangle
             // that contains the transformed boundary...
             var polygon = pkg.transform.transformPolygon(view.localBoundary());
-            var r = new m.Rectangle(Number.POSITIVE_INFINITY,Number.POSITIVE_INFINITY);
+            var r = new Rectangle(Number.POSITIVE_INFINITY,Number.POSITIVE_INFINITY);
             r.right(Number.NEGATIVE_INFINITY);
             r.bottom(Number.NEGATIVE_INFINITY);
             for (var j=0; j < polygon.length; j+=2) {
@@ -231,7 +231,7 @@ mod({
             
             // Update the stage's draw properties...
             this.viewPackages = viewPackages;
-            this.redraws = m.Rectangle.reduceRectangles(redraws);
+            this.redraws =Rectangle.reduceRectangles(redraws);
             
             // Now go through and actually do some drawing!
             for (i=0; i < this.redraws.length; i++) {
@@ -290,7 +290,7 @@ mod({
         * This is the main step of the display list.
         * * **/
         Stage.prototype.step = function Stage_step(time) {
-            m.View.prototype.draw.call(this, this.compositeCanvas.getContext('2d'));
+           View.prototype.draw.call(this, this.compositeCanvas.getContext('2d'));
         };
         
         return Stage;

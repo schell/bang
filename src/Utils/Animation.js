@@ -11,10 +11,9 @@ mod({
     dependencies : [],
     /**
     * Initializes the Animation type constructor.
-    * @param {Object}
     * @return {function}
     */
-    init : function initAnimation (m) {
+    init : function initAnimation () {
         /** * *
         * Creates a new Animation object.
         * Animation objects request timers from the browser and

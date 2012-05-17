@@ -11,9 +11,8 @@ mod({
     dependencies : [],
     /** * *
     * Initializes the utilities object.
-    * @param {Object} The mod modules object.
     * * **/
-    init : function initUtils (m) {
+    init : function initUtils () {
         /** * *
         * An empty constructor function.
         * @constructor

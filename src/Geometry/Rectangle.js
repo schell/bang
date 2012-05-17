@@ -13,23 +13,24 @@
 * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * **/
 mod({
     name : 'Rectangle',
-    dependencies : [ 'bang::Geometry/Polygon.js' ],
-    init : function initRectangle (m) {
+    dependencies : [ 'bang::Geometry/Vector.js', 'bang::Geometry/Polygon.js' ],
+    /** * *
+    * Initializes the Rectangle type.
+    * @param {function} Vector The Vector constructor.
+    * @param {function} Polygon The Polygon constructor.
+    * * **/
+    init : function initRectangle (Vector, Polygon) {
         /** * *
-        * Initializes the Rectangle type.
-        * @param {Object} The mod modules object.
+        * Creates a new rectangle at (x,y) with width w and height h.
+        * @param {number}
+        * @param {number}
+        * @param {number}
+        * @param {number}
+        * @return Rectangle
+        * @nosideeffects
+        * @constructor
         * * **/
-        
         function Rectangle(x,y,w,h) {
-            /** * *
-            * Creates a new rectangle at (x,y) with width w and height h.
-            * @param {number}
-            * @param {number}
-            * @param {number}
-            * @param {number}
-            * @return Rectangle
-            * @nosideeffects
-            * * **/
             x = x || 0;
             y = y || 0;
             w = w || 0;
@@ -42,7 +43,7 @@ mod({
             this.length = 8;
         }
         
-        Rectangle.prototype = new m.Polygon();
+        Rectangle.prototype = new Polygon();
         
         Rectangle.prototype.constructor = Rectangle;
         
@@ -169,7 +170,7 @@ mod({
         * * **/
         Rectangle.prototype.intersectionWith = function Rectangle_intersectionWith(r) {
             if (this.intersectsRectangle(r)) {
-                return new m.Rectangle();
+                return new Rectangle();
             }
             return false;
         };
@@ -213,7 +214,7 @@ mod({
                     return Math.abs(n) !== Number.POSITIVE_INFINITY;
                 }
                 
-                var t = new m.Vector(0, 0);
+                var t = new Vector(0, 0);
                 var a, b;
 
                 /* find slope and intercept of segment pq */
@@ -246,7 +247,7 @@ mod({
                 var n, i, j=0, s, p, out, intersection;
                 
                 n = vec.length/2;
-                out = new m.Polygon();
+                out = new Polygon();
                 s = vec.pointAt(n-1);
                 
                 for(i = 0 ; i < n; i++ ) {
@@ -331,7 +332,7 @@ mod({
                     
             // We're going to need this function during end events...
             function mapIntersectionToScan(el) {
-                var newScan = new m.Rectangle(e.x, el.top(), 0, el.height());
+                var newScan = new Rectangle(e.x, el.top(), 0, el.height());
                 newScan.intersects = [el];
                 return newScan;
             }
@@ -391,7 +392,7 @@ mod({
                                     intersected.bottom(Math.max(intersected.bottom(), b));
                                     intersected.intersects = intersected.intersects.concat(scan.intersects);
                                 } else {
-                                    intersected = new m.Rectangle(e.x, t, 0, b - t);
+                                    intersected = new Rectangle(e.x, t, 0, b - t);
                                     intersected.intersects = scan.intersects.concat([e.rectangle]);
                                 }
                                 // Get rid of the current scan...

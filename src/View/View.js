@@ -14,7 +14,7 @@ mod({
     * @param {Object}
     * @nosideeffects
     * * **/
-    init : function initView (m) {
+    init : function initView (Rectangle, Matrix) {
         /** * *
         * A private variable for holding the number
         * of instantiated View objects.
@@ -159,7 +159,7 @@ mod({
         * @nosideeffects
         * * **/
         View.prototype.localTransform = function View_localTransform(invert) {
-            var matrix = new m.Matrix();
+            var matrix = new Matrix();
                 
             if (invert) {
                 // Let's just provide them with an inverse instead of
@@ -227,7 +227,7 @@ mod({
         * @return {Rectangle}
         * * **/
         View.prototype.localBoundary = function View_localBoundary() {
-            return new m.Rectangle(0, 0, this.width, this.height);
+            return new Rectangle(0, 0, this.width, this.height);
         };
         /** * *
         * Applies this view's transformation to a context.  

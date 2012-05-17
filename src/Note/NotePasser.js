@@ -24,13 +24,13 @@ mod({
              * @param - self Object - The object to add NotePasser properties to.
              * @return self NotePasser Object 
              */
-            self = m.Object(self); 
+            self =Object(self); 
             
-            m.safeAddin(self, 'tag', 'NotePasser');
+           safeAddin(self, 'tag', 'NotePasser');
             
-            defaultNoteCenter = defaultNoteCenter || m.NoteCenter();
+            defaultNoteCenter = defaultNoteCenter ||NoteCenter();
             
-            m.safeAddin(self, 'noteCenter', defaultNoteCenter);
+           safeAddin(self, 'noteCenter', defaultNoteCenter);
             
             return self;
         };

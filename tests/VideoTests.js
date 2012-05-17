@@ -16,10 +16,10 @@ mod({
          */
         
         return function(callback) {
-            var stage = m.Stage();
+            var stage =Stage();
             stage.setParentElement('bang');
             
-            var video = m.Video({
+            var video =Video({
                 width : 340,
                 height : 190,
                 rotation: 45,

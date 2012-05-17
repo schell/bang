@@ -15,25 +15,25 @@ mod({
          * @param {Object} The mod modules object.
          */
         return function runBitmapTests(callback) {
-            var assert = m.assert;
+            var assert =assert;
             assert.suite = 'Bitmap Tests';
             
-            var stage = m.Stage();
+            var stage =Stage();
             stage.setParentElement('bang');
             
             var dne = 'nothing/nothing.png';
             var local = 'images/block.png';
-            var bm = m.Bitmap();
+            var bm =Bitmap();
             
             function loadBitmapTests(cb) {
-                bm.addListener(bm, m.Bitmap.DID_NOT_LOAD, function(note) {
-                    assert.eq(note.body.type, m.LoadError.type, 'Bitmap notifies of failed image load.');
-                    bm.removeListener(bm, m.Bitmap.DID_NOT_LOAD);
+                bm.addListener(bm,Bitmap.DID_NOT_LOAD, function(note) {
+                    assert.eq(note.body.type,LoadError.type, 'Bitmap notifies of failed image load.');
+                    bm.removeListener(bm,Bitmap.DID_NOT_LOAD);
                 
                 
                     bm.load(local);
                 });
-                bm.addListener(bm, m.Bitmap.DID_LOAD, function(note) {
+                bm.addListener(bm,Bitmap.DID_LOAD, function(note) {
                     assert.eq(note.body, local, 'Bitmap notifies of successfull image load.');
                     cb();
                 });
@@ -43,14 +43,14 @@ mod({
             function drawBitmapTests(cb) {
                 stage.addView(bm);
                 setTimeout(function() {
-                    var canSeeBitmap = m.interactiveTests ? confirm('Can you see a bloody block rendered on the stage? (hit enter or click "Okay" to answer "yes, I do.")') : true;
+                    var canSeeBitmap =interactiveTests ? confirm('Can you see a bloody block rendered on the stage? (hit enter or click "Okay" to answer "yes, I do.")') : true;
                     assert.eq(canSeeBitmap, true, 'Bitmap can render to stage');
                     cb();
                 }, 1000);
             }
             
             function easeBitmapTests(cb) {
-                bm.tween = m.Ease({
+                bm.tween =Ease({
                     target : bm,
                     duration : 1000,
                     properties : {
@@ -58,7 +58,7 @@ mod({
                         scaleY : 0.5
                     },
                     onComplete : function() {
-                        var canEase = m.interactiveTests ? confirm('Did the bloody block get smaller?') : true;
+                        var canEase =interactiveTests ? confirm('Did the bloody block get smaller?') : true;
                         assert.eq(canEase, true, 'Can tween bitmap.');
                         if (window.location.href.indexOf('http://') !== -1) {
                             // We are running from a server, so we can do

@@ -16,17 +16,17 @@
          */
          return function runGeomTests(callback) { 
              // aliases
-             var ifndefInit = m.ifndefInit;
-             var ifndefInitObj = m.ifndefInitObj;
-             var safeAddin = m.safeAddin;
-             var assert = m.assert;
-             var Point = m.Point;
-             var Size = m.Size;
-             var Rectangle = m.Rectangle;
+             var ifndefInit =ifndefInit;
+             var ifndefInitObj =ifndefInitObj;
+             var safeAddin =safeAddin;
+             var assert =assert;
+             var Point =Point;
+             var Size =Size;
+             var Rectangle =Rectangle;
          
             assert.suite = 'Geom Tests';
         
-            var mat = m.Matrix({
+            var mat =Matrix({
                 elements : [
                     0, 1, 2,
                     3, 4, 5, 
@@ -44,7 +44,7 @@
             assert.eq(c0.toString(), '0,3,6', 'Can get matrix column.');
             assert.eq(c2.toString(), '2,5,8', 'Can get matrix column.');
             
-            var A = m.Matrix({
+            var A =Matrix({
                 elements : [
                     5, 9, 2, 
                     1, 7, 6,
@@ -52,7 +52,7 @@
                 ]
             });
             
-            var B = m.Matrix({
+            var B =Matrix({
                 elements : [
                     9, 1, 6, 
                     7, 2, 4,
@@ -60,7 +60,7 @@
                 ]
             });
             
-            var AB = m.Matrix({
+            var AB =Matrix({
                 elements : [
                     124, 43, 72,
                     106, 75, 52,
@@ -68,7 +68,7 @@
                 ]
             });
             
-            var BA = m.Matrix({
+            var BA =Matrix({
                 elements : [
                     64, 112, 72,
                     49, 93, 58,
@@ -93,7 +93,7 @@
         
             mat.loadIdentity();
         
-            var vec = m.Vector({
+            var vec =Vector({
                 elements : [
                     2,
                     4
@@ -130,7 +130,7 @@
         
             assert.eq(pnt1.closer(pnt2, pnt3), pnt2, 'Point can determine closest point');
         
-            var unitSquare = m.Polygon({
+            var unitSquare =Polygon({
                 elements : [
                     -1,  1,
                      1,  1,
@@ -140,7 +140,7 @@
             });
             assert.eq(unitSquare.containsPoint(m.Point()), true, 'Polygon unit square contains origin');
             
-            var rect = m.Polygon({
+            var rect =Polygon({
                 elements : [
                     10, 5,
                     10, -5,
@@ -148,22 +148,22 @@
                     -10, 5
                 ]
             });
-            var transform = m.Matrix();
+            var transform =Matrix();
             transform.rotate(Math.PI/2).scale(2, 2);
             transform.transformPolygon(rect);
             var cleanElements = rect.elements.map(function(el,ndx,a) {
                 return Math.round(el);
             });
-            var resultPoly = m.Polygon({
+            var resultPoly =Polygon({
                 elements : cleanElements
             });
-            var comparePoly = m.Polygon({
+            var comparePoly =Polygon({
                 elements : [-10,20,10,20,10,-20,-10,-20]
             });
             assert.eq(resultPoly.isEqualTo(comparePoly), true, 'Matrix can transform polygons.');
             assert.eq(resultPoly.elements.toString(), comparePoly.elements.toString(), 'Matrix can transform polygons.');
             
-            var D = m.Matrix().translate(100, 50).scale(0.5).rotate(Math.PI/4);
+            var D =Matrix().translate(100, 50).scale(0.5).rotate(Math.PI/4);
             var invD = D.inverse();
             var I = D.copy().multiply(invD);
             I.elements = I.elements.map(function(el,ndx,a) {

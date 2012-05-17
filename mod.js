@@ -278,10 +278,37 @@
                 }
             }
         };
-    
-        var pkg = constructPkg(module);
-        addPkg(pkg);
-        
+        var getKeysAndModuleParamsForPkg = function (pkg) {
+            // Get the modules that this pkg depends on...
+            var modulePkgs = mod.pkgs.slice();
+            var initParams = [];
+            var params = pkg.dependencies.map(function (dependency) {
+                for (var i=0; i < modulePkgs.length; i++) {
+                    var modulePkg = modulePkgs[i];
+                    if (modulePkg.path === dependency) {
+                        // We've found the dependency's module package,
+                        // now get the module...
+                        var module = mod.modules[modulePkg.name];
+                        if (!module) {
+                            throw new Error('Module '+modulePkg.name+' has not been initialized.');
+                        }
+                        modulePkgs.splice(i, 1);
+                        // Add the module name to the list of parameters for the package...
+                        initParams.push(modulePkg.name);
+                        return module;
+                    }
+                }
+                // This dependency did not define a module...
+                return false;
+            }).filter(function (module) {
+                return module;
+            });
+            
+            return {
+                keys : initParams,
+                modules : params
+            };
+        };
         /** * *
         * Initializes a pkg and references it in the modules object.
         * * **/
@@ -298,32 +325,11 @@
             try {
                 switch (typeof pkg.init) {
                     case 'function':
-                        // Get the modules that this pkg depends on...
-                        var modulePkgs = mod.pkgs.slice();
-                        var params = pkg.dependencies.map(function (dependency) {
-                            for (var i=0; i < modulePkgs.length; i++) {
-                                var modulePkg = modulePkgs[i];
-                                if (modulePkg.path === dependency) {
-                                    // We've found the dependency's module package,
-                                    // now get the module...
-                                    var module = mod.modules[modulePkg.name];
-                                    if (!module) {
-                                        throw new Error('Module '+modulePkg.name+' has not been initialized.');
-                                    }
-                                    modulePkgs.splice(i, 1);
-                                    // Add the module name to the list of parameters for the package...
-                                    initParams.push(modulePkg.name);
-                                    return module;
-                                }
-                            }
-                            // This dependency did not define a module...
-                            return false;
-                        }).filter(function (module) {
-                            return module;
-                        });
-                        mod.modules[pkg.name] = pkg.init.apply(null, params);
+                        // Get the parameters to pass to the factory...
+                        var keysAndModules = getKeysAndModuleParamsForPkg(pkg);
+                        mod.modules[pkg.name] = pkg.init.apply(null, keysAndModules.modules);
                         // Set its initString for compilation later...
-                        pkg.initString = stringifyFactory(pkg.init, initParams);
+                        pkg.initString = stringifyFactory(pkg.init, keysAndModules.keys);
                     break;
                     
                     case 'object':
@@ -340,6 +346,10 @@
                 throw new Error ('Error initializing '+pkg.path+'\n'+e);
             }
         };
+        
+        var pkg = constructPkg(module);
+        addPkg(pkg);
+        
         // A private placeholder function that executes
         // after all loading and all initialization...
         var _onload = function emptyFunction(){};
@@ -397,9 +407,11 @@
             output += '    return modules;\n';
             output += '}(window));';
             mod.compilation = output;
-            
+            // Get the last package init'd, because that's the one at the top of the tree...
+            var mainPkg = mod.pkgs[mod.pkgs.length-1];
+            var keysAndModules = getKeysAndModuleParamsForPkg(mainPkg);
             // At the end of all initialization perform the onload...
-            _onload(mod.modules);
+            _onload.apply(null, keysAndModules.modules);
         };
         //--------------------------------------
         //  LOADING
@@ -559,7 +571,8 @@
     //--------------------------------------
     //  GLOBALS
     //--------------------------------------
-    //window.define = window.define || define;
-    //window.require = window.require || define;
+    // Don't overwrite these, as they're experimental right now...
+    window.define = window.define || define;
+    window.require = window.require || define;
     window.mod = mod;
 })(window);

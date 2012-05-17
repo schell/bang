@@ -29,40 +29,41 @@
                 dependencies : [
                     'bang::Utils/Assert.js',
                     'bang::Geometry/Vector.js',
+                    'bang::Geometry/Polygon.js',
                     'bang::Geometry/Rectangle.js',
                     'bang::Geometry/Matrix.js',
                     'bang::View/View.js',
                     'bang::View/Stage.js',
                     'bang::Utils/Animation.js'
                 ],
-                init : function initMain (m) {
+                init : function initMain () {
                     return {};
                 }
-            }).onload(function test(m) {
+            }).onload(function test(Assert, Vector, Polygon, Rectangle, Matrix, View, Stage, Animation) {
                 assert.suite = 'Array';
                 var t = [];
                 
                 assert.suite = 'Vector';
                 
-                var v = new m.Vector(0,1,2,3,4,5);
-                var vv = new m.Vector(0,1,2,3,4,5);
+                var v = new Vector(0,1,2,3,4,5);
+                var vv = new Vector(0,1,2,3,4,5);
                 assert.eq(v[3], 3, 'Vector initializes with elements.');
                 assert.eq(v.length, 6, 'Vector initializes with length.');
                 var vcopy = v.copy();
                 assert.eq(vcopy.isEqualTo(v) && vv.isEqualTo(vcopy), true, 'Vector can evaluate equality.');
-                var add1 = vcopy.add(new m.Vector(1,1,1,1,1,1));
-                assert.eq(add1.isEqualTo(new m.Vector(1,2,3,4,5,6)), true, 'Vector can add.');
-                var sub2 = vcopy.subtract(new m.Vector(2,2,2,2,2,2));
-                assert.eq(sub2.isEqualTo(new m.Vector(-2,-1,0,1,2,3)), true, 'Vector can subtract.');
-                v = new m.Vector(1,2,3);
+                var add1 = vcopy.add(new Vector(1,1,1,1,1,1));
+                assert.eq(add1.isEqualTo(new Vector(1,2,3,4,5,6)), true, 'Vector can add.');
+                var sub2 = vcopy.subtract(new Vector(2,2,2,2,2,2));
+                assert.eq(sub2.isEqualTo(new Vector(-2,-1,0,1,2,3)), true, 'Vector can subtract.');
+                v = new Vector(1,2,3);
                 var magv = v.magnitude();
                 assert.eq(magv >= 3.74165 && magv <= 3.74166, true, 'Vector can calc magnitude ('+magv+').');
                 var unit = v.normalize();
                 assert.eq(unit.magnitude(), 1, 'Vector can calc normal vector.');
                 
                 assert.suite = 'Rectangle';
-                var r1 = new m.Rectangle(0,0,100,100);
-                var r2 = new m.Rectangle(50,50,100,100)
+                var r1 = new Rectangle(0,0,100,100);
+                var r2 = new Rectangle(50,50,100,100)
                 assert.eq(r1.right(10),10, 'Rectangle sets right.');
                 assert.eq(r1.width(), 10, 'Rectangle updates width after set right.');
                 r1.right(100);
@@ -70,13 +71,13 @@
                 r1.left(0);
                 assert.eq(r1.width(100),100,'Rectangle updates width after set left.');
                 assert.eq(r1.intersectsRectangle(r2), true, 'Rectangle knows intersection.');
-                var output = new m.Rectangle.reduceRectangles([r1,r2]);
+                var output = new Rectangle.reduceRectangles([r1,r2]);
                 assert.eq(output.length, 3, 'Rectangle reduces to correct number of rects.');
                 assert.eq(output.toString(), 'Rectangle[0,0,50,100],Rectangle[50,0,50,150],Rectangle[100,50,50,100]', 'Rectangle reduces to correct rectangles.');
                 
                 assert.suite = 'Matrix';
                 
-                var mat = new m.Matrix(
+                var mat = new Matrix(
                     0, 1, 2,
                     3, 4, 5, 
                     6, 7, 8
@@ -92,25 +93,25 @@
                 assert.eq(c0.toString(), '0,3,6', 'Can get matrix column.');
                 assert.eq(c2.toString(), '2,5,8', 'Can get matrix column.');
             
-                var A = new m.Matrix(
+                var A = new Matrix(
                     5, 9, 2, 
                     1, 7, 6,
                     3, 4, 8
                 );
             
-                var B = new m.Matrix(
+                var B = new Matrix(
                     9, 1, 6, 
                     7, 2, 4,
                     8, 10, 3
                 );
             
-                var AB = new m.Matrix(
+                var AB = new Matrix(
                     124, 43, 72,
                     106, 75, 52,
                     119, 91, 58
                 );
             
-                var BA = new m.Matrix(
+                var BA = new Matrix(
                     64, 112, 72,
                     49, 93, 58,
                     59, 154, 100
@@ -133,7 +134,7 @@
         
                 mat = mat.identity();
         
-                var vec = new m.Vector(2, 4);
+                var vec = new Vector(2, 4);
         
                 mat = mat.translate(1, 1);
         
@@ -151,47 +152,47 @@
                 assert.eq(tVec.x(), 2, 'Matrix can scale Vector in x');
                 assert.eq(tVec.y(), 3, 'Matrix can scale Vector in y');
                 
-                var unitSquare = new m.Polygon(
+                var unitSquare = new Polygon(
                     -1,  1,
                      1,  1,
                      1, -1,
                     -1, -1
                 );
-                assert.eq(unitSquare.containsPoint(new m.Vector(0,0)), true, 'Polygon unit square contains origin');
+                assert.eq(unitSquare.containsPoint(new Vector(0,0)), true, 'Polygon unit square contains origin');
                 
-                var D = new m.Matrix().translate(100, 50).scale(0.5).rotate(Math.PI/4);
+                var D = new Matrix().translate(100, 50).scale(0.5).rotate(Math.PI/4);
                 var invD = D.inverse();
                 var I = D.multiply(invD);
                 I = I.map(function(el,ndx,a) {
                     return Math.round(el);
                 });
-                assert.eq(I.isEqualTo(new m.Matrix()), true, 'Matrix can return inverse.');
+                assert.eq(I.isEqualTo(new Matrix()), true, 'Matrix can return inverse.');
             
-                var rect = new m.Polygon(
+                var rect = new Polygon(
                         10, 5,
                         10, -5,
                         -10, -5,
                         -10, 5
                 );
-                var transform = new m.Matrix().rotate(Math.PI/2).scale(2, 2);
+                var transform = new Matrix().rotate(Math.PI/2).scale(2, 2);
                 rect = transform.transformPolygon(rect);
                 var resultPoly = rect.map(function(el,ndx,a) {
                     return Math.round(el);
                 });
-                var comparePoly = new m.Polygon(-10,20,10,20,10,-20,-10,-20)
+                var comparePoly = new Polygon(-10,20,10,20,10,-20,-10,-20)
                 assert.eq(resultPoly.isEqualTo(comparePoly), true, 'Matrix can transform polygons.');
                 assert.eq(resultPoly.toString(), comparePoly.toString(), 'Matrix can transform polygons.');
                 
-                var clipRectangle = new m.Rectangle(10,10,20,40);
-                var polyToClip = new m.Polygon(0,0, 40,0, 0,40);
+                var clipRectangle = new Rectangle(10,10,20,40);
+                var polyToClip = new Polygon(0,0, 40,0, 0,40);
                 var clippedPoly = clipRectangle.clipPolygon(polyToClip);
-                var checkPoly = new m.Polygon(10,10,30,10,10,30);
+                var checkPoly = new Polygon(10,10,30,10,10,30);
                 assert.eq(checkPoly.toString(), clippedPoly.toString(), 'Rectangle can clip polygon.');
             
                 assert.suite = 'View';
-                var view1 = new m.View(0, 0, 40, 40);
+                var view1 = new View(0, 0, 40, 40);
                 view1.tag = 'view1';
-                var view2 = new m.View(0, 0, 40, 40);
+                var view2 = new View(0, 0, 40, 40);
                 view2.tag = 'view2';
                 
                 var bang = document.getElementById('bang');
@@ -217,7 +218,7 @@
                 bang.removeChild(view1.canvas);
                 bang.removeChild(view2.canvas);
                 
-                var container = new m.Stage(250, 250);
+                var container = new Stage(250, 250);
                 container.tag = 'stage';
                 assert.eq(container.canvas.width, 250, 'Stage constructor sets width.');
                 assert.eq(container.canvas.height, 250, 'Stage constructor sets height.');
@@ -231,7 +232,7 @@
                 view2.x = 80;
                 container.draw();
                 
-                var view3 = new m.View(40,40, 40, 40);
+                var view3 = new View(40,40, 40, 40);
                 view3.tag = 'view3';
                 view3.rotation = Math.PI/4;
                 view3.context.fillStyle = 'cyan';
@@ -251,7 +252,7 @@
                 
                 assert.suite = 'Animation';
                 var calls = 0;
-                var timer = new m.Animation();
+                var timer = new Animation();
                 var animation;
                 var animate = function (time) {
                     calls++;
@@ -265,12 +266,12 @@
                     assert.stat();
                 }, 500);
                 
-                var stage = new m.Stage(300, 300);
+                var stage = new Stage(300, 300);
                 stage.context.fillStyle = 'black';
                 stage.context.fillRect(0, 0, 300, 300);
                 stage.showRedrawRegions = true;
                 
-                var block = new m.View(0, 0, 50, 50);
+                var block = new View(0, 0, 50, 50);
                 block.context.fillStyle = 'red';
                 block.context.fillRect(0, 0, 50, 50);
                 stage.addView(block);

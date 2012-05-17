@@ -15,10 +15,10 @@ mod({
         * @param {Object} The mod modules object.
         * * **/
         return function runViewTests(callback) {
-            var assert = m.assert;
+            var assert =assert;
             assert.suite = 'View Tests';
         
-            var view = m.View({
+            var view =View({
                 tag : 'view'
             });
             var payload = false;
@@ -42,10 +42,10 @@ mod({
             assert.suite = 'ViewContainer Tests';
         
             var calledUpdateContext = false;
-            view.addListener(view, m.View.DID_UPDATE_CONTEXT, function updatedContext(note) {
+            view.addListener(view,View.DID_UPDATE_CONTEXT, function updatedContext(note) {
                 calledUpdateContext = true;
             });
-            var container = m.ViewContainer({
+            var container =ViewContainer({
                 tag : 'container'
             });
             container.context = 1000;
@@ -58,13 +58,13 @@ mod({
             assert.eq(container.subviews().length, 0, 'ViewContainer can remove subviews.');
             assert.eq(container.subviews().indexOf(view), -1, 'ViewContainer can remove subviews.');
         
-            var topOfTree = m.ViewContainer({
+            var topOfTree =ViewContainer({
                 tag : 'tree_0'
             });
             var treeLength = 10;
             var lastBranch = topOfTree;
             for (var i=0; i < treeLength; i++) {
-                var branch = m.ViewContainer({
+                var branch =ViewContainer({
                     tag : 'tree_'+(i+1).toString()
                 });
                 lastBranch.addView(branch);
@@ -77,10 +77,10 @@ mod({
         
             assert.suite = 'Stage Tests';
         
-            var stage = m.Stage();
+            var stage =Stage();
             assert.eq('canvas' in stage, true, 'Stage has canvas instance.');
             assert.eq('id' in stage.canvas, true, 'Stage.canvas has id.');
-            assert.eq('context' in stage && m.defined(stage.context), true, 'Stage has 2d context.');
+            assert.eq('context' in stage &&defined(stage.context), true, 'Stage has 2d context.');
         
             var throwsError = false;
             try {
@@ -97,11 +97,11 @@ mod({
             assert.eq(m.defined(view.context) && view.context === stage.context, true, 'Subviews inherit parent\'s context.');
             assert.eq(m.defined(view.stage) && view.stage === stage, true, 'Subviews inherit parent\'s stage.');
             
-            var hitView = m.View({
+            var hitView =View({
                 
             });
             
-            var rsTest = m.View();
+            var rsTest =View();
             rsTest.scaleX = 0.5;
             rsTest.rotation = 45;
             assert.eq(rsTest.scaleX, 0.5, 'Rotation does not affect store scaleX value.');
@@ -116,18 +116,18 @@ mod({
                 };
             }
         
-            var red = m.View({
+            var red =View({
                 tag : 'red',
-                hitArea : m.Rectangle.from(-50, -50, 100, 100),
+                hitArea :Rectangle.from(-50, -50, 100, 100),
                 scaleX : 0.5,
                 scaleY : 0.5
             });
             red.alpha = 0.5;
             red.drawQueue.push(makeDrawFunction(red, 'rgb(255, 0, 0)'));
         
-            var blue = m.View({
+            var blue =View({
                 tag : 'blue',
-                hitArea : m.Rectangle.from(0, 0, 100, 100),
+                hitArea :Rectangle.from(0, 0, 100, 100),
                 x : 100,
                 y : 100,
                 scaleX : 0.5,
@@ -135,9 +135,9 @@ mod({
             });
             red.alpha = 0.5;
             blue.drawQueue.push(makeDrawFunction(blue, 'rgb(0, 0, 255)'));
-            var green = m.ViewContainer({
+            var green =ViewContainer({
                 tag : 'redAndBlue',
-                hitArea : m.Rectangle.from(0, 0, 100, 100),
+                hitArea :Rectangle.from(0, 0, 100, 100),
                 x : 200,
                 y : 200,
                 rotation : 0
@@ -145,7 +145,7 @@ mod({
             green.addView(red);
             green.addView(blue);
             green.drawQueue.push(makeDrawFunction(green, 'rgb(0, 255, 0)'));
-            green.addListener(undefined, m.Stage.FRAME_TICK, function tick(note) {
+            green.addListener(undefined,Stage.FRAME_TICK, function tick(note) {
                 red.rotation += 2;
                 blue.rotation += 2;
                 green.rotation -= 2;
@@ -159,8 +159,8 @@ mod({
                         return;
                     }
                         
-                    fill = m.ifndefInit(fill, 'rgba(0,0,0,0.5)');
-                    stroke = m.ifndefInit(stroke, 'rgba(0,0,0,0.8)');
+                    fill =ifndefInit(fill, 'rgba(0,0,0,0.5)');
+                    stroke =ifndefInit(stroke, 'rgba(0,0,0,0.8)');
                         
                     context.save();
                     context.fillStyle = fill;
@@ -178,34 +178,34 @@ mod({
                     context.restore();
                 }
                 
-                var trunk = m.ViewContainer({
+                var trunk =ViewContainer({
                     x : 150,
-                    hitArea : m.Rectangle.from(0, 0, 100, 100)
+                    hitArea :Rectangle.from(0, 0, 100, 100)
                 });
-                var branch = m.ViewContainer({
+                var branch =ViewContainer({
                     x : 50,
                     y : 50,
                     scaleY : 0.5,
                     rotation : 45,
-                    hitArea : m.Rectangle.from(0, 0, 100, 100)
+                    hitArea :Rectangle.from(0, 0, 100, 100)
                 });
-                var branchArm = m.ViewContainer({
+                var branchArm =ViewContainer({
                     x : 100,
                     y : 100,
                     scaleX : 0.5,
-                    hitArea : m.Rectangle.from(0, 0, 100, 100)
+                    hitArea :Rectangle.from(0, 0, 100, 100)
                 });
-                var leftLeaf = m.View({
+                var leftLeaf =View({
                     x : 50,
                     y : 100,
                     scaleX : 0.5,
                     scaleY : 0.5,
-                    hitArea : m.Rectangle.from(0, 0, 100, 100)
+                    hitArea :Rectangle.from(0, 0, 100, 100)
                 });
-                var rightLeaf = m.ViewContainer({
+                var rightLeaf =ViewContainer({
                     x : 100, 
                     y : 0,
-                    hitArea : m.Rectangle.from(0, 0, 100, 100)
+                    hitArea :Rectangle.from(0, 0, 100, 100)
                 });
                 
                 trunk.addHitAreaDrawFunction('rgb(50,50,50)');
@@ -226,11 +226,11 @@ mod({
                 var inverseRightMatrix = rightLeaf.getCompoundTransform(true);
                 var leftHitInRightCoords = inverseRightMatrix.transformPolygon(leftLeafHitArea.copy());
                 
-                var leftInRight = m.View({
+                var leftInRight =View({
                     x : leftHitInRightCoords.left(),
                     y : leftHitInRightCoords.top(),
                     alpha : 0.5,
-                    hitArea : m.Rectangle.from(0, 0, leftHitInRightCoords.width(), leftHitInRightCoords.height())
+                    hitArea :Rectangle.from(0, 0, leftHitInRightCoords.width(), leftHitInRightCoords.height())
                 });
                 leftInRight.drawQueue.push(function() {
                     drawPolygon(leftInRight.context, 'yellow', 'lime', leftInRight.hitArea);
@@ -262,7 +262,7 @@ mod({
             function testMouseInput(cb) {
                 // Reset the stage...
                 stage.remove();
-                stage = m.Stage();
+                stage =Stage();
                 stage.setParentElement('bang');
                 
                 var currentTestFunc;
@@ -279,82 +279,82 @@ mod({
                 stage.tag = 'stage';
                 stage.alpha = 0.5;
                 stage.addHitAreaDrawFunction('green', 'black');
-                stage.addListener(stage, m.View.MOUSE_DOWN, onMouseEvent);
+                stage.addListener(stage,View.MOUSE_DOWN, onMouseEvent);
                 
-                var root = m.ViewContainer({
+                var root =ViewContainer({
                     tag : 'root',
                     x : stage.hitArea.width()/2 - 50,
-                    hitArea : m.Rectangle.from(0, 0, 100, 100)
+                    hitArea :Rectangle.from(0, 0, 100, 100)
                 });
-                root.addListener(root, m.View.MOUSE_DOWN, onMouseEvent);
+                root.addListener(root,View.MOUSE_DOWN, onMouseEvent);
                 root.addHitAreaDrawFunction('red', 'red');
                 stage.addView(root);
                 
-                var leftbranch = m.ViewContainer({
+                var leftbranch =ViewContainer({
                     tag : 'leftbranch',
                     x : -50,
                     y : 50,
-                    hitArea : m.Rectangle.from(0, 0, 100, 100)
+                    hitArea :Rectangle.from(0, 0, 100, 100)
                 });
-                leftbranch.addListener(leftbranch, m.View.MOUSE_DOWN, onMouseEvent);
+                leftbranch.addListener(leftbranch,View.MOUSE_DOWN, onMouseEvent);
                 leftbranch.addHitAreaDrawFunction('yellow', 'fuchsia');
                 root.addView(leftbranch);
                 
-                var leftleftleaf = m.View({
+                var leftleftleaf =View({
                     tag : 'leftleftleaf',
                     y : 100,
-                    hitArea : m.Rectangle.from(0, 0, 50, 50)
+                    hitArea :Rectangle.from(0, 0, 50, 50)
                 });
-                leftleftleaf.addListener(leftleftleaf, m.View.MOUSE_DOWN, onMouseEvent);
+                leftleftleaf.addListener(leftleftleaf,View.MOUSE_DOWN, onMouseEvent);
                 leftleftleaf.addHitAreaDrawFunction('gray', 'fuchsia');
                 leftbranch.addView(leftleftleaf);
                 
-                var leftrightleaf = m.View({
+                var leftrightleaf =View({
                     tag : 'leftrightleaf',
                     x : 50,
                     y : 100,
-                    hitArea : m.Rectangle.from(0, 0, 50, 50)
+                    hitArea :Rectangle.from(0, 0, 50, 50)
                 });
-                leftrightleaf.addListener(leftrightleaf, m.View.MOUSE_DOWN, onMouseEvent);
+                leftrightleaf.addListener(leftrightleaf,View.MOUSE_DOWN, onMouseEvent);
                 leftrightleaf.addHitAreaDrawFunction('gray', 'teal');
                 leftbranch.addView(leftrightleaf);
                 
-                var rightbranch = m.ViewContainer({
+                var rightbranch =ViewContainer({
                     tag : 'rightbranch',
                     x : 50,
                     y : 50,
-                    hitArea : m.Rectangle.from(0, 0, 100, 100)
+                    hitArea :Rectangle.from(0, 0, 100, 100)
                 });
-                rightbranch.addListener(rightbranch, m.View.MOUSE_DOWN, onMouseEvent);
+                rightbranch.addListener(rightbranch,View.MOUSE_DOWN, onMouseEvent);
                 rightbranch.addHitAreaDrawFunction('yellow', 'teal');
                 root.addView(rightbranch);
                 
-                var rightleftleaf = m.View({
+                var rightleftleaf =View({
                     tag : 'rightleftleaf',
                     y : 100,
-                    hitArea : m.Rectangle.from(0, 0, 50, 50)
+                    hitArea :Rectangle.from(0, 0, 50, 50)
                 });
-                rightleftleaf.addListener(rightleftleaf, m.View.MOUSE_DOWN, onMouseEvent);
+                rightleftleaf.addListener(rightleftleaf,View.MOUSE_DOWN, onMouseEvent);
                 rightleftleaf.addHitAreaDrawFunction('gray', 'fuchsia');
                 rightbranch.addView(rightleftleaf);
                 
-                var rightrightleaf = m.ViewContainer({
+                var rightrightleaf =ViewContainer({
                     tag : 'rightrightleaf',
                     x : 50,
                     y : 100,
-                    hitArea : m.Rectangle.from(0, 0, 50, 50)
+                    hitArea :Rectangle.from(0, 0, 50, 50)
                 });
-                rightrightleaf.addListener(rightrightleaf, m.View.MOUSE_DOWN, onMouseEvent);
+                rightrightleaf.addListener(rightrightleaf,View.MOUSE_DOWN, onMouseEvent);
                 rightrightleaf.addHitAreaDrawFunction('gray', 'teal');
                 rightbranch.addView(rightrightleaf);
                 
-                var rightrightrightleaf = m.View({
+                var rightrightrightleaf =View({
                     tag : 'rightrightrightleaf',
                     x : 50,
                     y : 50,
-                    hitArea : m.Rectangle.from(0, 0, 50, 50)
+                    hitArea :Rectangle.from(0, 0, 50, 50)
                 });
-                rightrightrightleaf.addListener(rightrightrightleaf, m.View.MOUSE_DOWN, onMouseEvent);
+                rightrightrightleaf.addListener(rightrightrightleaf,View.MOUSE_DOWN, onMouseEvent);
                 rightrightrightleaf.addHitAreaDrawFunction('gray', 'teal');
                 rightrightleaf.addView(rightrightrightleaf);
                 
@@ -372,7 +372,7 @@ mod({
                 
                 assert.eq(compareList.toString(), stage.displayList().toString(), 'Stage builds accurate display list.');
                 
-                var newroot = m.ViewContainer({
+                var newroot =ViewContainer({
                     tag : 'newroot'
                 });
                 newroot.addView(root);
@@ -422,15 +422,15 @@ mod({
                     // Reset the drawQueue to the old one...
                     el.drawQueue = oldQueue.slice();
                     
-                    el.addListener(el, m.View.MOUSE_DOWN, function(mouseNote) {
+                    el.addListener(el,View.MOUSE_DOWN, function(mouseNote) {
                         console.log(el.toString(),'mouse down');
                         el.drawQueue = downQueue.slice();
                     });
-                    el.addListener(el, m.View.MOUSE_UP, function(mouseNote) {
+                    el.addListener(el,View.MOUSE_UP, function(mouseNote) {
                         console.log(el.toString(),'mouse up');
                         el.drawQueue = upQueue.slice();
                     });
-                    el.addListener(el, m.View.MOUSE_MOVE, function(mouseNote) {
+                    el.addListener(el,View.MOUSE_MOVE, function(mouseNote) {
                         var x = mouseNote.localPoint.x();
                         var y = mouseNote.localPoint.y();
                         el.drawQueue = [
@@ -454,22 +454,22 @@ mod({
                             }
                         ];
                     });
-                    el.addListener(el, m.View.MOUSE_OVER, function(mouseNote) {
+                    el.addListener(el,View.MOUSE_OVER, function(mouseNote) {
                         el.drawQueue = overQueue.slice();
                     });
-                    el.addListener(el, m.View.MOUSE_OUT, function(mouseNote) {
+                    el.addListener(el,View.MOUSE_OUT, function(mouseNote) {
                         el.drawQueue = oldQueue.slice();
                     });
-                    el.addListener(el, m.View.MOUSE_CLICK, function(mouseNote) {
+                    el.addListener(el,View.MOUSE_CLICK, function(mouseNote) {
                         var x = mouseNote.globalPoint.x();
                         var y = mouseNote.globalPoint.y();
-                        var block = m.View({
+                        var block =View({
                             x : x-1,
                             y : y-1,
-                            hitArea : m.Rectangle.from(-1,-1,2,2)
+                            hitArea :Rectangle.from(-1,-1,2,2)
                         });
                         block.addHitAreaDrawFunction('fuchsia','fuchsia');
-                        block.tween = m.Ease({
+                        block.tween =Ease({
                             target : block,
                             duration : 500,
                             equation : 'easeOutExpo',
@@ -488,7 +488,7 @@ mod({
                         
                         // Test that the stage issues MOUSE_LEAVE events...
                         var leaveTarget = false;
-                        stage.addListener(stage, m.Stage.MOUSE_LEAVE, function(note) {
+                        stage.addListener(stage,Stage.MOUSE_LEAVE, function(note) {
                             leaveTarget = note.body.target;
                         });
                         stage.canvas.onmouseout({
@@ -507,12 +507,12 @@ mod({
                 console.log('green easing test');
                 // Reset the stage...
                 stage.remove();
-                stage = m.Stage();
+                stage =Stage();
                 stage.setParentElement('bang');
 
                 stage.addView(green);
                 
-                var ease = m.Ease({
+                var ease =Ease({
                     properties : {
                         alpha : 0.1
                     },
@@ -526,14 +526,14 @@ mod({
             function testScaledEasing(cb) {
                 console.log('scaled easing test');
                 stage.remove();
-                stage = m.Stage();
+                stage =Stage();
                 stage.setParentElement('bang');
-                var scaled = m.View({
-                    hitArea : m.Rectangle.from(0, 0, 500, 10)
+                var scaled =View({
+                    hitArea :Rectangle.from(0, 0, 500, 10)
                 });
                 scaled.drawQueue.push(makeDrawFunction(scaled, 'rgb(0, 255, 255)'));
                 scaled.scaleX = 0;
-                scaled.tween = m.Ease({
+                scaled.tween =Ease({
                     target : scaled,
                     duration : 500,
                     properties : {
@@ -547,14 +547,14 @@ mod({
                 scaled.tween.interpolate();
                 stage.addView(scaled);
         
-                var bar = m.View({
-                    hitArea : m.Rectangle.from(-250, -5, 500, 10),
+                var bar =View({
+                    hitArea :Rectangle.from(-250, -5, 500, 10),
                     x : 250,
                     y : 250,
                     rotation : 45,
                     scaleX : 0.5
                 });
-                bar.tween = m.Ease({
+                bar.tween =Ease({
                     target : bar,
                     duration : 1000,
                     equation : 'linear',

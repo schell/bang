@@ -9,10 +9,9 @@
 mod({
     name : 'Assert',
     dependencies : [  ],
-    init : function initType (m) {
+    init : function initType () {
         /** * *
         * Initializes the assert object.
-        * @param m {Object} The mod modules object.
         * * **/
         //--------------------------------------
         //  ADDITIONS TO WINDOW

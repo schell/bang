@@ -43,21 +43,21 @@
                     'tests/VideoTests.js'
                 ],
                 init : function initMain (m) {
-                    m.interactiveTests = false;
+                   interactiveTests = false;
                     return undefined;
                 },
                 callback : function callbackMain (m) {
-                    go( m.GlobalTests,
-                        m.GeomTests, 
-                        m.NoteTests,
-                        m.ViewTests,
-                        m.BitmapTests,
-                        m.SpriteTests,
-                        m.TextTests,
+                    go(GlobalTests,
+                       GeomTests, 
+                       NoteTests,
+                       ViewTests,
+                       BitmapTests,
+                       SpriteTests,
+                       TextTests,
                         //m.VideoTests,
-                        m.UtilsTests,
+                       UtilsTests,
                         function() {
-                            m.assert.stat();
+                           assert.stat();
                         }
                     ).start();
                 }

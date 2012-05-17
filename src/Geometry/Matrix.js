@@ -16,12 +16,12 @@
 * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * **/
 mod({
     name : 'Matrix',
-    dependencies : [ 'bang::Geometry/Vector.js', 'bang::Geometry/Polygon.js' ],
+    dependencies : [ 'bang::Geometry/Vector.js' ],
     /** * *
     * Initializes the Matrix 
-    * @param {Object} The mod modules object.
+    * @param {function} Vector The Vector constructor function.
     * * **/
-    init : function initMatrix (m) {
+    init : function initMatrix (Vector) {
         
         function Matrix() {
             if (arguments.length) {
@@ -35,7 +35,7 @@ mod({
             this.length = 9;
         }
         
-        Matrix.prototype = new m.Vector();
+        Matrix.prototype = new Vector();
         
         Matrix.prototype.constructor = Matrix;
         
@@ -202,7 +202,7 @@ mod({
             var h = this.h();
             var i = this.i();
                 
-            return new m.Matrix(
+            return new Matrix(
                 e*i - f*h, f*g - d*i, d*h - e*g,
                 c*h - b*i, a*i - c*g, b*g - a*h,
                 b*f - c*e, c*d - a*f, a*e - b*d
@@ -368,7 +368,7 @@ mod({
                     acc.push(el);
                 }
                 return acc;
-            }, new m.Vector());
+            }, new Vector());
         };
         /** * *
         * Transforms polygon input using this matrix.
@@ -382,7 +382,7 @@ mod({
             for (i; i < input.length; i+=2) {
                 var x = input[i];
                 var y = input[i+1];
-                var shim = new m.Vector(x,y);
+                var shim = new Vector(x,y);
                 var tvec = this.transform2DVector(shim);
                 polygon[i] = tvec.x();
                 polygon[i+1] = tvec.y();

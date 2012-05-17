@@ -16,14 +16,14 @@ mod({
          */
         return function runNoteCenterTests(callback) {
             // aliases
-            var ifndefInit = m.ifndefInit;
-            var ifndefInitObj = m.ifndefInitObj;
-            var safeAddin = m.safeAddin;
-            var assert = m.assert;
-            var Note = m.Note;
-            var NoteCenter = m.NoteCenter;
-            var Listener = m.Listener;
-            var Dispatcher = m.Dispatcher;
+            var ifndefInit =ifndefInit;
+            var ifndefInitObj =ifndefInitObj;
+            var safeAddin =safeAddin;
+            var assert =assert;
+            var Note =Note;
+            var NoteCenter =NoteCenter;
+            var Listener =Listener;
+            var Dispatcher =Dispatcher;
         
             (function NoteCenter_tests() {
                 assert.suite = 'NoteCenter tests';
@@ -100,7 +100,7 @@ mod({
                 dispatcher.sendNotification('a note name', 777);
                 assert.eq(payload, 666, 'Listeners can remove interests.');
             
-                var itself = m.Object({
+                var itself =Object({
                     tag : 'itself'
                 });
                 Listener(itself);

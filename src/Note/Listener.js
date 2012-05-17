@@ -21,33 +21,33 @@ mod({
              * @param - self Object - The object to add Listener properties to.
              * @return self Listener Object 
              */
-            self = m.Object(self); 
+            self =Object(self); 
             
-            m.safeAddin(self, 'tag', 'Listener');
+           safeAddin(self, 'tag', 'Listener');
             
             // Add in NotePasser properties...
-            m.NotePasser(self);
+           NotePasser(self);
             
-            m.safeAddin(self, 'addListener', function View_addNoteListener(dispatcher, noteName, callback) {
+           safeAddin(self, 'addListener', function View_addNoteListener(dispatcher, noteName, callback) {
                 /**
                  * Listens for notes named *noteName* dispatched from *dispatcher*. Calls *callback* when
                  * received.
                  */
                 var listener = self;
-                dispatcher = m.ifndefInitObj(dispatcher, undefined);
-                noteName = m.ifndefInit(noteName, undefined);
-                callback = m.ifndefInit(callback, function blankCallback(note) {});
+                dispatcher =ifndefInitObj(dispatcher, undefined);
+                noteName =ifndefInit(noteName, undefined);
+                callback =ifndefInit(callback, function blankCallback(note) {});
                 
                 self.noteCenter.addListener(listener, dispatcher, noteName, callback);
             });
             
-            m.safeAddin(self, 'removeListener', function _name (dispatcher, noteName) {
+           safeAddin(self, 'removeListener', function _name (dispatcher, noteName) {
                 /**
                  * Stops listening for notes named *noteName* dispatched from *dispatcher*.
                  */
                 var listener = self;
-                dispatcher = m.ifndefInitObj(dispatcher, undefined);
-                noteName = m.ifndefInitObj(noteName, undefined);
+                dispatcher =ifndefInitObj(dispatcher, undefined);
+                noteName =ifndefInitObj(noteName, undefined);
                 self.noteCenter.removeListener(listener, dispatcher, noteName);
             });
             

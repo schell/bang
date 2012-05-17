@@ -11,10 +11,9 @@ mod({
     dependencies : [ ],
     /** * *
     * Initializes the Vector array extension.
-    * @param {Object}
     * @return {function(...)}
     * * **/
-    init : function initVector (m) {
+    init : function initVector () {
         /** * *
         * Creates a new instance of vector.
         * * **/
@@ -206,7 +205,7 @@ mod({
         * * **/
         Vector.prototype.pointAt = function Vector_pointAt(n) {
             var ndx = 2*n;
-            return new m.Vector(this[ndx], this[ndx+1]);
+            return new Vector(this[ndx], this[ndx+1]);
         };
         
         /** * *
@@ -261,7 +260,7 @@ mod({
                 x = e2.b / (e1.m + e1.b - e2.m);
                 y = e2.yAtx(x);
             }
-            return new m.Vector(x, y);
+            return new Vector(x, y);
         };
         
         return Vector;
