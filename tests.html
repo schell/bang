@@ -34,12 +34,13 @@
                     'bang::Geometry/Matrix.js',
                     'bang::View/View.js',
                     'bang::View/Stage.js',
-                    'bang::Utils/Animation.js'
+                    'bang::Utils/Animation.js',
+                    'bang::Utils/Ease.js'
                 ],
                 init : function initMain () {
                     return {};
                 }
-            }).onload(function test(Assert, Vector, Polygon, Rectangle, Matrix, View, Stage, Animation) {
+            }).onload(function test(Assert, Vector, Polygon, Rectangle, Matrix, View, Stage, Animation, Ease) {
                 assert.suite = 'Array';
                 var t = [];
                 
@@ -271,23 +272,28 @@
                 stage.context.fillRect(0, 0, 300, 300);
                 stage.showRedrawRegions = true;
                 
-                var block = new View(0, 0, 50, 50);
-                block.context.fillStyle = 'red';
-                block.context.fillRect(0, 0, 50, 50);
+                var block = new View(25, 25, 50, 50);
+                var square = new View(0, 0, 50, 50);
+                square.x = -25;
+                square.y = -25;
+                square.context.fillStyle = 'red';
+                square.context.fillRect(0, 0, 50, 50);
+                block.addView(square);
                 stage.addView(block);
                 bang.appendChild(stage.compositeCanvas);
                 
-                var theta = 0;
-                function move() {
-                    block.x = 150+Math.cos(theta)*100;
-                    block.y = 150+Math.sin(theta)*100;
-                    theta += Math.PI/360;
-                    setTimeout(move, 1);
-                }
-                
-                window.stage = stage;
-                window.block = block;
-                window.move = move;
+                var tween = new Ease({
+                    target : block,
+                    duration : 1000,
+                    equation : Ease.easeInOutExpo,
+                    properties : {
+                        x : 250,
+                        y : 250,
+                        rotation : Math.PI*2,
+                        scaleX : 2,
+                        scaleY : 2
+                    }
+                }).interpolate();
             });
         </script>
     </body>
