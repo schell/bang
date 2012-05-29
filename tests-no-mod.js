@@ -2575,7 +2575,10 @@
     })(modules.Task,modules.Animation);
 /// main from main
     modules.main = (function initMain() {
-                    return {};
-                })(modules.Assert,modules.Vector,modules.Polygon,modules.Rectangle,modules.Matrix,modules.View,modules.Stage,modules.Animation,modules.Ease,modules.Task);
+        for(var factory in modules) {
+            window[factory] = modules[factory];
+        }
+        return {};
+    })(modules.Assert,modules.Vector,modules.Polygon,modules.Rectangle,modules.Matrix,modules.View,modules.Stage,modules.Animation,modules.Ease,modules.Task);
     return modules;
 }(window));
