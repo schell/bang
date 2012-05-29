@@ -421,6 +421,58 @@
                         ).onCancel(function(task) {
                             assert.eq(task.results.join(','), ',', 'Nested tasks can cancel root outer task.');
                             assert.stat();
+                            
+                            assert.suite = 'Ease is a Task';
+                            
+                            new Task(
+                                new Ease({
+                                    target : block,
+                                    properties : {
+                                        x : 225,
+                                        y : 225,
+                                        rotation : Math.PI*2,
+                                        alpha : 0.75
+                                    },
+                                    equation : Ease.easeInOutExpo,
+                                    duration : 1000
+                                }),
+                                new Ease({
+                                    target : block,
+                                    properties : {
+                                        x : 225,
+                                        y : 25,
+                                        rotation : 0,
+                                        alpha : 1
+                                    },
+                                    delay : 500,
+                                    duration : 500,
+                                    equation : Ease.easeOutExpo
+                                })
+                            ).onComplete(function (param, task) {
+                                new Task('parallel',
+                                    new Ease({
+                                        target : block,
+                                        properties : {
+                                            alpha : 0.5
+                                        }
+                                    }),
+                                    new Ease({
+                                        target : block,
+                                        properties : {
+                                            x : 150,
+                                            y : 150
+                                        }
+                                    }).onComplete(function() {
+                                        assert.eq(true, true, 'Ease calls Task\'s onComplete.');
+                                
+                                        assert.eq(task.results.join(','), ',', 'Ease is a Task');
+                                        assert.stat();
+                                    })
+                                ).go();
+                                
+                                assert.eq(task.results.join(','), ',', 'Ease is a Task');
+                                assert.stat();
+                            }).go();
                         }).go();
                     }).go();
                 }).go();
