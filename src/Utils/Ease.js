@@ -8,12 +8,12 @@
 * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * **/
 mod({
     name : 'Ease',
-    dependencies : [ 'bang::Utils/Animation.js' ],
+    dependencies : [ 'bang::Utils/Task.js', 'bang::Utils/Animation.js' ],
     /** * *
     * Initializes the Ease constructor.
     * @return {function} The Ease object constructor.
     * * **/
-    init : function initEase (Animation) {
+    init : function initEase (Task, Animation) {
         /** * *
         * Creates a new Ease object.
         * @param {Object} config The configuration object. Its properties are any number of those of an Ease object.
@@ -45,7 +45,7 @@ mod({
             this.interpolation = {};
         }
         
-        Ease.prototype = {};
+        Ease.prototype = new Task();
         
         Ease.prototype.constructor = Ease;
         //--------------------------------------
@@ -350,7 +350,7 @@ mod({
         * Cancels the interpolation, sets all properties to their finished state.
         * Calls the onComplete function.
         * * **/
-        Ease.prototype.finish = function Ease_finish() {
+        Ease.prototype.finish = function Ease_finish(callback) {
             // Cancel...
             this.cancel();
             // Set final values...
@@ -425,6 +425,19 @@ mod({
             tween.interpolation = Ease.timer.requestAnimation(interpolationFunction);
             return tween;
         };
+        /** * *
+        * Runs this tween as a Task.
+        * * **/
+        Ease.prototype.go = function Ease_go(results) {
+            var oldOnComplete = this.onComplete;
+            var alias = this;
+            this.onComplete = function newOnComplete() {
+                oldOnComplete();
+                Task.prototype.go.call(alias);
+            }
+            this.interpolate();
+        }
+        
         return Ease;
     }
 });

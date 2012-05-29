@@ -16,10 +16,19 @@
         <link rel="shortcut icon" href="favicon.png" />
     </head>
     <body id="body">
-        
+
         <div id="bang"></div>
+        <xmp id="output"></xmp>
         
         <script type="text/javascript" charset="utf-8">
+/*            console = {
+                log : function() {
+                    var args = Array.prototype.slice.apply(arguments);
+                    var output = document.getElementById('output');
+                    output.innerHTML = args.join(' ') + '\n' + output.innerHTML;
+                }
+            };*/
+            
             mod.useTagInjection = true;
             mod.expansions = {
                 bang : 'src/',
@@ -35,12 +44,13 @@
                     'bang::View/View.js',
                     'bang::View/Stage.js',
                     'bang::Utils/Animation.js',
-                    'bang::Utils/Ease.js'
+                    'bang::Utils/Ease.js',
+                    'bang::Utils/Task.js'
                 ],
                 init : function initMain () {
                     return {};
                 }
-            }).onload(function test(Assert, Vector, Polygon, Rectangle, Matrix, View, Stage, Animation, Ease) {
+            }).onload(function test(Assert, Vector, Polygon, Rectangle, Matrix, View, Stage, Animation, Ease, Task) {
                 assert.suite = 'Array';
                 var t = [];
                 
@@ -282,18 +292,140 @@
                 stage.addView(block);
                 bang.appendChild(stage.compositeCanvas);
                 
-                var tween = new Ease({
-                    target : block,
-                    duration : 1000,
-                    equation : Ease.easeInOutExpo,
-                    properties : {
-                        x : 250,
-                        y : 250,
-                        rotation : Math.PI*2,
-                        scaleX : 2,
-                        scaleY : 2
+                // serial task test
+                assert.suite = 'Serial Task Test';
+                
+                var serial = new Task(
+                    function one(cb, param, task) {
+                        setTimeout(function() {
+                            assert.eq(param, undefined, 'Result of previous operation is undefined during the first operation.');
+                            assert.eq(task !== undefined, true, 'The task itself is passed as the third parameter to task operations.');
+                            cb('s1');
+                        }, 1000);
+                    },
+                    function two(cb, param, task) {
+                        setTimeout(function() {
+                            assert.eq(param, 's1', 'Serial task gives results of the first operation to the second operation.');
+                            cb('s2');
+                        }, 500)
+                    },
+                    new Task(
+                        function nestOne(cb, param, task) {
+                            setTimeout(function() {
+                                console.log('sn',1);
+                                assert.eq(param, 's2', 'Serial task gives results of previous operation to first operation in a nested serial Task.');
+                                cb('sn1');
+                            }, 300);
+                        },
+                        function nestTwo(cb, param, task) {
+                            setTimeout(function() {
+                                console.log('sn',2);
+                                assert.eq(param, 'sn1', 'Nested serial task gives result of previous operation to next operation.');
+                                cb('sn2');
+                            }, 100);
+                        }
+                    ).onComplete(function nestingDone(param, task) {
+                        assert.eq(param, 'sn2', 'Nested serial task gives onComplete callback the results of the last serial operation.');
+                        return task.results.join(',');
+                    }),
+                    function three(cb, param, task) {
+                        assert.eq(param, 'sn1,sn2', 'A nested serial task\'s onComplete result is given to the next operation in the parent task.');
+                        cb('s3');
                     }
-                }).interpolate();
+                ).onComplete(function(param, task) {
+                    assert.eq(param, 's3', 'A serial parent task calls the onComplete with the results of the last operation.');
+                    assert.stat();
+                    
+                    assert.suite = 'Parallel Task Test';
+                    
+                    new Task(
+                        function one(cb, param) {
+                            setTimeout(function() {
+                                assert.eq(param, undefined, 'Result of previous operation is undefined during the first operation.');
+                                assert.eq(task !== undefined, true, 'The task itself is passed as the third parameter to task operations.');
+                                cb(1);
+                            },400);
+                        },
+                        new Task('parallel',
+                            function three(cb, param, task) {
+                                setTimeout(function() {
+                                    assert.eq(param, 1, 'Parent task gives result of previous operation to parallel sub tasks.');
+                                    cb(3);
+                                }, 200);
+                            },
+                            function twohalf(cb, param, task) {
+                                setTimeout(function() {
+                                    assert.eq(param, 1, 'Parent task gives result of previous operation to parallel sub tasks.');
+                                    cb(2.5);
+                                }, 150);
+                            },
+                            function two(cb, param, task) {
+                                setTimeout(function() {
+                                    assert.eq(param, 1, 'Parent task gives result of previous operation to parallel sub tasks.');
+                                    cb(2);
+                                }, 100);
+                            }
+                        ).onComplete(function(param, task) {
+                            assert.eq(param, 2, 'Parallel task gives result of the last operation written (last in the queue) as the first onComplete parameter.');
+                            return task.results.join('-');
+                        }),
+                        function four(cb, param, task) {
+                            setTimeout(function() {
+                                assert.eq(param, '3-2.5-2', 'The result of a nested parallel task\'s onComplete is given to the parent task\'s next operation.');
+                                cb(4);
+                            },50);
+                        }
+                    ).onComplete(function done(param, task) {
+                        assert.eq(task.results.join(','), '1,3-2.5-2,4', 'Parent tasks hold results of operations and nested tasks when onComplete is called.');
+                        assert.stat();
+                        
+                        assert.suite = 'Task General Tests';
+                        
+                        new Task(
+                            new Task('parallel',
+                                function one(cb, param, task) {
+                                    setTimeout(function() {
+                                        cb(1);
+                                    }, 500);
+                                },
+                                function two(cb, param, task) {
+                                    setTimeout(function() {
+                                        cb(2);
+                                    }, 200);
+                                },
+                                function three(cb, param, task) {
+                                    setTimeout(function() {
+                                        cb(3);
+                                    }, 100);
+                                },
+                                new Task( // nested serial task that will cancel...
+                                    function n1(cb, param, task) {
+                                        setTimeout(function() {
+                                            cb('n1');
+                                        }, 150);
+                                    },
+                                    function n2(cb, param, task) {
+                                        setTimeout(function() {
+                                            task.cancel();
+                                            cb('n2');
+                                        }, 25);
+                                    },
+                                    function n3(cb, param, task) {
+                                        throw new Error('This should not have ran.');
+                                    }
+                                )
+                            ),
+                            function outer(cb,param,task) {
+                                throw new Error('This also should not have ran.');
+                            }
+                        ).onCancel(function(task) {
+                            assert.eq(task.results.join(','), ',', 'Nested tasks can cancel root outer task.');
+                            assert.stat();
+                        }).go();
+                    }).go();
+                }).go();
+                
+                
             });
         </script>
     </body>
