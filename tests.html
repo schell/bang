@@ -21,7 +21,7 @@
         <xmp id="output"></xmp>
         
         <script type="text/javascript" charset="utf-8">
-/*            console = {
+            /*console = {
                 log : function() {
                     var args = Array.prototype.slice.apply(arguments);
                     var output = document.getElementById('output');
@@ -51,433 +51,441 @@
                     return {};
                 }
             }).onload(function test(Assert, Vector, Polygon, Rectangle, Matrix, View, Stage, Animation, Ease, Task) {
-                assert.suite = 'Array';
-                var t = [];
                 
-                assert.suite = 'Vector';
+                new Task(
+                    function testEaseAndTask(easeTaskCB) {
+                        var bang = document.getElementById('bang');
+                        var stage = new Stage(300, 300);
+                        stage.context.fillStyle = 'black';
+                        stage.context.fillRect(0, 0, 300, 300);
+                        stage.showRedrawRegions = true;
                 
-                var v = new Vector(0,1,2,3,4,5);
-                var vv = new Vector(0,1,2,3,4,5);
-                assert.eq(v[3], 3, 'Vector initializes with elements.');
-                assert.eq(v.length, 6, 'Vector initializes with length.');
-                var vcopy = v.copy();
-                assert.eq(vcopy.isEqualTo(v) && vv.isEqualTo(vcopy), true, 'Vector can evaluate equality.');
-                var add1 = vcopy.add(new Vector(1,1,1,1,1,1));
-                assert.eq(add1.isEqualTo(new Vector(1,2,3,4,5,6)), true, 'Vector can add.');
-                var sub2 = vcopy.subtract(new Vector(2,2,2,2,2,2));
-                assert.eq(sub2.isEqualTo(new Vector(-2,-1,0,1,2,3)), true, 'Vector can subtract.');
-                v = new Vector(1,2,3);
-                var magv = v.magnitude();
-                assert.eq(magv >= 3.74165 && magv <= 3.74166, true, 'Vector can calc magnitude ('+magv+').');
-                var unit = v.normalize();
-                assert.eq(unit.magnitude(), 1, 'Vector can calc normal vector.');
+                        var block = new View(25, 25, 50, 50);
+                        var square = new View(0, 0, 50, 50);
+                        square.x = -25;
+                        square.y = -25;
+                        square.context.fillStyle = 'red';
+                        square.context.fillRect(0, 0, 50, 50);
+                        block.addView(square);
+                        stage.addView(block);
+                        bang.appendChild(stage.compositeCanvas);
                 
-                assert.suite = 'Rectangle';
-                var r1 = new Rectangle(0,0,100,100);
-                var r2 = new Rectangle(50,50,100,100)
-                assert.eq(r1.right(10),10, 'Rectangle sets right.');
-                assert.eq(r1.width(), 10, 'Rectangle updates width after set right.');
-                r1.right(100);
-                assert.eq(r1.left(10),10, 'Rectangle sets left.');
-                r1.left(0);
-                assert.eq(r1.width(100),100,'Rectangle updates width after set left.');
-                assert.eq(r1.intersectsRectangle(r2), true, 'Rectangle knows intersection.');
-                var output = new Rectangle.reduceRectangles([r1,r2]);
-                assert.eq(output.length, 3, 'Rectangle reduces to correct number of rects.');
-                assert.eq(output.toString(), 'Rectangle[0,0,50,100],Rectangle[50,0,50,150],Rectangle[100,50,50,100]', 'Rectangle reduces to correct rectangles.');
+                        // serial task test
+                        assert.suite = 'Serial Task Test';
                 
-                assert.suite = 'Matrix';
-                
-                var mat = new Matrix(
-                    0, 1, 2,
-                    3, 4, 5, 
-                    6, 7, 8
-                );
-            
-                var r0 = mat.row(0);
-                var r2 = mat.row(2);
-                assert.eq(r0.toString(), '0,1,2', 'Can get matrix row.');
-                assert.eq(r2.toString(), '6,7,8', 'Can get matrix row.');
-            
-                var c0 = mat.column(0);
-                var c2 = mat.column(2);
-                assert.eq(c0.toString(), '0,3,6', 'Can get matrix column.');
-                assert.eq(c2.toString(), '2,5,8', 'Can get matrix column.');
-            
-                var A = new Matrix(
-                    5, 9, 2, 
-                    1, 7, 6,
-                    3, 4, 8
-                );
-            
-                var B = new Matrix(
-                    9, 1, 6, 
-                    7, 2, 4,
-                    8, 10, 3
-                );
-            
-                var AB = new Matrix(
-                    124, 43, 72,
-                    106, 75, 52,
-                    119, 91, 58
-                );
-            
-                var BA = new Matrix(
-                    64, 112, 72,
-                    49, 93, 58,
-                    59, 154, 100
-                );
-            
-                var resultAB = A.multiply(B);
-                var resultBA = B.multiply(A);
-            
-                assert.eq(resultAB.toString(), AB.toString(), 'Matrix can multiply');
-            
-                mat = mat.identity();
-            
-                mat = mat.translate(1, 2);
-                assert.eq(mat.x(), 1, 'Matrix can translate x');
-                assert.eq(mat.y(), 2, 'Matrix can translate y');
-            
-                mat = mat.scale(0.5, 0.3, 0.1);
-                assert.eq(mat.a(), 0.5, 'Matrix can scale x');
-                assert.eq(mat.e(), 0.3, 'Matrix can scale y');
-        
-                mat = mat.identity();
-        
-                var vec = new Vector(2, 4);
-        
-                mat = mat.translate(1, 1);
-        
-                var tVec = mat.transform2DVector(vec);
-                assert.eq(tVec.x(), 3, 'Matrix can translate Vector in x');
-                assert.eq(tVec.y(), 5, 'Matrix can translate Vector in y');
-        
-                tVec = mat.transform2DVector(tVec);
-                assert.eq(tVec.x(), 4, 'Matrix can translate Vector in x');
-                assert.eq(tVec.y(), 6, 'Matrix can translate Vector in y');
-        
-                mat = mat.identity();
-                mat = mat.scale(0.5, 0.5, 0.5);
-                tVec = mat.transform2DVector(tVec);
-                assert.eq(tVec.x(), 2, 'Matrix can scale Vector in x');
-                assert.eq(tVec.y(), 3, 'Matrix can scale Vector in y');
-                
-                var unitSquare = new Polygon(
-                    -1,  1,
-                     1,  1,
-                     1, -1,
-                    -1, -1
-                );
-                assert.eq(unitSquare.containsPoint(new Vector(0,0)), true, 'Polygon unit square contains origin');
-                
-                var D = new Matrix().translate(100, 50).scale(0.5).rotate(Math.PI/4);
-                var invD = D.inverse();
-                var I = D.multiply(invD);
-                I = I.map(function(el,ndx,a) {
-                    return Math.round(el);
-                });
-                assert.eq(I.isEqualTo(new Matrix()), true, 'Matrix can return inverse.');
-            
-                var rect = new Polygon(
-                        10, 5,
-                        10, -5,
-                        -10, -5,
-                        -10, 5
-                );
-                var transform = new Matrix().rotate(Math.PI/2).scale(2, 2);
-                rect = transform.transformPolygon(rect);
-                var resultPoly = rect.map(function(el,ndx,a) {
-                    return Math.round(el);
-                });
-                var comparePoly = new Polygon(-10,20,10,20,10,-20,-10,-20)
-                assert.eq(resultPoly.isEqualTo(comparePoly), true, 'Matrix can transform polygons.');
-                assert.eq(resultPoly.toString(), comparePoly.toString(), 'Matrix can transform polygons.');
-                
-                var clipRectangle = new Rectangle(10,10,20,40);
-                var polyToClip = new Polygon(0,0, 40,0, 0,40);
-                var clippedPoly = clipRectangle.clipPolygon(polyToClip);
-                var checkPoly = new Polygon(10,10,30,10,10,30);
-                assert.eq(checkPoly.toString(), clippedPoly.toString(), 'Rectangle can clip polygon.');
-            
-                assert.suite = 'View';
-                var view1 = new View(0, 0, 40, 40);
-                view1.tag = 'view1';
-                var view2 = new View(0, 0, 40, 40);
-                view2.tag = 'view2';
-                
-                var bang = document.getElementById('bang');
-                bang.appendChild(view1.canvas);
-                bang.appendChild(view2.canvas);
-                
-                assert.eq(view1.isDirty, false, 'View starts clean.');
-                view1.context.fillRect(0,0,20,20);
-                view1.context.fillStyle = 'red';
-                view1.context.fillRect(20,0,20,20);
-                view1.context.fillStyle = 'green';
-                view1.context.fillRect(20,20,20,20);
-                view1.context.fillStyle = 'blue';
-                view1.context.fillRect(0,20,20,20);
-                assert.eq(view1.isDirty, true, 'View is dirty after drawing.');
-                
-                view2.context.drawImage(view1.canvas, 20,20,20,20, 0,0,20,20);
-                assert.eq(view2.isDirty, true, 'Receiving view is dirty after drawing into context.');
-                
-                var data = view2.context.getImageData(0,0,1,1);
-                assert.eq(data.data[1] > data.data[0] && data.data[1] > data.data[2], true, 'Receiving view gets appropriately drawn into.');
-                
-                bang.removeChild(view1.canvas);
-                bang.removeChild(view2.canvas);
-                
-                var container = new Stage(250, 250);
-                container.tag = 'stage';
-                assert.eq(container.canvas.width, 250, 'Stage constructor sets width.');
-                assert.eq(container.canvas.height, 250, 'Stage constructor sets height.');
-                container.addView(view1);
-                view1.addView(view2);
-                bang.appendChild(container.canvas);
-                
-                view2.x = 40;
-                container.draw();
-                
-                view2.x = 80;
-                container.draw();
-                
-                var view3 = new View(40,40, 40, 40);
-                view3.tag = 'view3';
-                view3.rotation = Math.PI/4;
-                view3.context.fillStyle = 'cyan';
-                view3.context.fillRect(0,0,40,40);
-                container.addView(view3);
-                container.draw();
-                
-                var children = container.children();
-                assert.eq(children.toString(), 'View{"stage"[0,0,250,250]},View{"view1"[0,0,40,40]},View{"view2"[80,0,40,40]},View{"view3"[40,40,40,40]}', 'Stage flattens display list (and toString works the way we expect).');
-                
-                assert.eq(container.viewPackages.length, 4, "Draw updates list of clean view states.");
-                
-                view3.x = 60;
-                container.redraw();
-                
-                bang.removeChild(container.canvas);
-                
-                assert.suite = 'Animation';
-                var calls = 0;
-                var timer = new Animation();
-                var animation;
-                var animate = function (time) {
-                    calls++;
-                    timer.cancelAnimation(animation);
-                    assert.eq(calls, 1, 'Can cancel animation.');
-                };
-                animation = timer.requestAnimation(animate);
-                setTimeout(function () {
-                    assert.eq(calls, 1, 'Can start and cancel animation.');
-                    
-                    assert.stat();
-                }, 500);
-                
-                var stage = new Stage(300, 300);
-                stage.context.fillStyle = 'black';
-                stage.context.fillRect(0, 0, 300, 300);
-                stage.showRedrawRegions = true;
-                
-                var block = new View(25, 25, 50, 50);
-                var square = new View(0, 0, 50, 50);
-                square.x = -25;
-                square.y = -25;
-                square.context.fillStyle = 'red';
-                square.context.fillRect(0, 0, 50, 50);
-                block.addView(square);
-                stage.addView(block);
-                bang.appendChild(stage.compositeCanvas);
-                
-                // serial task test
-                assert.suite = 'Serial Task Test';
-                
-                var serial = new Task(
-                    function one(cb, param, task) {
-                        setTimeout(function() {
-                            assert.eq(param, undefined, 'Result of previous operation is undefined during the first operation.');
-                            assert.eq(task !== undefined, true, 'The task itself is passed as the third parameter to task operations.');
-                            cb('s1');
-                        }, 1000);
-                    },
-                    function two(cb, param, task) {
-                        setTimeout(function() {
-                            assert.eq(param, 's1', 'Serial task gives results of the first operation to the second operation.');
-                            cb('s2');
-                        }, 500)
-                    },
-                    new Task(
-                        function nestOne(cb, param, task) {
-                            setTimeout(function() {
-                                console.log('sn',1);
-                                assert.eq(param, 's2', 'Serial task gives results of previous operation to first operation in a nested serial Task.');
-                                cb('sn1');
-                            }, 300);
-                        },
-                        function nestTwo(cb, param, task) {
-                            setTimeout(function() {
-                                console.log('sn',2);
-                                assert.eq(param, 'sn1', 'Nested serial task gives result of previous operation to next operation.');
-                                cb('sn2');
-                            }, 100);
-                        }
-                    ).onComplete(function nestingDone(param, task) {
-                        assert.eq(param, 'sn2', 'Nested serial task gives onComplete callback the results of the last serial operation.');
-                        return task.results.join(',');
-                    }),
-                    function three(cb, param, task) {
-                        assert.eq(param, 'sn1,sn2', 'A nested serial task\'s onComplete result is given to the next operation in the parent task.');
-                        cb('s3');
-                    }
-                ).onComplete(function(param, task) {
-                    assert.eq(param, 's3', 'A serial parent task calls the onComplete with the results of the last operation.');
-                    assert.stat();
-                    
-                    assert.suite = 'Parallel Task Test';
-                    
-                    new Task(
-                        function one(cb, param) {
-                            setTimeout(function() {
-                                assert.eq(param, undefined, 'Result of previous operation is undefined during the first operation.');
-                                assert.eq(task !== undefined, true, 'The task itself is passed as the third parameter to task operations.');
-                                cb(1);
-                            },400);
-                        },
-                        new Task('parallel',
-                            function three(cb, param, task) {
+                        var serial = new Task(
+                            function one(cb, param, task) {
                                 setTimeout(function() {
-                                    assert.eq(param, 1, 'Parent task gives result of previous operation to parallel sub tasks.');
-                                    cb(3);
-                                }, 200);
-                            },
-                            function twohalf(cb, param, task) {
-                                setTimeout(function() {
-                                    assert.eq(param, 1, 'Parent task gives result of previous operation to parallel sub tasks.');
-                                    cb(2.5);
-                                }, 150);
+                                    assert.eq(param, undefined, 'Result of previous operation is undefined during the first operation.');
+                                    assert.eq(task !== undefined, true, 'The task itself is passed as the third parameter to task operations.');
+                                    cb('s1');
+                                }, 1000);
                             },
                             function two(cb, param, task) {
                                 setTimeout(function() {
-                                    assert.eq(param, 1, 'Parent task gives result of previous operation to parallel sub tasks.');
-                                    cb(2);
-                                }, 100);
+                                    assert.eq(param, 's1', 'Serial task gives results of the first operation to the second operation.');
+                                    cb('s2');
+                                }, 500)
+                            },
+                            new Task(
+                                function nestOne(cb, param, task) {
+                                    setTimeout(function() {
+                                        console.log('sn',1);
+                                        assert.eq(param, 's2', 'Serial task gives results of previous operation to first operation in a nested serial Task.');
+                                        cb('sn1');
+                                    }, 300);
+                                },
+                                function nestTwo(cb, param, task) {
+                                    setTimeout(function() {
+                                        console.log('sn',2);
+                                        assert.eq(param, 'sn1', 'Nested serial task gives result of previous operation to next operation.');
+                                        cb('sn2');
+                                    }, 100);
+                                }
+                            ).onComplete(function nestingDone(param, task) {
+                                assert.eq(param, 'sn2', 'Nested serial task gives onComplete callback the results of the last serial operation.');
+                                return task.results.join(',');
+                            }),
+                            function three(cb, param, task) {
+                                assert.eq(param, 'sn1,sn2', 'A nested serial task\'s onComplete result is given to the next operation in the parent task.');
+                                cb('s3');
                             }
                         ).onComplete(function(param, task) {
-                            assert.eq(param, 2, 'Parallel task gives result of the last operation written (last in the queue) as the first onComplete parameter.');
-                            return task.results.join('-');
-                        }),
-                        function four(cb, param, task) {
-                            setTimeout(function() {
-                                assert.eq(param, '3-2.5-2', 'The result of a nested parallel task\'s onComplete is given to the parent task\'s next operation.');
-                                cb(4);
-                            },50);
-                        }
-                    ).onComplete(function done(param, task) {
-                        assert.eq(task.results.join(','), '1,3-2.5-2,4', 'Parent tasks hold results of operations and nested tasks when onComplete is called.');
-                        assert.stat();
-                        
-                        assert.suite = 'Task General Tests';
-                        
-                        new Task(
-                            new Task('parallel',
-                                function one(cb, param, task) {
+                            assert.eq(param, 's3', 'A serial parent task calls the onComplete with the results of the last operation.');
+                            assert.stat();
+                    
+                            assert.suite = 'Parallel Task Test';
+                    
+                            new Task(
+                                function one(cb, param) {
                                     setTimeout(function() {
+                                        assert.eq(param, undefined, 'Result of previous operation is undefined during the first operation.');
+                                        assert.eq(task !== undefined, true, 'The task itself is passed as the third parameter to task operations.');
                                         cb(1);
-                                    }, 500);
+                                    },400);
                                 },
-                                function two(cb, param, task) {
-                                    setTimeout(function() {
-                                        cb(2);
-                                    }, 200);
-                                },
-                                function three(cb, param, task) {
-                                    setTimeout(function() {
-                                        cb(3);
-                                    }, 100);
-                                },
-                                new Task( // nested serial task that will cancel...
-                                    function n1(cb, param, task) {
+                                new Task('parallel',
+                                    function three(cb, param, task) {
                                         setTimeout(function() {
-                                            cb('n1');
+                                            assert.eq(param, 1, 'Parent task gives result of previous operation to parallel sub tasks.');
+                                            cb(3);
+                                        }, 200);
+                                    },
+                                    function twohalf(cb, param, task) {
+                                        setTimeout(function() {
+                                            assert.eq(param, 1, 'Parent task gives result of previous operation to parallel sub tasks.');
+                                            cb(2.5);
                                         }, 150);
                                     },
-                                    function n2(cb, param, task) {
+                                    function two(cb, param, task) {
                                         setTimeout(function() {
-                                            task.cancel();
-                                            cb('n2');
-                                        }, 25);
-                                    },
-                                    function n3(cb, param, task) {
-                                        throw new Error('This should not have ran.');
+                                            assert.eq(param, 1, 'Parent task gives result of previous operation to parallel sub tasks.');
+                                            cb(2);
+                                        }, 100);
                                     }
-                                )
-                            ),
-                            function outer(cb,param,task) {
-                                throw new Error('This also should not have ran.');
-                            }
-                        ).onCancel(function(task) {
-                            assert.eq(task.results.join(','), ',', 'Nested tasks can cancel root outer task.');
-                            assert.stat();
-                            
-                            assert.suite = 'Ease is a Task';
-                            
-                            new Task(
-                                new Ease({
-                                    target : block,
-                                    properties : {
-                                        x : 225,
-                                        y : 225,
-                                        rotation : Math.PI*2,
-                                        alpha : 0.75
-                                    },
-                                    equation : Ease.easeInOutExpo,
-                                    duration : 1000
+                                ).onComplete(function(param, task) {
+                                    assert.eq(param, 2, 'Parallel task gives result of the last operation written (last in the queue) as the first onComplete parameter.');
+                                    return task.results.join('-');
                                 }),
-                                new Ease({
-                                    target : block,
-                                    properties : {
-                                        x : 225,
-                                        y : 25,
-                                        rotation : 0,
-                                        alpha : 1
-                                    },
-                                    delay : 500,
-                                    duration : 500,
-                                    equation : Ease.easeOutExpo
-                                })
-                            ).onComplete(function (param, task) {
-                                new Task('parallel',
-                                    new Ease({
-                                        target : block,
-                                        properties : {
-                                            alpha : 0.5
-                                        }
-                                    }),
-                                    new Ease({
-                                        target : block,
-                                        properties : {
-                                            x : 150,
-                                            y : 150
-                                        }
-                                    }).onComplete(function() {
-                                        assert.eq(true, true, 'Ease calls Task\'s onComplete.');
+                                function four(cb, param, task) {
+                                    setTimeout(function() {
+                                        assert.eq(param, '3-2.5-2', 'The result of a nested parallel task\'s onComplete is given to the parent task\'s next operation.');
+                                        cb(4);
+                                    },50);
+                                }
+                            ).onComplete(function done(param, task) {
+                                assert.eq(task.results.join(','), '1,3-2.5-2,4', 'Parent tasks hold results of operations and nested tasks when onComplete is called.');
+                                assert.stat();
+                        
+                                assert.suite = 'Task General Tests';
+                        
+                                new Task(
+                                    new Task('parallel',
+                                        function one(cb, param, task) {
+                                            setTimeout(function() {
+                                                cb(1);
+                                            }, 500);
+                                        },
+                                        function two(cb, param, task) {
+                                            setTimeout(function() {
+                                                cb(2);
+                                            }, 200);
+                                        },
+                                        function three(cb, param, task) {
+                                            setTimeout(function() {
+                                                cb(3);
+                                            }, 100);
+                                        },
+                                        new Task( // nested serial task that will cancel...
+                                            function n1(cb, param, task) {
+                                                setTimeout(function() {
+                                                    cb('n1');
+                                                }, 150);
+                                            },
+                                            function n2(cb, param, task) {
+                                                setTimeout(function() {
+                                                    task.cancel();
+                                                    cb('n2');
+                                                }, 25);
+                                            },
+                                            function n3(cb, param, task) {
+                                                throw new Error('This should not have ran.');
+                                            }
+                                        )
+                                    ),
+                                    function outer(cb,param,task) {
+                                        throw new Error('This also should not have ran.');
+                                    }
+                                ).onCancel(function(task) {
+                                    assert.eq(task.results.join(','), ',', 'Nested tasks can cancel root outer task.');
+                                    assert.stat();
+                            
+                                    assert.suite = 'Ease is a Task';
+                            
+                                    new Task(
+                                        new Ease({
+                                            target : block,
+                                            properties : {
+                                                x : 225,
+                                                y : 225,
+                                                rotation : Math.PI*2,
+                                                alpha : 0.75
+                                            },
+                                            equation : Ease.easeInOutExpo,
+                                            duration : 1000
+                                        }),
+                                        new Ease({
+                                            target : block,
+                                            properties : {
+                                                x : 225,
+                                                y : 25,
+                                                rotation : 0,
+                                                alpha : 1
+                                            },
+                                            delay : 500,
+                                            duration : 500,
+                                            equation : Ease.easeOutExpo
+                                        })
+                                    ).onComplete(function (param, task) {
+                                        new Task('parallel',
+                                            new Ease({
+                                                target : block,
+                                                properties : {
+                                                    alpha : 0.5
+                                                }
+                                            }),
+                                            new Ease({
+                                                target : block,
+                                                properties : {
+                                                    x : 150,
+                                                    y : 150
+                                                }
+                                            }).onComplete(function() {
+                                                assert.eq(true, true, 'Ease calls Task\'s onComplete.');
+                                                
+                                                assert.eq(task.results.join(','), ',', 'Ease is a Task');
+                                                assert.stat();
+                                            })
+                                        ).go();
                                 
                                         assert.eq(task.results.join(','), ',', 'Ease is a Task');
                                         assert.stat();
-                                    })
-                                ).go();
-                                
-                                assert.eq(task.results.join(','), ',', 'Ease is a Task');
-                                assert.stat();
+
+                                        easeTaskCB();
+                                    }).go();
+                                }).go();
                             }).go();
                         }).go();
-                    }).go();
-                }).go();
+                    },
+                    function testOtherThings(cb) {
+                        assert.suite = 'Array';
+                        var t = [];
                 
+                        assert.suite = 'Vector';
                 
+                        var v = new Vector(0,1,2,3,4,5);
+                        var vv = new Vector(0,1,2,3,4,5);
+                        assert.eq(v[3], 3, 'Vector initializes with elements.');
+                        assert.eq(v.length, 6, 'Vector initializes with length.');
+                        var vcopy = v.copy();
+                        assert.eq(vcopy.isEqualTo(v) && vv.isEqualTo(vcopy), true, 'Vector can evaluate equality.');
+                        var add1 = vcopy.add(new Vector(1,1,1,1,1,1));
+                        assert.eq(add1.isEqualTo(new Vector(1,2,3,4,5,6)), true, 'Vector can add.');
+                        var sub2 = vcopy.subtract(new Vector(2,2,2,2,2,2));
+                        assert.eq(sub2.isEqualTo(new Vector(-2,-1,0,1,2,3)), true, 'Vector can subtract.');
+                        v = new Vector(1,2,3);
+                        var magv = v.magnitude();
+                        assert.eq(magv >= 3.74165 && magv <= 3.74166, true, 'Vector can calc magnitude ('+magv+').');
+                        var unit = v.normalize();
+                        assert.eq(unit.magnitude(), 1, 'Vector can calc normal vector.');
+                
+                        assert.suite = 'Rectangle';
+                        var r1 = new Rectangle(0,0,100,100);
+                        var r2 = new Rectangle(50,50,100,100)
+                        assert.eq(r1.right(10),10, 'Rectangle sets right.');
+                        assert.eq(r1.width(), 10, 'Rectangle updates width after set right.');
+                        r1.right(100);
+                        assert.eq(r1.left(10),10, 'Rectangle sets left.');
+                        r1.left(0);
+                        assert.eq(r1.width(100),100,'Rectangle updates width after set left.');
+                        assert.eq(r1.intersectsRectangle(r2), true, 'Rectangle knows intersection.');
+                        var output = new Rectangle.reduceRectangles([r1,r2]);
+                        assert.eq(output.length, 3, 'Rectangle reduces to correct number of rects.');
+                        assert.eq(output.toString(), 'Rectangle[0,0,50,100],Rectangle[50,0,50,150],Rectangle[100,50,50,100]', 'Rectangle reduces to correct rectangles.');
+                
+                        assert.suite = 'Matrix';
+                
+                        var mat = new Matrix(
+                            0, 1, 2,
+                            3, 4, 5, 
+                            6, 7, 8
+                        );
+            
+                        var r0 = mat.row(0);
+                        var r2 = mat.row(2);
+                        assert.eq(r0.toString(), '0,1,2', 'Can get matrix row.');
+                        assert.eq(r2.toString(), '6,7,8', 'Can get matrix row.');
+            
+                        var c0 = mat.column(0);
+                        var c2 = mat.column(2);
+                        assert.eq(c0.toString(), '0,3,6', 'Can get matrix column.');
+                        assert.eq(c2.toString(), '2,5,8', 'Can get matrix column.');
+            
+                        var A = new Matrix(
+                            5, 9, 2, 
+                            1, 7, 6,
+                            3, 4, 8
+                        );
+            
+                        var B = new Matrix(
+                            9, 1, 6, 
+                            7, 2, 4,
+                            8, 10, 3
+                        );
+            
+                        var AB = new Matrix(
+                            124, 43, 72,
+                            106, 75, 52,
+                            119, 91, 58
+                        );
+            
+                        var BA = new Matrix(
+                            64, 112, 72,
+                            49, 93, 58,
+                            59, 154, 100
+                        );
+            
+                        var resultAB = A.multiply(B);
+                        var resultBA = B.multiply(A);
+            
+                        assert.eq(resultAB.toString(), AB.toString(), 'Matrix can multiply');
+            
+                        mat = mat.identity();
+            
+                        mat = mat.translate(1, 2);
+                        assert.eq(mat.x(), 1, 'Matrix can translate x');
+                        assert.eq(mat.y(), 2, 'Matrix can translate y');
+            
+                        mat = mat.scale(0.5, 0.3, 0.1);
+                        assert.eq(mat.a(), 0.5, 'Matrix can scale x');
+                        assert.eq(mat.e(), 0.3, 'Matrix can scale y');
+        
+                        mat = mat.identity();
+        
+                        var vec = new Vector(2, 4);
+        
+                        mat = mat.translate(1, 1);
+        
+                        var tVec = mat.transform2DVector(vec);
+                        assert.eq(tVec.x(), 3, 'Matrix can translate Vector in x');
+                        assert.eq(tVec.y(), 5, 'Matrix can translate Vector in y');
+        
+                        tVec = mat.transform2DVector(tVec);
+                        assert.eq(tVec.x(), 4, 'Matrix can translate Vector in x');
+                        assert.eq(tVec.y(), 6, 'Matrix can translate Vector in y');
+        
+                        mat = mat.identity();
+                        mat = mat.scale(0.5, 0.5, 0.5);
+                        tVec = mat.transform2DVector(tVec);
+                        assert.eq(tVec.x(), 2, 'Matrix can scale Vector in x');
+                        assert.eq(tVec.y(), 3, 'Matrix can scale Vector in y');
+                
+                        var unitSquare = new Polygon(
+                            -1,  1,
+                             1,  1,
+                             1, -1,
+                            -1, -1
+                        );
+                        assert.eq(unitSquare.containsPoint(new Vector(0,0)), true, 'Polygon unit square contains origin');
+                
+                        var D = new Matrix().translate(100, 50).scale(0.5).rotate(Math.PI/4);
+                        var invD = D.inverse();
+                        var I = D.multiply(invD);
+                        I = I.map(function(el,ndx,a) {
+                            return Math.round(el);
+                        });
+                        assert.eq(I.isEqualTo(new Matrix()), true, 'Matrix can return inverse.');
+            
+                        var rect = new Polygon(
+                                10, 5,
+                                10, -5,
+                                -10, -5,
+                                -10, 5
+                        );
+                        var transform = new Matrix().rotate(Math.PI/2).scale(2, 2);
+                        rect = transform.transformPolygon(rect);
+                        var resultPoly = rect.map(function(el,ndx,a) {
+                            return Math.round(el);
+                        });
+                        var comparePoly = new Polygon(-10,20,10,20,10,-20,-10,-20)
+                        assert.eq(resultPoly.isEqualTo(comparePoly), true, 'Matrix can transform polygons.');
+                        assert.eq(resultPoly.toString(), comparePoly.toString(), 'Matrix can transform polygons.');
+                
+                        var clipRectangle = new Rectangle(10,10,20,40);
+                        var polyToClip = new Polygon(0,0, 40,0, 0,40);
+                        var clippedPoly = clipRectangle.clipPolygon(polyToClip);
+                        var checkPoly = new Polygon(10,10,30,10,10,30);
+                        assert.eq(checkPoly.toString(), clippedPoly.toString(), 'Rectangle can clip polygon.');
+            
+                        assert.suite = 'View';
+                        var view1 = new View(0, 0, 40, 40);
+                        view1.tag = 'view1';
+                        var view2 = new View(0, 0, 40, 40);
+                        view2.tag = 'view2';
+                
+                        var bang = document.getElementById('bang');
+                        bang.appendChild(view1.canvas);
+                        bang.appendChild(view2.canvas);
+                
+                        assert.eq(view1.isDirty, false, 'View starts clean.');
+                        view1.context.fillRect(0,0,20,20);
+                        view1.context.fillStyle = 'red';
+                        view1.context.fillRect(20,0,20,20);
+                        view1.context.fillStyle = 'green';
+                        view1.context.fillRect(20,20,20,20);
+                        view1.context.fillStyle = 'blue';
+                        view1.context.fillRect(0,20,20,20);
+                        assert.eq(view1.isDirty, true, 'View is dirty after drawing.');
+                
+                        view2.context.drawImage(view1.canvas, 20,20,20,20, 0,0,20,20);
+                        assert.eq(view2.isDirty, true, 'Receiving view is dirty after drawing into context.');
+                
+                        var data = view2.context.getImageData(0,0,1,1);
+                        assert.eq(data.data[1] > data.data[0] && data.data[1] > data.data[2], true, 'Receiving view gets appropriately drawn into.');
+                
+                        bang.removeChild(view1.canvas);
+                        bang.removeChild(view2.canvas);
+                
+                        var container = new Stage(250, 250);
+                        container.tag = 'stage';
+                        assert.eq(container.canvas.width, 250, 'Stage constructor sets width.');
+                        assert.eq(container.canvas.height, 250, 'Stage constructor sets height.');
+                        container.addView(view1);
+                        view1.addView(view2);
+                        bang.appendChild(container.canvas);
+                
+                        view2.x = 40;
+                        container.draw();
+                
+                        view2.x = 80;
+                        container.draw();
+                
+                        var view3 = new View(40,40, 40, 40);
+                        view3.tag = 'view3';
+                        view3.rotation = Math.PI/4;
+                        view3.context.fillStyle = 'cyan';
+                        view3.context.fillRect(0,0,40,40);
+                        container.addView(view3);
+                        container.draw();
+                
+                        var children = container.children();
+                        assert.eq(children.toString(), 'View{"stage"[0,0,250,250]},View{"view1"[0,0,40,40]},View{"view2"[80,0,40,40]},View{"view3"[40,40,40,40]}', 'Stage flattens display list (and toString works the way we expect).');
+                
+                        assert.eq(container.viewPackages.length, 4, "Draw updates list of clean view states.");
+                
+                        view3.x = 60;
+                        container.redraw();
+                
+                        bang.removeChild(container.canvas);
+                
+                        assert.suite = 'Animation';
+                        var calls = 0;
+                        var timer = new Animation();
+                        var animation;
+                        var animate = function (time) {
+                            calls++;
+                            timer.cancelAnimation(animation);
+                            assert.eq(calls, 1, 'Can cancel animation.');
+                        };
+                        animation = timer.requestAnimation(animate);
+                        setTimeout(function () {
+                            assert.eq(calls, 1, 'Can start and cancel animation.');
+                    
+                            assert.stat();
+                            cb();
+                        }, 500);
+                    }
+                ).go();
             });
         </script>
     </body>
