@@ -16,19 +16,35 @@
         <link rel="shortcut icon" href="favicon.png" />
     </head>
     <body id="body">
+        <script id="fragment_shader" type="x-shader/x-fragment">
+			#ifdef GL_ES
+  				precision highp float;
+  			#endif
+
+			varying vec2 tex;
+			uniform sampler2D sampler;
+			
+            void main (void) {
+				gl_FragColor = texture2D(sampler, vec2(tex.s, tex.t));
+            }
+        </script>
+        <script id="vertex_shader" type="x-shader/x-vertex">
+            attribute vec2 vertexCoord;
+			attribute vec2 textureCoord;
+
+            uniform mat3 matrix;
+			varying vec2 tex;
+            
+            void main (void) {
+                tex = textureCoord;
+                gl_Position = matrix * vertexCoord;
+            }
+        </script>
 
         <div id="bang"></div>
         <xmp id="output"></xmp>
         
         <script type="text/javascript" charset="utf-8">
-            /*console = {
-                log : function() {
-                    var args = Array.prototype.slice.apply(arguments);
-                    var output = document.getElementById('output');
-                    output.innerHTML = args.join(' ') + '\n' + output.innerHTML;
-                }
-            };*/
-            
             mod.useTagInjection = true;
             mod.expansions = {
                 bang : 'src/',
@@ -48,13 +64,30 @@
                     'bang::Utils/Task.js'
                 ],
                 init : function initMain () {
+                    mod.exportAll();
                     return {};
                 }
             }).onload(function test(Assert, Vector, Polygon, Rectangle, Matrix, View, Stage, Animation, Ease, Task) {
+                var bang = document.getElementById('bang');
                 
-                new Task(
+                new Task('parallel',
+                    function testWebGL(webglCB) {
+                        var canvas = document.createElement('canvas');
+                        var gl = false;
+                        try {
+                            gl = canvas.getContext('experimental-webgl');
+                        } catch(e) {
+                            console.error('Could not get webgl context.');
+                        }
+                        assert.eq(gl !== false, true, 'Can get webgl context.');
+                        gl.clearColor(0, 0, 0, 0);
+                        gl.clearDepth(1.0);
+            		    gl.enable(gl.DEPTH_TEST);
+            		    gl.enable(gl.BLEND);
+            		    gl.blendFunc(gl.SRC_ALPHA, gl.ONE_MINUS_SRC_ALPHA);
+                        webglCB();
+                    },
                     function testEaseAndTask(easeTaskCB) {
-                        var bang = document.getElementById('bang');
                         var stage = new Stage(300, 300);
                         stage.context.fillStyle = 'black';
                         stage.context.fillRect(0, 0, 300, 300);
@@ -295,21 +328,56 @@
                 
                         assert.suite = 'Matrix';
                 
+                        var mat2x2 = new Matrix(
+                            3, 2,
+                            5, 2
+                        );
+                        assert.eq(Matrix.det2x2(mat2x2), -4, 'Matrix can take determinant of 2x2 matrix.');
+                        
+                        var mat3x3 = new Matrix(
+                            1,3,2,
+                            4,1,3,
+                            2,5,2
+                        );
+                        assert.eq(mat3x3.minorAt(0,0), -13, 'Matrix can find minor 0,0 (3x3).');
+                        assert.eq(mat3x3.minorAt(1,0), 2, 'Matrix can find minor 1,0 (3x3).');
+                        assert.eq(mat3x3.cofactorAt(0, 0), -13, 'Matrix can find cofactor 0,0 (3x3).');
+                        assert.eq(mat3x3.cofactorAt(1, 0), -2, 'Matrix can find cofactor 1,0 (3x3).');
+                        assert.eq(mat3x3.determinant(), 17, 'Can get determinant of 3x3.');
+                        
+                        var largerOrderMatrix = new Matrix(
+                            3,2,0,1,
+                            4,0,1,2,
+                            3,0,2,1,
+                            9,2,3,1
+                        );
+                        assert.eq(largerOrderMatrix.minorAt(1,0), -16, 'Can get minor 0,1 of larger order matrices (4x4).');
+                        assert.eq(largerOrderMatrix.determinant(), 24, 'Can get determinant of larger order matrices (4x4).');
+                        
                         var mat = new Matrix(
                             0, 1, 2,
                             3, 4, 5, 
                             6, 7, 8
                         );
+                        
+                        var matMinus00 = mat.deleteRowAndColumnAt(0,0);
+                        var matMinus10 = mat.deleteRowAndColumnAt(1,0);
+                        var matMinus11 = mat.deleteRowAndColumnAt(1,1);
+                        var matMinus22 = mat.deleteRowAndColumnAt(2,2);
+                        assert.eq(matMinus00.toString(), 'Matrix[4,5,7,8]', 'Matrix can return matrix with deleted row and column.');
+                        assert.eq(matMinus10.toString(), 'Matrix[3,5,6,8]', 'Matrix can return matrix with deleted row and column.');
+                        assert.eq(matMinus11.toString(), 'Matrix[0,2,6,8]', 'Matrix can return matrix with deleted row and column.');
+                        assert.eq(matMinus22.toString(), 'Matrix[0,1,3,4]', 'Matrix can return matrix with deleted row and column.');
             
                         var r0 = mat.row(0);
                         var r2 = mat.row(2);
-                        assert.eq(r0.toString(), '0,1,2', 'Can get matrix row.');
-                        assert.eq(r2.toString(), '6,7,8', 'Can get matrix row.');
+                        assert.eq(r0.toString(), 'Vector[0,1,2]', 'Can get matrix row.');
+                        assert.eq(r2.toString(), 'Vector[6,7,8]', 'Can get matrix row.');
             
                         var c0 = mat.column(0);
                         var c2 = mat.column(2);
-                        assert.eq(c0.toString(), '0,3,6', 'Can get matrix column.');
-                        assert.eq(c2.toString(), '2,5,8', 'Can get matrix column.');
+                        assert.eq(c0.toString(), 'Vector[0,3,6]', 'Can get matrix column.');
+                        assert.eq(c2.toString(), 'Vector[2,5,8]', 'Can get matrix column.');
             
                         var A = new Matrix(
                             5, 9, 2, 

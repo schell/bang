@@ -1,6 +1,6 @@
 /** * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * *
 * Matrix.js
-* A 2D matrix for transformations.
+* A 3x3 matrix for transformations.
 * /---------------------------------------\
 * | indices     | elements   | meaning    |
 * |---------------------------------------| 
@@ -24,21 +24,49 @@ mod({
     init : function initMatrix (Vector) {
         
         function Matrix() {
+            /** * *
+            * The number of columns and rows.
+            * @type {number}
+            * * **/
+            this.numColumnsAndRows = Math.sqrt(arguments.length);
+            if (this.numColumnsAndRows - Math.floor(this.numColumnsAndRows)) {
+                throw new Error('A matrix must have an equal number of rows and columns.');
+            }
+            
             if (arguments.length) {
                 this.length = 0;
                 for (var i=0; i < arguments.length; i++) {
                     this.push(arguments[i]);
                 }
             } else {
+                this.length = 9;
+                this.numColumnsAndRows = 3;
                 this.loadIdentity();
             }
-            this.length = 9;
         }
         
         Matrix.prototype = new Vector();
         
         Matrix.prototype.constructor = Matrix;
-        
+        //--------------------------------------
+        //  CLASS METHODS
+        //--------------------------------------
+        /** * *
+        * Returns the determinant of a given 2x2 matrix.
+        * @param {Vector}
+        * @return {number}
+        * @nosideeffects
+        * * **/
+        Matrix.det2x2 = function Matrix_det2x2(matrix) {
+            if (matrix.length !== 4) {
+                throw new Error('Matrix must be 2x2.');
+            }
+            var a = matrix[0];
+            var b = matrix[1];
+            var c = matrix[2];
+            var d = matrix[3];
+            return a*d - b*c;
+        };
         //--------------------------------------
         //  METHODS
         //--------------------------------------
@@ -163,23 +191,6 @@ mod({
             return this[5];
         };
         /** * *
-        * Returns the determinate of this matrix.
-        * @return number
-        * @nosideeffects
-        * * **/
-        Matrix.prototype.determinant = function Matrix_determinate() {
-            var a = this.a();
-            var b = this.b();
-            var c = this.c();
-            var d = this.d();
-            var e = this.e();
-            var f = this.f();
-            var g = this.g();
-            var h = this.h();
-            var i = this.i();
-            return a*(e*i - f*h) - b*(d*i - f*g) + c*(d*h - e*g);
-        };
-        /** * *
         * Returns the inverse of this matrix or false if no inverse exists.
         * @return Matrix
         * @nosideeffects
@@ -216,9 +227,9 @@ mod({
         * @nosideeffects
         * * **/
         Matrix.prototype.row = function Matrix_row(n) {
-            var elementsInRow = 3;
+            var elementsInRow = this.numColumnsAndRows;
             var start = n*elementsInRow;
-            var row = [];
+            var row = new Vector();
             for (var i=0; i < elementsInRow; i++) {
                 row.push(this[start+i]);
             }
@@ -226,15 +237,15 @@ mod({
         };
         /** * *
         * Returns column n of this matrix.
-        * @return Array
+        * @return {Vector}
         * @nosideeffects
         * * **/
         Matrix.prototype.column = function Matrix_column(n) {
-            var elementsInColumn = 3;
+            var elementsInColumn = this.numColumnsAndRows;
             var start = n;
-            var column = [];
+            var column = new Vector();
             for (var i=0; i < elementsInColumn; i++) {
-                column.push(this[start+3*i]);
+                column.push(this[start+this.numColumnsAndRows*i]);
             }
             return column;
         };
@@ -244,25 +255,109 @@ mod({
         * @nosideeffects
         * * **/
         Matrix.prototype.identity = function Matrix_identity() {
-            return new Matrix(
-                1.0, 0.0, 0.0, 
-                0.0, 1.0, 0.0, 
-                0.0, 0.0, 1.0 
-            );
+            var m = new Matrix().loadIdentity();
+            return m;
         };
         /** * *
-        * Loads the elements of the identity matrix.
+        * Loads the elements of the identity matrix. Returns itself.
+        * @return {Matrix}
         * * **/
         Matrix.prototype.loadIdentity = function Matrix_loadIdentity() {
-            this[0] = 1;
-            this[1] = 0;
-            this[2] = 0;
-            this[3] = 0;
-            this[4] = 1;
-            this[5] = 0;
-            this[6] = 0;
-            this[7] = 0;
-            this[8] = 1;
+            this.length = this.numColumnsAndRows*this.numColumnsAndRows;
+            
+            for (var i=0; i < this.length; i++) {
+                this[i] = (i%(this.numColumnsAndRows+1)) === 0 ? 1 : 0;
+            }
+            
+            return this;
+        };
+        /** * *
+        * Returns a new matrix with row x and column y deleted.
+        * Calling this on a 4x4 matrix will return a 3x3 matrix.
+        * @param {number} c The column to delete
+        * @param {number} r The row to delete
+        * @return {Matrix}
+        * @nosideeffects
+        * * **/
+        Matrix.prototype.deleteRowAndColumnAt = function Matrix_deleteRowAndColumnAt(c, r) {
+            var alias = this;
+            /** * *
+            * Returns whether the given index is in a given row.
+            * @param {number} ndx The index.
+            * @param {number} row The row.
+            * @return {boolean}
+            * @nosideeffects
+            * * **/
+            function isIndexInRow(ndx, row) {
+                var startNdx = alias.numColumnsAndRows*row;
+                var endNdx = startNdx + alias.numColumnsAndRows;
+                return startNdx <= ndx && ndx < endNdx;
+            }
+            /** * *
+            * Returns whether the given index is in a given column.
+            * @param {number} ndx The index.
+            * @param {number} col The column.
+            * @return {boolean}
+            * @nosideeffects
+            * * **/
+            function isIndexInColumn(ndx, col) {
+                return (ndx - col)%alias.numColumnsAndRows === 0;
+            }
+            var matrix = new Matrix();
+            matrix.length = (this.numColumnsAndRows-1)*(this.numColumnsAndRows-1);
+            matrix.numColumnsAndRows = this.numColumnsAndRows-1;
+            for (var ndx=0,i=0; ndx < this.length; ndx++) {
+                if (isIndexInRow(ndx, r) || isIndexInColumn(ndx, c)) {
+                    continue;
+                }
+                matrix[i++] = this[ndx];
+            }
+            return matrix;
+        };
+        /** * *
+        * Returns the minor for an element at row x and column y.
+        * @param {number} x The row.
+        * @param {number} y The column.
+        * @return {number} The minor for the element.
+        * * **/
+        Matrix.prototype.minorAt = function Matrix_minorAt(x, y) {
+            var ndx = y*this.numColumnsAndRows + x;
+            if (this[ndx] === 0) {
+                return 0;
+            }
+            
+            var minorMatrix = this.deleteRowAndColumnAt(x, y);
+            return minorMatrix.determinant();
+        };
+        /** * *
+        * Returns the cofactor for an element at row x and column y.
+        * @param {number} x The row.
+        * @param {number} y The column.
+        * @return {number} The cofactor for the element.
+        * * **/
+        Matrix.prototype.cofactorAt = function Matrix_cofactorAt(x, y) {
+            var ndx = y*this.numColumnsAndRows + x;
+            return this.minorAt(x, y)*((ndx%2) ? -1 : 1);
+        };
+        /** * *
+        * Returns the determinant of the matrix.
+        * @return {number}
+        * @nosideeffects
+        * * **/
+        Matrix.prototype.determinant = function Matrix_determinate() {
+            if (this.length === 1) {
+                return this[0];
+            }
+            if (this.numColumnsAndRows === 2) {
+                return Matrix.det2x2(this);
+            }
+            
+            var alias = this;
+            var ndx = 0;
+            return this.row(0).foldl(function(acc,el) {
+                // Return the product of the element and its cofactor...
+                return acc + (el*alias.cofactorAt(ndx++, 0));
+            }, 0);
         };
         /** * *
         * Multiplies this matrix by matrix.
@@ -289,8 +384,8 @@ mod({
             var elements = new Matrix();
             elements.length = 0;
                 
-            var resultRows = this.length/3;
-            var resultCols = matrix.length/3;
+            var resultRows = this.length/this.numColumnsAndRows;
+            var resultCols = matrix.length/this.numColumnsAndRows;
             for (var i=0; i < resultRows; i++) {
                 for (var j=0; j < resultCols; j++) {
                     var row = this.row(i);
@@ -304,6 +399,8 @@ mod({
                     elements.push(addRowAndColumn(row, column));
                 }
             }
+            elements.numColumnsAndRows = this.numColumnsAndRows;
+            
             return elements;
         };
         /** * *

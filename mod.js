@@ -101,6 +101,14 @@
         //  METHODS
         //--------------------------------------
         /** * *
+        * Exports all modules to global space.
+        * * **/
+        mod.exportAll = function modExportAll() {
+            for(var module in mod.modules) {
+                window[module] = mod.modules[module];
+            }
+        };
+        /** * *
         * Configures mod.
         * Used mostly for AMD compliance.
         * @param {Object}
@@ -546,33 +554,5 @@
             }
         };
     };
-    //--------------------------------------
-    //  AMD COMPLIANCE
-    //--------------------------------------
-    /** * *
-    * Defines a module using the AMD spec.
-    * https://github.com/amdjs/amdjs-api/wiki/AMD
-    * @param {?string} id The id of the module.
-    * @param {?Array.<string>} dependencies The modules this module depends on.
-    * @param {function|Object} factory The value of the module.
-    * * **/
-    function define(id, dependencies, factory) {
-        var args = Array.prototype.slice.call(arguments);
-        factory = args.pop();
-        dependencies = args.pop();
-        id = args.pop();
-        
-        mod({
-            name : id,
-            dependencies : dependencies,
-            init : factory
-        });
-    }
-    //--------------------------------------
-    //  GLOBALS
-    //--------------------------------------
-    // Don't overwrite these, as they're experimental right now...
-    window.define = window.define || define;
-    window.require = window.require || define;
     window.mod = mod;
 })(window);

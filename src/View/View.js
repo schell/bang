@@ -240,20 +240,10 @@ mod({
             context.globalAlpha *= this.alpha;
         };
         /** * *
-        * Sets this view as being dirty. Causes the stage to redraw.
+        * Sets this view as being dirty.
         * * **/
         View.prototype.markAsDirty = function View_markAsDirty() {
             this.isDirty = true;
-            var parent = this;
-            // Traverse up the display list and tell the root it should redraw.
-            while (parent) {
-                if (!parent.parent) {
-                    parent.shouldRedraw = true;
-                    parent = false;
-                } else {
-                    parent = parent.parent;
-                }
-            }
         };
         /** * *
         * Adds a subview to this view.
