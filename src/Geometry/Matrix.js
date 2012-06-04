@@ -22,25 +22,43 @@ mod({
     * @param {function} Vector The Vector constructor function.
     * * **/
     init : function initMatrix (Vector) {
-        
+        /** * *
+        * Creates a new Matrix object. You can optionally provide the number 
+        * of rows and columns as an array, and the elements as numbers.
+        * @type {Array=} rowsAndColumns The number of rows and columns. (optional)
+        * @type {...number=} elements The matrix elements. (optional)
+        * * **/
         function Matrix() {
+            var args = Array.prototype.slice.call(arguments);
+            var numberOfRowsAndColumns = [0,0];
+            if (typeof args[0] === 'object') {
+                numberOfRowsAndColumns = args.shift();
+            } else if (args.length) {
+                var sqrtLen = Math.sqrt(args.length);
+                numberOfRowsAndColumns = [sqrtLen, sqrtLen];
+            }
             /** * *
-            * The number of columns and rows.
+            * The number of columns.
             * @type {number}
             * * **/
-            this.numColumnsAndRows = Math.sqrt(arguments.length);
-            if (this.numColumnsAndRows - Math.floor(this.numColumnsAndRows)) {
-                throw new Error('A matrix must have an equal number of rows and columns.');
-            }
+            this.numColumns = numberOfRowsAndColumns[0];
+            /** * *
+            * The number of rows.
+            * @type {number}
+            * * **/
+            this.numRows = numberOfRowsAndColumns[1];
+
+            this.length = this.numRows*this.numColumns;
             
-            if (arguments.length) {
+            if (args.length) {
                 this.length = 0;
-                for (var i=0; i < arguments.length; i++) {
-                    this.push(arguments[i]);
+                for (var i=0; i < args.length; i++) {
+                    this.push(args[i]);
                 }
-            } else {
+            } else if (this.length === 0) {
                 this.length = 9;
-                this.numColumnsAndRows = 3;
+                this.numColumns = 3;
+                this.numRows = 3;
                 this.loadIdentity();
             }
         }
@@ -191,43 +209,12 @@ mod({
             return this[5];
         };
         /** * *
-        * Returns the inverse of this matrix or false if no inverse exists.
-        * @return Matrix
-        * @nosideeffects
-        * * **/
-        Matrix.prototype.inverse = function Matrix_inverse() {
-            var detM = this.determinant();
-            if (detM === 0) {
-                // This matrix is singular and has no inverse...
-                return false;
-            }
-            var oneOverDet = 1 / detM;
-
-            var a = this.a();
-            var b = this.b();
-            var c = this.c();
-            var d = this.d();
-            var e = this.e();
-            var f = this.f();
-            var g = this.g();
-            var h = this.h();
-            var i = this.i();
-                
-            return new Matrix(
-                e*i - f*h, f*g - d*i, d*h - e*g,
-                c*h - b*i, a*i - c*g, b*g - a*h,
-                b*f - c*e, c*d - a*f, a*e - b*d
-            ).map(function(el,ndx,a) {
-                return el*oneOverDet;
-            });
-        };
-        /** * *
         * Returns row n of this matrix.
         * @return Vector
         * @nosideeffects
         * * **/
         Matrix.prototype.row = function Matrix_row(n) {
-            var elementsInRow = this.numColumnsAndRows;
+            var elementsInRow = this.numColumns;
             var start = n*elementsInRow;
             var row = new Vector();
             for (var i=0; i < elementsInRow; i++) {
@@ -241,11 +228,11 @@ mod({
         * @nosideeffects
         * * **/
         Matrix.prototype.column = function Matrix_column(n) {
-            var elementsInColumn = this.numColumnsAndRows;
+            var elementsInColumn = this.numRows;
             var start = n;
             var column = new Vector();
             for (var i=0; i < elementsInColumn; i++) {
-                column.push(this[start+this.numColumnsAndRows*i]);
+                column.push(this[start+this.numRows*i]);
             }
             return column;
         };
@@ -263,10 +250,14 @@ mod({
         * @return {Matrix}
         * * **/
         Matrix.prototype.loadIdentity = function Matrix_loadIdentity() {
-            this.length = this.numColumnsAndRows*this.numColumnsAndRows;
+            if (this.numColumns !== this.numRows) {
+                // This is not a square matrix and does not have an identity...
+                throw new Error('Matrix must be square (nxn) to have an identity.');
+            }
+            this.length = this.numColumns*this.numRows;
             
             for (var i=0; i < this.length; i++) {
-                this[i] = (i%(this.numColumnsAndRows+1)) === 0 ? 1 : 0;
+                this[i] = (i%(this.numRows+1)) === 0 ? 1 : 0;
             }
             
             return this;
@@ -289,8 +280,8 @@ mod({
             * @nosideeffects
             * * **/
             function isIndexInRow(ndx, row) {
-                var startNdx = alias.numColumnsAndRows*row;
-                var endNdx = startNdx + alias.numColumnsAndRows;
+                var startNdx = alias.numColumns*row;
+                var endNdx = startNdx + alias.numColumns;
                 return startNdx <= ndx && ndx < endNdx;
             }
             /** * *
@@ -301,11 +292,9 @@ mod({
             * @nosideeffects
             * * **/
             function isIndexInColumn(ndx, col) {
-                return (ndx - col)%alias.numColumnsAndRows === 0;
+                return (ndx - col)%alias.numColumns === 0;
             }
-            var matrix = new Matrix();
-            matrix.length = (this.numColumnsAndRows-1)*(this.numColumnsAndRows-1);
-            matrix.numColumnsAndRows = this.numColumnsAndRows-1;
+            var matrix = new Matrix([this.numRows-1, this.numColumns-1]);
             for (var ndx=0,i=0; ndx < this.length; ndx++) {
                 if (isIndexInRow(ndx, r) || isIndexInColumn(ndx, c)) {
                     continue;
@@ -321,7 +310,7 @@ mod({
         * @return {number} The minor for the element.
         * * **/
         Matrix.prototype.minorAt = function Matrix_minorAt(x, y) {
-            var ndx = y*this.numColumnsAndRows + x;
+            var ndx = y*this.numColumns + x;
             if (this[ndx] === 0) {
                 return 0;
             }
@@ -336,8 +325,12 @@ mod({
         * @return {number} The cofactor for the element.
         * * **/
         Matrix.prototype.cofactorAt = function Matrix_cofactorAt(x, y) {
-            var ndx = y*this.numColumnsAndRows + x;
-            return this.minorAt(x, y)*((ndx%2) ? -1 : 1);
+            var ndx = y*this.numColumns + x;
+            var sign = ((ndx%2) ? -1 : 1);
+            if (this.numColumns%2 === 0) {
+                sign *= (y%2 ? -1 : 1);
+            }
+            return this.minorAt(x, y)*sign;
         };
         /** * *
         * Returns the determinant of the matrix.
@@ -348,16 +341,67 @@ mod({
             if (this.length === 1) {
                 return this[0];
             }
-            if (this.numColumnsAndRows === 2) {
+            if (this.numColumns === 2 && this.numRows === 2) {
                 return Matrix.det2x2(this);
             }
             
             var alias = this;
             var ndx = 0;
             return this.row(0).foldl(function(acc,el) {
-                // Return the product of the element and its cofactor...
+                // Accumulate the product of the element and its cofactor...
                 return acc + (el*alias.cofactorAt(ndx++, 0));
             }, 0);
+        };
+        /** * *
+        * Returns the transpose of the matrix.
+        * @return {Matrix}
+        * * **/
+        Matrix.prototype.transpose = function Matrix_transpose() {
+            var transpose = this.copy();
+            for (var i=0; i < this.numColumns; i++) {
+                for (var j=0; j < this.numRows; j++) {
+                    var thisNdx = i*this.numColumns + j;
+                    var transNdx = j*this.numColumns + i;
+                    transpose[transNdx] = this[thisNdx];
+                }
+            }
+            return transpose;
+        };
+        /** * *
+        * Returns the matrix of cofactors.
+        * @return {Matrix}
+        * * **/
+        Matrix.prototype.cofactors = function Matrix_cofactors() {
+            var cofactors = this.copy();
+            for (var i=0; i < this.numColumns; i++) {
+                for (var j=0; j < this.numRows; j++) {
+                    var ndx = j*this.numColumns + i;
+                    cofactors[ndx] = this.cofactorAt(i, j);
+                }
+            }
+            return cofactors;
+        };
+        /** * *
+        * Returns the inverse of this matrix or false if no inverse exists.
+        * @return {Matrix}
+        * @nosideeffects
+        * * **/
+        Matrix.prototype.inverse = function Matrix_inverse() {
+            var detM = this.determinant();
+            if (detM === 0) {
+                // This matrix is singular and has no inverse...
+                return false;
+            }
+            var oneOverDet = 1 / detM;
+            // Get the matrix of cofactors...
+            var cofactors = this.cofactors();
+            // Get the adjoint matrix by transposing the matrix of cofactors...
+            var adjoint = cofactors.transpose();
+            // Divide the adjoint by the determinant...
+            for (var i=0; i < adjoint.length; i++) {
+                adjoint[i] *= oneOverDet;
+            }
+            return adjoint;
         };
         /** * *
         * Multiplies this matrix by matrix.
@@ -365,7 +409,10 @@ mod({
         * @return Matrix
         * @nosideeffects
         * * **/
-        Matrix.prototype.multiply = function Matrix_multiply(matrix) {            
+        Matrix.prototype.multiply = function Matrix_multiply(matrix) {   
+            if (this.numColumns !== matrix.numRows) {
+                throw new Error('The number of columns in first matrix must equal the number of rows in the second.');
+            }         
             /** * *
             * Adds a matrix element *row* and *column*.
             * @param Array
@@ -384,8 +431,8 @@ mod({
             var elements = new Matrix();
             elements.length = 0;
                 
-            var resultRows = this.length/this.numColumnsAndRows;
-            var resultCols = matrix.length/this.numColumnsAndRows;
+            var resultRows = this.numColumns;
+            var resultCols = matrix.numRows;
             for (var i=0; i < resultRows; i++) {
                 for (var j=0; j < resultCols; j++) {
                     var row = this.row(i);
@@ -399,7 +446,9 @@ mod({
                     elements.push(addRowAndColumn(row, column));
                 }
             }
-            elements.numColumnsAndRows = this.numColumnsAndRows;
+            elements.numRows = resultRows;
+            elements.numColumns = resultCols;
+            elements.length = resultRows*resultCols;
             
             return elements;
         };
