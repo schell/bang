@@ -357,7 +357,8 @@
                             3,0,2,1,
                             9,2,3,1
                         );
-                        assert.eq(largerOrderMatrix.minorAt(1,0), -16, 'Can get minor 0,1 of larger order matrices (4x4).');
+                        assert.eq(largerOrderMatrix.minorAt(1,0), -16, 'Can get minor 1,0 of larger order matrices (4x4).');
+                        assert.eq(largerOrderMatrix.minorAt(1,1), -12, 'Can get minor 1,1 of larger order matrices (4x4).');
                         assert.eq(largerOrderMatrix.determinant(), 24, 'Can get determinant of larger order matrices (4x4).');
                         var transposeCheck = new Matrix(
                             3,4,3,9,
@@ -366,9 +367,16 @@
                             1,2,1,1
                         );
                         assert.eq(largerOrderMatrix.transpose().isEqualTo(transposeCheck), true, 'Can transpose matrix (4x4).');
-                        assert.eq(largerOrderMatrix.inverse().multiply(largerOrderMatrix).toString(), new Matrix(), 'Can take inverse and multiply to get identity.');
+                        var identity = new Matrix([4,4]);
+                        var identityByInverse = largerOrderMatrix.inverse().multiply(largerOrderMatrix).map(function (el,ndx) {
+                            var diff = identity[ndx] - el;
+                            if (Math.abs(diff) < .000001) {
+                                return identity[ndx];
+                            }
+                        });
+                        assert.eq(identityByInverse.toString(), identity.toString(), 'Can take inverse and multiply to get identity (4x4).');
                         
-                        var mat = new Matrix(
+                        var mat = new Transform2d(
                             0, 1, 2,
                             3, 4, 5, 
                             6, 7, 8
@@ -437,18 +445,17 @@
                         var vec = new Vector(2, 4);
         
                         mat = mat.translate(1, 1);
-        
-                        var tVec = mat.transform2DVector(vec);
+                        var tVec = mat.transformVector(vec);
                         assert.eq(tVec.x(), 3, 'Matrix can translate Vector in x');
                         assert.eq(tVec.y(), 5, 'Matrix can translate Vector in y');
         
-                        tVec = mat.transform2DVector(tVec);
+                        tVec = mat.transformVector(tVec);
                         assert.eq(tVec.x(), 4, 'Matrix can translate Vector in x');
                         assert.eq(tVec.y(), 6, 'Matrix can translate Vector in y');
         
                         mat = mat.identity();
                         mat = mat.scale(0.5, 0.5, 0.5);
-                        tVec = mat.transform2DVector(tVec);
+                        tVec = mat.transformVector(tVec);
                         assert.eq(tVec.x(), 2, 'Matrix can scale Vector in x');
                         assert.eq(tVec.y(), 3, 'Matrix can scale Vector in y');
                 
@@ -466,7 +473,7 @@
                                 -10, -5,
                                 -10, 5
                         );
-                        var transform = new Matrix().rotate(Math.PI/2).scale(2, 2);
+                        var transform = new Transform2d().rotate(Math.PI/2).scale(2, 2);
                         rect = transform.transformPolygon(rect);
                         var resultPoly = rect.map(function(el,ndx,a) {
                             return Math.round(el);

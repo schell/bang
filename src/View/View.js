@@ -8,7 +8,7 @@
 * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * **/
 mod({
     name : 'View',
-    dependencies : [ 'bang::Geometry/Rectangle.js', 'bang::Geometry/Matrix.js' ],
+    dependencies : [ 'bang::Geometry/Rectangle.js', 'bang::Geometry/Transform2d.js' ],
     /** * *
     * Initializes the View type.
     * @param {Object}
@@ -156,10 +156,11 @@ mod({
         * If invert is true, will return the inverse of the
         * local tranformation matrix.
         * @param {boolean=}
+        * @return {Transform2d}
         * @nosideeffects
         * * **/
         View.prototype.localTransform = function View_localTransform(invert) {
-            var matrix = new Matrix();
+            var matrix = new Transform2d();
                 
             if (invert) {
                 // Let's just provide them with an inverse instead of

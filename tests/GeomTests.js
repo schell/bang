@@ -102,17 +102,17 @@
         
             mat.translate(1, 1);
         
-            var tVec = mat.transform2DVector(vec);
+            var tVec = mat.transformVector(vec);
             assert.eq(tVec.x(), 3, 'Matrix can translate Vector in x');
             assert.eq(tVec.y(), 5, 'Matrix can translate Vector in y');
         
-            tVec = mat.transform2DVector(tVec);
+            tVec = mat.transformVector(tVec);
             assert.eq(tVec.x(), 4, 'Matrix can translate Vector in x');
             assert.eq(tVec.y(), 6, 'Matrix can translate Vector in y');
         
             mat.loadIdentity();
             mat.scale(0.5, 0.5, 0.5);
-            tVec = mat.transform2DVector(tVec);
+            tVec = mat.transformVector(tVec);
             assert.eq(tVec.x(), 2, 'Matrix can scale Vector in x');
             assert.eq(tVec.y(), 3, 'Matrix can scale Vector in y');
         

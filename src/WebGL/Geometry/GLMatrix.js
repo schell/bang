@@ -412,7 +412,7 @@ mod({
         * @return {Vector}
         * @nosideeffects
         * * **/
-        GLMatrix.prototype.transform2DVector = function GLMatrix_transform2DVector(vec) {
+        GLMatrix.prototype.transformVector = function GLMatrix_transformVector(vec) {
             // Make the 2-vector homogenous...
             vec = vec.copy();
             vec[2] = 1; 
@@ -437,7 +437,7 @@ mod({
                 var x = input[i];
                 var y = input[i+1];
                 var shim = new Vector(x,y);
-                var tvec = this.transform2DVector(shim);
+                var tvec = this.transformVector(shim);
                 polygon[i] = tvec.x();
                 polygon[i+1] = tvec.y();
             }
