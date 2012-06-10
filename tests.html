@@ -61,30 +61,52 @@
                     'bang::View/Stage.js',
                     'bang::Utils/Animation.js',
                     'bang::Utils/Ease.js',
-                    'bang::Utils/Task.js'
+                    'bang::Utils/Task.js',
+                    'bang::WebGL/Shaders/Shader.js',
+                    'bang::WebGL/Shaders/Program.js'
                 ],
                 init : function initMain () {
                     mod.exportAll();
                     return {};
                 }
-            }).onload(function test(Assert, Vector, Polygon, Rectangle, Matrix, View, Stage, Animation, Ease, Task) {
+            }).onload(function test(
+                Assert, Vector, Polygon, Rectangle, Matrix, 
+                View, Stage, Animation, Ease, Task, Shader, Program
+            ) {
+                //
                 var bang = document.getElementById('bang');
                 
                 new Task('parallel',
                     function testWebGL(webglCB) {
-                        var canvas = document.createElement('canvas');
-                        var gl = false;
+                        var context = document.createElement('canvas').getContext('experimental-webgl');
+                        
+                        var canCompileDefaultFragmentShader = true;
                         try {
-                            gl = canvas.getContext('experimental-webgl');
-                        } catch(e) {
-                            console.error('Could not get webgl context.');
+                            var shader = new Shader(context, context.FRAGMENT_SHADER);
+                        } catch (e) {
+                            console.log(e.toString());
+                            canCompileDefaultFragmentShader = false;
                         }
-                        assert.eq(gl !== false, true, 'Can get webgl context.');
-                        gl.clearColor(0, 0, 0, 0);
-                        gl.clearDepth(1.0);
-            		    gl.enable(gl.DEPTH_TEST);
-            		    gl.enable(gl.BLEND);
-            		    gl.blendFunc(gl.SRC_ALPHA, gl.ONE_MINUS_SRC_ALPHA);
+                        assert.eq(canCompileDefaultFragmentShader, true, 'Can compile the default fragment shader.');
+                        
+                        var canCompileDefaultVertexShader = true;
+                        try {
+                            var shader = new Shader(context, context.VERTEX_SHADER);
+                        } catch (e) {
+                            console.log(e.toString());
+                            canCompileDefaultVertexShader = false;
+                        }
+                        assert.eq(canCompileDefaultVertexShader, true, 'Can compile the default vertex shader.');
+                        
+                        var canLinkProgram = true;
+                        try {
+                            var program = new Program(context);
+                        } catch (e) {
+                            console.log(e.toString());
+                            canLinkProgram = false;
+                        }
+                        assert.eq(canLinkProgram, true, 'Can link default shader program.');
+                        
                         webglCB();
                     },
                     function testEaseAndTask(easeTaskCB) {
@@ -541,11 +563,8 @@
                 
                         var children = container.children();
                         assert.eq(children.toString(), 'View{"stage"[0,0,250,250]},View{"view1"[0,0,40,40]},View{"view2"[80,0,40,40]},View{"view3"[40,40,40,40]}', 'Stage flattens display list (and toString works the way we expect).');
-                
-                        assert.eq(container.viewPackages.length, 4, "Draw updates list of clean view states.");
-                
+                                
                         view3.x = 60;
-                        container.redraw();
                 
                         bang.removeChild(container.canvas);
                 

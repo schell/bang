@@ -26,29 +26,6 @@ mod({
            View.call(this, 0, 0, width, height);
             
             /** * *
-            * A flattened version of the display list at its last
-            * clean state. Compiled after the last draw. Mostly used
-            * to map children to their previous boundaries.
-            * @type {Array.<View>}
-            * * **/
-            this.cleanViews = [];
-            /** * *
-            * A list of objects that store the clean state of a view.
-            * @type {Array.<Object>}
-            * * **/
-            this.viewPackages = [];
-            /** * *
-            * A list of rectangular areas that were redrawn during the last redraw.
-            * @type {Array.<Rectangle>}
-            * * **/
-            this.redraws = [];
-            /** * *
-            * Whether or not this Stage should redraw itself.
-            * Subviews set this variable in markAsDirty() when changes are made to them.
-            * @type {boolean}
-            * * **/
-            this.shouldRedraw = false;
-            /** * *
             * An animation timer for scheduling redraws.
             * @type {Animation}
             * * **/
@@ -103,6 +80,9 @@ mod({
         * @param {HTMLCanvasRenderingContext2D}
         * * **/
         Stage.prototype.draw = function Stage_draw(context) {
+            if (!context) {
+                return;
+            }
             View.prototype.draw.call(this, context);
         }
         /** * *

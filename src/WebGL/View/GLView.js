@@ -15,17 +15,22 @@ mod({
     * * **/
     init : function GLViewFactory (View) {
         /** * *
-        * Creates a new GLView. By default a GLView's mesh will be a flat rectangle
+        * Creates a new GLView. By default a GLView's mesh will be a flat triangle
         * at the origin of 3d space. The GLView's context property is used as the texture 
         * of the object, so you can draw directly into the view, using the view's local
         * coordinates.
+        * @param {Mesh} mesh
         * @constructor
         * * **/
         function GLView(x, y, z, mesh) {
-            
+            this.mesh = mesh || new Mesh(
+                0, 0, 0,
+                1, 0, 0,
+                0, 1, 0
+            );
         }
         
-        GLView.prototype = new View();
+        GLView.prototype = {};
         
         GLView.prototype.constructor = GLView;
         //--------------------------------------

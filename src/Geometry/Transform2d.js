@@ -34,7 +34,7 @@ mod({
             Matrix.prototype.constructor.apply(this, args);
         }
         
-        Transform2d.prototype = new Matrix();
+        Transform2d.prototype = new Matrix([3,3]);
         
         Transform2d.prototype.constructor = Transform2d;
         //--------------------------------------
