@@ -8,26 +8,59 @@
 * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * **/
 mod({
     name : 'GLView',
-    dependencies : [ 'bang::View/View.js' ],
+    dependencies : [ 'bang::Geometry/Transform3d.js', 'bang::Geometry/Mesh.js', 'bang::WebGL/Shaders/Program.js' ],
     /** * *
     * Initializes the GLView object constructor.
     * @param {function} View The View constructor.
     * * **/
-    init : function GLViewFactory (View) {
+    init : function GLViewFactory (View, Mesh, Program) {
         /** * *
         * Creates a new GLView. By default a GLView's mesh will be a flat triangle
-        * at the origin of 3d space. The GLView's context property is used as the texture 
-        * of the object, so you can draw directly into the view, using the view's local
-        * coordinates.
+        * at the origin of 3d space.
         * @param {Mesh} mesh
         * @constructor
         * * **/
-        function GLView(x, y, z, mesh) {
+        function GLView(gl, mesh) {
+            if (!gl) {
+                throw new Error('GLView must have WebGLRenderingContext parameter gl.');
+            }
+            
+            /** * *
+            * The WebGLRenderingContext.
+            * @type {WebGLRenderingContext}
+            * * **/
+            this.gl = gl;
+            /** * *
+            * A model mesh.
+            * @type {Mesh}
+            * * **/
             this.mesh = mesh || new Mesh(
-                0, 0, 0,
-                1, 0, 0,
-                0, 1, 0
+                1.0,  1.0,  0.0,  
+                -1.0, 1.0,  0.0,  
+                1.0,  -1.0, 0.0,
+                -1.0, -1.0, 0.0
             );
+            /** * *
+            * The transformation of the view.
+            * @type {Transform3d}
+            * * **/
+            this.transform = new Transform3d();
+            /** * *
+            * A WebGLBuffer to hold our mesh data.
+            * False by default, will bind to a buffer before first draw.
+            * @type {WebGLBuffer|boolean}
+            * * **/
+            this.meshBuffer = false;
+            /** * *
+            * A list of child views.
+            * @type {Array.<GLView>}
+            * * **/
+            this.displayList = [];
+            /** * *
+            * The shader program to use for drawing.
+            * @type Program
+            * * **/
+            this.program = new Program(this.gl);
         }
         
         GLView.prototype = {};
@@ -36,7 +69,67 @@ mod({
         //--------------------------------------
         //  METHODS
         //--------------------------------------
-        
+        /** * *
+        * Adds a subview to this view.
+        * @param {GLView}
+        * * **/
+        GLView.prototype.addView = function GLView_addView(subView) {
+            if (subView.parent) {
+                subView.parent.removeView(subView);
+            }
+            this.displayList.push(subView);
+            subView.parent = this;
+        };
+        /** * *
+        * Adds a subview to this view at a given index.
+        * @param {GLView}
+        * @param {number}
+        * * **/
+        GLView.prototype.addViewAt = function GLView_addViewAt(subView, insertNdx) {
+            insertNdx = insertNdx || 0;
+            
+            if (subView.parent) {
+                subView.parent.removeView(subView);
+            }
+            this.displayList.splice(insertNdx, 0, subView);
+            subView.parent = this;
+        };
+        /** * *
+        * Removes a subview of this view.
+        * @param {GLView}
+        * * **/
+        GLView.prototype.removeView = function GLView_removeView(subView) {
+            var ndx = this.displayList.indexOf(subView);
+            if (ndx !== -1) {
+                this.displayList.splice(ndx, 1);
+            } else {
+                throw new Error('Subview must be a child of the caller.');
+            }
+            subView.parent = false;
+        };
+        /** * *
+        * Draws the view.
+        * * **/
+        GLView.prototype.draw = function GLView_draw() {
+            if (!this.meshBuffer && this.mesh) {
+                this.meshBuffer = this.gl.createBuffer();
+                this.gl.bindBuffer(this.gl.ARRAY_BUFFER, this.meshBuffer);
+                this.gl.bufferData(this.gl.ARRAY_BUFFER, new Float32Array(this.mesh), this.gl.STATIC_DRAW);
+                
+                this.transform = this.transform.translate(0, 0, -6);
+            }
+
+            this.gl.clear(this.gl.COLOR_BUFFER_BIT | this.gl.DEPTH_BUFFER_BIT);
+            
+            this.gl.bindBuffer(this.gl.ARRAY_BUFFER, this.meshBuffer);
+            this.gl.vertexAttribPointer(this.program.aVertex, 3, this.gl.FLOAT, false, 0, 0);
+            
+            var pMatUniform = this.gl.getUniformLocation(this.program.id, 'uPMatrix');
+            this.gl.uniformMatrix4fv(pMatUniform, false, new Float32Array(this.gl.stage.projection.transpose()));
+            var mvMatUniform = this.gl.getUniformLocation(this.program.id, 'uMVMatrix');
+            this.gl.uniformMatrix4fv(mvMatUniform, false, new Float32Array(this.transform.transpose()));
+            this.gl.drawArrays(this.gl.TRIANGLE_STRIP, 0, this.mesh.length/3);
+        };
         
         return GLView;
     }

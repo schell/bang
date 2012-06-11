@@ -459,7 +459,12 @@
                 var script = document.createElement('script');
                 script.type = 'text/javascript';
                 script.id = 'mod_script_'+nocache;
+                var timeout = setTimeout(function didNotLoad() {
+                    throw new Error('Script '+src+' could not be loaded.');
+                }, 5000);
+                
                 script.onload = function() {
+                    clearTimeout(timeout);
                     mod.head.removeChild(script);
                     onload();
                 };

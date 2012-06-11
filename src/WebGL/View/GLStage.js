@@ -8,12 +8,12 @@
 * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * **/
 mod({
     name : 'GLStage',
-    dependencies : [ 'bang::WebGL/View/GLView.js', 'bang::WebGl/Shaders/Program.js' ],
+    dependencies : [ 'bang::WebGL/View/GLView.js' ],
     /** * *
     * Initializes the Stage object constructor.
     * @return {function}
     * * **/
-    init : function StageFactory (GLView, Program) {
+    init : function StageFactory (GLView) {
         /** * *
         * 
         * @constructor
@@ -34,17 +34,15 @@ mod({
             * @type {number}
             * * **/
             this.height = height || this.canvas.height;
+            
+            this.canvas.width = this.width;
+            this.canvas.height = this.height;
+            
             /** * *
-            * A WebGL context to draw into.
+            * A WebGL gl to draw into.
             * @type {WebGLRenderingContext}
             * * **/
-            this.canvas.getContext('experimental-webgl');
-            /** * *
-            * A list of Programs to use for drawing.
-            * If this is left unset, the stage will not draw. Set to false by default.
-            * @type {Array.<Program>|boolean}
-            * * **/
-            this.programs = false;
+            this.gl = this.canvas.getContext('experimental-webgl');
             /** * *
             * An animation timer for scheduling redraws.
             * @type {Animation}
@@ -60,6 +58,16 @@ mod({
             * @type {boolean}
             * * **/
             this.initialized = false;
+            /** * *
+            * The root view.
+            * @type {GLView}
+            * * **/
+            this.rootView = new GLView(this.gl);
+            /** * *
+            * The projection matrix.
+            * @type {Transform3d}
+            * * **/
+            this.projection = Transform3d.perspective(45, 640/480, 0.1, 100);
         }
         
         GLStage.prototype = {};
@@ -72,34 +80,29 @@ mod({
         * Initializes the stage by compiling and linking shader programs.
         * * **/
         GLStage.prototype.initialize = function GLStage_initialize() {
-            this.context.clearColor(0, 0, 0, 0);
-            this.context.clearDepth(1.0);
-		    this.context.enable(gl.DEPTH_TEST);
-		    this.context.enable(gl.BLEND);
-		    this.context.blendFunc(gl.SRC_ALPHA, gl.ONE_MINUS_SRC_ALPHA);
-            
+            this.gl.stage = this;
+            this.gl.clearColor(0.5, 0.5, 0.5, 1.0);                      
+            this.gl.enable(this.gl.DEPTH_TEST);                               
+            this.gl.depthFunc(this.gl.LEQUAL);                                
+            this.gl.clear(this.gl.COLOR_BUFFER_BIT|this.gl.DEPTH_BUFFER_BIT);
+            this.initialized = true;
         };
-        
         /** * *
-        * Draws this view and its display hierarchy into the given context.
+        * Draws this view and its display hierarchy into the given gl.
         * @param {HTMLCanvasRenderingContext2D}
         * * **/
-        GLStage.prototype.draw = function GLStage_draw(context) {
-            if (!this.shaders) {
-                // Shaders must be set first...
-                return;
-            }
+        GLStage.prototype.draw = function GLStage_draw(gl) {
             if (!this.initialized) {
                 this.initialize();
             }
             // Do the draw...
-            
+            this.rootView.draw();
         };
         /** * *
         * This is the main step of the display list.
         * * **/
         GLStage.prototype.step = function GLStage_step(time) {
-           this.draw(this.compositeCanvas.getContext('2d'));
+           this.draw();
         };
         
         

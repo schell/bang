@@ -16,34 +16,7 @@
         <link rel="shortcut icon" href="favicon.png" />
     </head>
     <body id="body">
-        <script id="fragment_shader" type="x-shader/x-fragment">
-			#ifdef GL_ES
-  				precision highp float;
-  			#endif
-
-			varying vec2 tex;
-			uniform sampler2D sampler;
-			
-            void main (void) {
-				gl_FragColor = texture2D(sampler, vec2(tex.s, tex.t));
-            }
-        </script>
-        <script id="vertex_shader" type="x-shader/x-vertex">
-            attribute vec2 vertexCoord;
-			attribute vec2 textureCoord;
-
-            uniform mat3 matrix;
-			varying vec2 tex;
-            
-            void main (void) {
-                tex = textureCoord;
-                gl_Position = matrix * vertexCoord;
-            }
-        </script>
-
         <div id="bang"></div>
-        <xmp id="output"></xmp>
-        
         <script type="text/javascript" charset="utf-8">
             mod.useTagInjection = true;
             mod.expansions = {
@@ -63,7 +36,8 @@
                     'bang::Utils/Ease.js',
                     'bang::Utils/Task.js',
                     'bang::WebGL/Shaders/Shader.js',
-                    'bang::WebGL/Shaders/Program.js'
+                    'bang::WebGL/Shaders/Program.js',
+                    'bang::WebGL/View/GLStage.js'
                 ],
                 init : function initMain () {
                     mod.exportAll();
@@ -107,6 +81,8 @@
                         }
                         assert.eq(canLinkProgram, true, 'Can link default shader program.');
                         
+                        var glstage = window.glstage = new GLStage(640, 480);
+                        bang.appendChild(glstage.canvas);
                         webglCB();
                     },
                     function testEaseAndTask(easeTaskCB) {

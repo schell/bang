@@ -31,12 +31,76 @@ mod({
         * * **/
         function Transform3d() {
             var args = Array.prototype.slice.call(arguments);
+            if (typeof args[0] !== 'object') {
+                args.unshift([4,4]);
+            }
             Matrix.prototype.constructor.apply(this, args);
         }
         
         Transform3d.prototype = new Matrix([4,4]);
         
         Transform3d.prototype.constructor = Transform3d;
+        //--------------------------------------
+        //  CLASS METHODS
+        //--------------------------------------
+        /** * *
+        * Creates a frustum projection matrix.
+        * @param {number} left The left side of the frustum.
+        * @param {number} right The right side of the frustum.
+        * @param {number} top The top side of the frustum.
+        * @param {number} bottom The bottom side of the frustum.
+        * @param {number} znear The near side of the frustum.
+        * @param {number} zfar The far side of the frustum.
+        * @return {Transform3d}
+        * @nosideeffects
+        * * **/
+        Transform3d.frustum = function Transform3d_frustum(left, right, bottom, top, znear, zfar) {
+            var X = 2*znear/(right-left);
+            var Y = 2*znear/(top-bottom);
+            var A = (right+left)/(right-left);
+            var B = (top+bottom)/(top-bottom);
+            var C = -(zfar+znear)/(zfar-znear);
+            var D = -2*zfar*znear/(zfar-znear);
+            return new Transform3d(
+                X, 0, A, 0,
+                0, Y, B, 0,
+                0, 0, C, D,
+                0, 0, -1,0
+            );
+        };
+        /** * *
+        * Creates a perspective projection matrix.
+        * @param {number} fovy The y axis field of view, in degrees.
+        * @param {number} aspect The aspect ratio
+        * @type {Transform3d}
+        * * **/
+        Transform3d.perspective = function Transform3d_perspective(fovy, aspect, near, far) {
+            var top = near * Math.tan(fovy * Math.PI / 360.0);
+            var bottom = -top;
+            var left = bottom * aspect;
+            var right = top * aspect;
+            
+            return Transform3d.frustum(left, right, bottom, top, near, far);
+        };
+        /** * *
+        * Creates an orthographic projection matrix.
+        * @param {number} left The left side of the frustum.
+        * @param {number} right The right side of the frustum.
+        * @param {number} top The top side of the frustum.
+        * @param {number} bottom The bottom side of the frustum.
+        * @param {number} near The near side of the frustum.
+        * @param {number} far The far side of the frustum.
+        * @return {Transform3d}
+        * @nosideeffects
+        * * **/
+        Transform3d.prototype.ortho = function Transform3d_perspective(left, right, top, bottom, near, far) {
+            return new Transform3d(
+                2/(right-left), 0, 0, -(right+left)/(right-left),
+                0, 2/(top-bottom), 0, -(top+bottom)/(top-bottom),
+                0, 0, -2/(far-near), -(far+near)/(far-near),
+                0, 0, 0, 1
+            );
+        };
         //--------------------------------------
         //  METHODS
         //--------------------------------------
@@ -176,7 +240,6 @@ mod({
             polygon.length = i;
             return polygon;
         };
-        
         
         return Transform3d;
     }

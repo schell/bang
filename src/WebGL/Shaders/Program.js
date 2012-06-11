@@ -18,20 +18,20 @@ mod({
         * Creates a new shader program object.
         * @constructor
         * * **/
-        function Program(context, shaders) {
-            if (!context) {
-                throw new Error('Program must have a context.');
+        function Program(gl, shaders) {
+            if (!gl) {
+                throw new Error('Program must have a gl.');
             }
             /** * *
-            * The WebGL context.
+            * The WebGL gl.
             * @type {WebGLRenderingContext}
             * * **/
-            this.context = context;
+            this.gl = gl;
             /** * *
             * A list of Shader objects to compile into this program.
             * @type {Array.<Shader>}
             * * **/
-            this.shaders = shaders || [new Shader(this.context, this.context.VERTEX_SHADER), new Shader(this.context, this.context.FRAGMENT_SHADER)];
+            this.shaders = shaders || [new Shader(this.gl, this.gl.VERTEX_SHADER), new Shader(this.gl, this.gl.FRAGMENT_SHADER)];
             /** * *
             * Whether or not this shader has been compiled
             * @type {boolean}
@@ -41,20 +41,23 @@ mod({
             * The webgl shader program.
             * @type {WebGLProgram}
             * * **/
-            this.id = this.context.createProgram();
+            this.id = this.gl.createProgram();
             
             // Compile the program...
             for (var i=0; i < this.shaders.length; i++) {
                 var shader = this.shaders[i];
-                this.context.attachShader(this.id, shader.id);
+                this.gl.attachShader(this.id, shader.id);
             }
-            this.context.linkProgram(this.id);
+            this.gl.linkProgram(this.id);
     
-            if (!this.context.getProgramParameter(this.id, this.context.LINK_STATUS)) {
-                throw new Error('LINK_STATUS: '+this.context.LINK_STATUS+', unable to link the shader program:\n'+this.context.getProgramInfoLog(this.id));
+            if (!this.gl.getProgramParameter(this.id, this.gl.LINK_STATUS)) {
+                throw new Error('LINK_STATUS: '+this.gl.LINK_STATUS+', unable to link the shader program:\n'+this.gl.getProgramInfoLog(this.id));
             }
             // Use this program...
             this.use();
+            
+            this.aVertex = this.gl.getAttribLocation(this.id, 'aVertex');
+            this.gl.enableVertexAttribArray(this.aVertex);
         }
         
         Program.prototype = {};
@@ -67,7 +70,7 @@ mod({
         * Tells the WebGLRenderingContext to use this program.
         * * **/
         Program.prototype.use = function Program_use() {
-            this.context.useProgram(this.id);
+            this.gl.useProgram(this.id);
         };
         
         return Program;

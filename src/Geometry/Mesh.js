@@ -11,18 +11,19 @@ mod({
     dependencies : [ 'bang::Geometry/Vector.js' ],
     /** * *
     * Initializes the Mesh object constructor.
-    * @param 
+    * @param {function} Vector The Vector constructor function.
     * * **/
-    init : function MeshFactory () {
+    init : function MeshFactory (Vector) {
         /** * *
-        * 
+        * Creates a new mesh.
         * @constructor
         * * **/
         function Mesh() {
-            
+            var args = Array.prototype.slice.call(arguments);
+            Vector.prototype.constructor.apply(this, args);
         }
         
-        Mesh.prototype = {};
+        Mesh.prototype = new Vector();
         
         Mesh.prototype.constructor = Mesh;
         //--------------------------------------
