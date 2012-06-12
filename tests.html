@@ -50,7 +50,7 @@
                 //
                 var bang = document.getElementById('bang');
                 
-                new Task('parallel',
+                new Task(
                     function testWebGL(webglCB) {
                         var context = document.createElement('canvas').getContext('experimental-webgl');
                         
@@ -83,7 +83,25 @@
                         
                         var glstage = window.glstage = new GLStage(640, 480);
                         bang.appendChild(glstage.canvas);
-                        webglCB();
+                        
+                        var t = {
+                            rotation : 0
+                        };
+                        var tween = new Ease({
+                            target : t,
+                            properties : {
+                                rotation : 2*Math.PI
+                            },
+                            duration : 1000,
+                            onUpdate : function() {
+                                glstage.rootView.transform = new Transform3d().translate(0, 0, -6).rotate(t.rotation, new Vector(0,1,0));
+                            }
+                        });
+                        tween.onComplete(function(_, tween) {
+                            t.rotation = 0;
+                            tween.interpolate();
+                        });
+                        tween.interpolate();
                     },
                     function testEaseAndTask(easeTaskCB) {
                         var stage = new Stage(300, 300);

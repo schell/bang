@@ -122,7 +122,7 @@ mod({
             this.gl.clear(this.gl.COLOR_BUFFER_BIT | this.gl.DEPTH_BUFFER_BIT);
             
             this.gl.bindBuffer(this.gl.ARRAY_BUFFER, this.meshBuffer);
-            this.gl.vertexAttribPointer(this.program.aVertex, 3, this.gl.FLOAT, false, 0, 0);
+            this.gl.vertexAttribPointer(this.program.shaderAttribLocations.aVertex, 3, this.gl.FLOAT, false, 0, 0);
             
             var pMatUniform = this.gl.getUniformLocation(this.program.id, 'uPMatrix');
             this.gl.uniformMatrix4fv(pMatUniform, false, new Float32Array(this.gl.stage.projection.transpose()));

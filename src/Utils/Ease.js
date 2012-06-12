@@ -355,29 +355,6 @@ mod({
             Ease.timer.cancelAnimation(this.interpolation);
         };
         /** * *
-        * Cancels the interpolation, sets all properties to their finished state.
-        * Calls the onComplete function.
-        * * **/
-        Ease.prototype.finish = function Ease_finish(callback) {
-            // Cancel...
-            this.cancel();
-            // Set final values...
-            for (var key in this.config.properties) {
-                if (key in this.config.target) {
-                    if (typeof this.config.target[key] === 'function') {
-                        // Apply the setter function...
-                        this.config.target[key](this.config.properties[key]);
-                    } else {
-                        this.config.target[key] = this.config.properties[key];
-                    }
-                }
-            }
-            // Call onComplete...
-            this.config.onComplete.apply(null, this.config.onCompleteParams);
-            // Call Task's go again...
-            Task.prototype.go.call(this);
-        };
-        /** * *
         * Starts interpolation. Returns itself.
         * @return {Ease}
         * * **/
@@ -414,7 +391,25 @@ mod({
             var interpolationFunction = function Ease_interpolate_interpolationFunction() {
                 time = Date.now() - start;
                 if (time >= tween.config.duration + tween.config.delay) {
-                    tween.finish();
+                    // Cancel...
+                    tween.cancel();
+                    // Set final values...
+                    for (var key in tween.config.properties) {
+                        if (key in tween.config.target) {
+                            if (typeof tween.config.target[key] === 'function') {
+                                // Apply the setter function...
+                                tween.config.target[key](tween.config.properties[key]);
+                            } else {
+                                tween.config.target[key] = tween.config.properties[key];
+                            }
+                        }
+                    }
+                    // Update...
+                    tween.config.onUpdate.apply(null, tween.config.onUpdateParams);
+                    // Call onComplete...
+                    tween.config.onComplete.apply(null, tween.config.onCompleteParams);
+                    // Call Task's go again...
+                    Task.prototype.go.call(tween);
                 } else if (time >= tween.config.delay) {
                     var t_interpolate = time - tween.config.delay;
                     for (var key in fromProperties) {
@@ -426,9 +421,9 @@ mod({
                         } else {
                             tween.config.target[key] = current;
                         }
-                        // Update...
-                        tween.config.onUpdate.apply(null, tween.config.onUpdateParams);
                     }
+                    // Update...
+                    tween.config.onUpdate.apply(null, tween.config.onUpdateParams);
                 }
             };
             // Start and store our interpolation...

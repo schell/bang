@@ -18,9 +18,9 @@ mod({
         * 
         * @constructor
         * * **/
-        function Shader(context, type, src) {
-            if (!context) {
-                throw new Error('Shader must have context.');
+        function Shader(gl, type, src, attributes, uniforms) {
+            if (!gl) {
+                throw new Error('Shader must have gl.');
             }
             if (!type) {
                 throw new Error('Shader must have a type, FRAGMENT_SHADER or VERTEX_SHADER');
@@ -29,7 +29,7 @@ mod({
             * The WebGLRenderingContext
             * @type {WebGLRenderingContext}
             * * **/
-            this.context = context;
+            this.gl = gl;
             /** * *
             * The type of this shader.
             * @type {number}
@@ -41,17 +41,27 @@ mod({
             * * **/
             this.src = src || this.defaultSourceForType(type);
             /** * *
+            * A list of all the vertex shader attributes.
+            * @type {Array.<string>}
+            * * **/
+            this.attributes = attributes || (type === this.gl.VERTEX_SHADER ? ['aVertex'] : []);
+            /** * *
+            * A list of all the vertex and fragment shader uniforms.
+            * @type {Array.<string>}
+            * * **/
+            this.uniforms = uniforms || (type === this.gl.VERTEX_SHADER ? ['uMVMatrix', 'uPMatrix'] : []);
+            /** * *
             * The webgl shader object.
             * @type {WebGLShader}
             * * **/
-            this.id = this.context.createShader(type);
+            this.id = this.gl.createShader(type);
             
             // Compile the shader...
-            this.context.shaderSource(this.id, this.src);
-            this.context.compileShader(this.id);
+            this.gl.shaderSource(this.id, this.src);
+            this.gl.compileShader(this.id);
             // Check the status of our compilation...
-            if (!this.context.getShaderParameter(this.id, this.context.COMPILE_STATUS)) {
-                throw new Error('Failed to compile shader ' + this.id + ':\n' + this.context.getShaderInfoLog(this.id));
+            if (!this.gl.getShaderParameter(this.id, this.gl.COMPILE_STATUS)) {
+                throw new Error('Failed to compile shader ' + this.id + ':\n' + this.gl.getShaderInfoLog(this.id));
             }
         }
         
@@ -64,36 +74,19 @@ mod({
         Shader.prototype.defaultSourceForType = function Shader_defaultSourceForType(type) {
             var src = '';
             switch (type) {
-                case this.context.FRAGMENT_SHADER: 
-                /*
-                    src += '#ifdef GL_ES\n';
-                    src += '	precision highp float;\n';
-                    src += '#endif\n';
-
-                    src += 'varying vec4 vColor;\n';
-
-                    src += 'void main (void) {\n';
-                    src += '	gl_FragColor = vColor;\n';
-                    src += '}\n';
-                    */
+                case this.gl.FRAGMENT_SHADER: 
                     src += 'void main(void) { gl_FragColor = vec4(1.0, 1.0, 1.0, 1.0);}';
                 break;
                 
-                case this.context.VERTEX_SHADER:
+                case this.gl.VERTEX_SHADER:
                     src += 'attribute vec3 aVertex;\n';
-                    src += '\n';
+
                     src += 'uniform mat4 uMVMatrix;\n';
                     src += 'uniform mat4 uPMatrix;\n';
-                    //src += 'uniform vec4 uColor;\n';
-
-                    //src += 'varying vec4 vColor;\n';
 
                     src += 'void main (void) {\n';
-
                     src += '    vec4 v = vec4(aVertex, 1);\n';
-
                     src += '    gl_Position = uPMatrix * uMVMatrix * v;\n';
-                    //src += '	vColor = uColor;\n';
                     src += '}\n';
                 break;
                 

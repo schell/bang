@@ -33,10 +33,15 @@ mod({
             * * **/
             this.shaders = shaders || [new Shader(this.gl, this.gl.VERTEX_SHADER), new Shader(this.gl, this.gl.FRAGMENT_SHADER)];
             /** * *
-            * Whether or not this shader has been compiled
-            * @type {boolean}
+            * A mapping of shader attributes to their attribute locations.  
+            * @type {Object}
             * * **/
-            this.hasBeenCompiled = false;
+            this.shaderAttribLocations = {};
+            /** * *
+            * A mapping of shader uniforms to their locations.
+            * @type {Object}
+            * * **/
+            this.shaderUniformLocations = {};
             /** * *
             * The webgl shader program.
             * @type {WebGLProgram}
@@ -56,8 +61,21 @@ mod({
             // Use this program...
             this.use();
             
-            this.aVertex = this.gl.getAttribLocation(this.id, 'aVertex');
-            this.gl.enableVertexAttribArray(this.aVertex);
+            // Run through the shaders and get the locations of various attributes
+            // and uniforms...
+            for (var i=0; i < this.shaders.length; i++) {
+                var shader = this.shaders[i];
+                for (var j=0; j < shader.attributes.length; j++) {
+                    var attrib  = shader.attributes[j];
+                    var location = this.gl.getAttribLocation(this.id, attrib);
+                    this.gl.enableVertexAttribArray(location);
+                    this.shaderAttribLocations[attrib] = location;
+                }
+                for (var j=0; j < shader.uniforms.length; j++) {
+                    var uniform = shader.uniforms[j];
+                    this.shaderUniformLocations[uniform] = this.gl.getUniformLocation(this.id, uniform);
+                }
+            }
         }
         
         Program.prototype = {};

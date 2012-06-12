@@ -188,9 +188,9 @@ mod({
         Transform3d.prototype.rotate = function Matrix_rotate(radians, vec3d) {
             // If no vector is given, rotate about z.
             vec3d = vec3d || new Vector(0, 0, 1);
-            var x = vec3d[0];
-            var y = vec3d[1];
-            var z = vec3d[2];
+            var x = vec3d[0]*radians;
+            var y = vec3d[1]*radians;
+            var z = vec3d[2]*radians;
             var cos = Math.cos;
             var sin = Math.sin;
             var rotation = new Transform3d(
