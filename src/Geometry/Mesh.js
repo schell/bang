@@ -1,6 +1,8 @@
 /** * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * *
 * Mesh.js
-* A vector of points in 3 space.
+* A mesh is a collection of vertices, texture coordinates, normals and any
+* number of other shader attributes interleaved into an array.
+*
 * Copyright (c) 2012 Schell Scivally. All rights reserved.
 * 
 * @author    Schell Scivally

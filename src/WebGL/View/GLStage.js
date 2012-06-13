@@ -8,12 +8,12 @@
 * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * **/
 mod({
     name : 'GLStage',
-    dependencies : [ 'bang::WebGL/View/GLView.js' ],
+    dependencies : [ 'bang::WebGL/View/GLView.js', 'bang::Geometry/Transform3d.js', 'bang::Utils/Animation.js' ],
     /** * *
     * Initializes the Stage object constructor.
     * @return {function}
     * * **/
-    init : function StageFactory (GLView) {
+    init : function StageFactory (GLView, Transform3d, Animation) {
         /** * *
         * 
         * @constructor
@@ -38,11 +38,9 @@ mod({
             this.canvas.width = this.width;
             this.canvas.height = this.height;
             
-            /** * *
-            * A WebGL gl to draw into.
-            * @type {WebGLRenderingContext}
-            * * **/
-            this.gl = this.canvas.getContext('experimental-webgl');
+            // Run the GLView constructor giving it a reference to a WebGLRenderingContext...
+            GLView.prototype.constructor.call(this, this.canvas.getContext('experimental-webgl'));
+            
             /** * *
             * An animation timer for scheduling redraws.
             * @type {Animation}
@@ -58,11 +56,7 @@ mod({
             * @type {boolean}
             * * **/
             this.initialized = false;
-            /** * *
-            * The root view.
-            * @type {GLView}
-            * * **/
-            this.rootView = new GLView(this.gl);
+            //this.rootView = false;
             /** * *
             * The projection matrix.
             * @type {Transform3d}
@@ -70,7 +64,7 @@ mod({
             this.projection = Transform3d.perspective(45, 640/480, 0.1, 100);
         }
         
-        GLStage.prototype = {};
+        GLStage.prototype = new GLView(false, false);
         
         GLStage.prototype.constructor = GLStage;
         //--------------------------------------
@@ -96,7 +90,7 @@ mod({
                 this.initialize();
             }
             // Do the draw...
-            this.rootView.draw();
+            GLView.prototype.draw.call(this);
         };
         /** * *
         * This is the main step of the display list.

@@ -50,7 +50,7 @@
                 //
                 var bang = document.getElementById('bang');
                 
-                new Task(
+                new Task('parallel',
                     function testWebGL(webglCB) {
                         var context = document.createElement('canvas').getContext('experimental-webgl');
                         
@@ -94,7 +94,7 @@
                             },
                             duration : 1000,
                             onUpdate : function() {
-                                glstage.rootView.transform = new Transform3d().translate(0, 0, -6).rotate(t.rotation, new Vector(0,1,0));
+                                glstage.transform = new Transform3d().translate(0, 0, -6).rotate(t.rotation, new Vector(0,1,0));
                             }
                         });
                         tween.onComplete(function(_, tween) {

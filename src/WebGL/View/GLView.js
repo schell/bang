@@ -13,7 +13,7 @@ mod({
     * Initializes the GLView object constructor.
     * @param {function} View The View constructor.
     * * **/
-    init : function GLViewFactory (View, Mesh, Program) {
+    init : function GLViewFactory (Transform3d, Mesh, Program) {
         /** * *
         * Creates a new GLView. By default a GLView's mesh will be a flat triangle
         * at the origin of 3d space.
@@ -21,12 +21,8 @@ mod({
         * @constructor
         * * **/
         function GLView(gl, mesh) {
-            if (!gl) {
-                throw new Error('GLView must have WebGLRenderingContext parameter gl.');
-            }
-            
             /** * *
-            * The WebGLRenderingContext.
+            * The WebGLRenderingContext that this view renders into.
             * @type {WebGLRenderingContext}
             * * **/
             this.gl = gl;
@@ -47,7 +43,8 @@ mod({
             this.transform = new Transform3d();
             /** * *
             * A WebGLBuffer to hold our mesh data.
-            * False by default, will bind to a buffer before first draw.
+            * False by default, will bind to a buffer before the first draw
+            * after a mesh has been set as this property.
             * @type {WebGLBuffer|boolean}
             * * **/
             this.meshBuffer = false;
@@ -58,9 +55,9 @@ mod({
             this.displayList = [];
             /** * *
             * The shader program to use for drawing.
-            * @type Program
+            * @type {Program|boolean}
             * * **/
-            this.program = new Program(this.gl);
+            this.program = this.gl ? new Program(this.gl) : false;
         }
         
         GLView.prototype = {};

@@ -19,9 +19,6 @@ mod({
         * @constructor
         * * **/
         function Program(gl, shaders) {
-            if (!gl) {
-                throw new Error('Program must have a gl.');
-            }
             /** * *
             * The WebGL gl.
             * @type {WebGLRenderingContext}
