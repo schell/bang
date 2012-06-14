@@ -36,7 +36,6 @@
                     'bang::Utils/Ease.js',
                     'bang::Utils/Task.js',
                     'bang::WebGL/Shaders/Shader.js',
-                    'bang::WebGL/Shaders/Program.js',
                     'bang::WebGL/View/GLStage.js'
                 ],
                 init : function initMain () {
@@ -45,7 +44,7 @@
                 }
             }).onload(function test(
                 Assert, Vector, Polygon, Rectangle, Matrix, 
-                View, Stage, Animation, Ease, Task, Shader, Program
+                View, Stage, Animation, Ease, Task, Shader, GLStage
             ) {
                 //
                 var bang = document.getElementById('bang');
@@ -54,32 +53,14 @@
                     function testWebGL(webglCB) {
                         var context = document.createElement('canvas').getContext('experimental-webgl');
                         
-                        var canCompileDefaultFragmentShader = true;
+                        var canCompileDefaultShader = true;
                         try {
-                            var shader = new Shader(context, context.FRAGMENT_SHADER);
+                            var shader = new Shader(context);
                         } catch (e) {
                             console.log(e.toString());
-                            canCompileDefaultFragmentShader = false;
+                            canCompileDefaultShader = false;
                         }
-                        assert.eq(canCompileDefaultFragmentShader, true, 'Can compile the default fragment shader.');
-                        
-                        var canCompileDefaultVertexShader = true;
-                        try {
-                            var shader = new Shader(context, context.VERTEX_SHADER);
-                        } catch (e) {
-                            console.log(e.toString());
-                            canCompileDefaultVertexShader = false;
-                        }
-                        assert.eq(canCompileDefaultVertexShader, true, 'Can compile the default vertex shader.');
-                        
-                        var canLinkProgram = true;
-                        try {
-                            var program = new Program(context);
-                        } catch (e) {
-                            console.log(e.toString());
-                            canLinkProgram = false;
-                        }
-                        assert.eq(canLinkProgram, true, 'Can link default shader program.');
+                        assert.eq(canCompileDefaultShader, true, 'Can compile and link the default shader program.');
                         
                         var glstage = window.glstage = new GLStage(300, 300);
                         glstage.transform = new Transform3d().translate(0, 0, -6).rotate(Math.PI/8, new Vector(0,1,0));
@@ -107,7 +88,7 @@
                             t.rotation = 0;
                             tween.interpolate();
                         });
-                        //tween.interpolate()
+                        tween.interpolate();
                     },
                     function testEaseAndTask(easeTaskCB) {
                         var stage = new Stage(300, 300);

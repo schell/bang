@@ -62,6 +62,9 @@ mod({
             * @type {Transform3d}
             * * **/
             this.projection = Transform3d.perspective(45, this.width/this.height, 0.1, 100);
+            
+            // Set the root view...
+            this.stage = this;
         }
         
         GLStage.prototype = new GLView(false, false);
@@ -80,6 +83,17 @@ mod({
             this.gl.depthFunc(this.gl.LEQUAL);                                
             this.gl.clear(this.gl.COLOR_BUFFER_BIT|this.gl.DEPTH_BUFFER_BIT);
             this.initialized = true;
+            this.shader.use();
+        };
+        /** * *
+        * Updates the projection matrix and other shader uniforms.
+        * * **/
+        GLStage.prototype.setUniforms = function GLStage_setUniforms() {
+            // Update the projection matrix...
+            var pMatUniform = this.shader.uniformLocations.uPMatrix;
+            this.gl.uniformMatrix4fv(pMatUniform, false, new Float32Array(this.projection.transpose()));
+            
+            return GLView.prototype.setUniforms.call(this);
         };
         /** * *
         * Draws this view and its display hierarchy into the given gl.
@@ -89,9 +103,6 @@ mod({
             if (!this.initialized) {
                 this.initialize();
             }
-            // Update the projection matrix...
-            var pMatUniform = this.gl.getUniformLocation(this.program.id, 'uPMatrix');
-            this.gl.uniformMatrix4fv(pMatUniform, false, new Float32Array(this.projection.transpose()));
             // Clear the stage...
             this.gl.clear(this.gl.COLOR_BUFFER_BIT | this.gl.DEPTH_BUFFER_BIT);
             // Do the draw...

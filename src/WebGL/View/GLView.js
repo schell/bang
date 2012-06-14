@@ -8,12 +8,12 @@
 * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * **/
 mod({
     name : 'GLView',
-    dependencies : [ 'bang::Geometry/Transform3d.js', 'bang::Geometry/Mesh.js', 'bang::WebGL/Shaders/Program.js' ],
+    dependencies : [ 'bang::Geometry/Transform3d.js', 'bang::Geometry/Mesh.js'],
     /** * *
     * Initializes the GLView object constructor.
     * @param {function} View The View constructor.
     * * **/
-    init : function GLViewFactory (Transform3d, Mesh, Program) {
+    init : function GLViewFactory (Transform3d, Mesh) {
         /** * *
         * Creates a new GLView. By default a GLView's mesh will be a flat triangle
         * at the origin of 3d space.
@@ -26,7 +26,13 @@ mod({
             * @type {WebGLRenderingContext}
             * * **/
             this.gl = gl;
-            
+            /** * *
+            * A reference to the root view.
+            * This is important because the root view typically handles
+            * the projection matrix.
+            * @type {GLStage}
+            * * **/
+            this.stage = false;
             /** * *
             * A model mesh.
             * @type {Mesh}
@@ -57,9 +63,9 @@ mod({
             this.displayList = [];
             /** * *
             * The shader program to use for drawing.
-            * @type {Program|boolean}
+            * @type {Shader|boolean}
             * * **/
-            this.program = this.gl ? new Program(this.gl) : false;
+            this.shader = this.gl ? new Shader(this.gl) : false;
         }
         
         GLView.prototype = {};
@@ -81,9 +87,10 @@ mod({
             if (!subView.gl) {
                 subView.gl = this.gl;
             }
-            if (!subView.program) {
-                subView.program = this.program;
+            if (!subView.shader) {
+                subView.shader = this.shader;
             }
+            subView.stage = this.stage;
         };
         /** * *
         * Adds a subview to this view at a given index.
@@ -101,9 +108,10 @@ mod({
             if (!subView.gl) {
                 subView.gl = this.gl;
             }
-            if (!subView.program) {
-                subView.program = this.program;
+            if (!subView.shader) {
+                subView.shader = this.shader;
             }
+            subView.stage = this.stage;
         };
         /** * *
         * Removes a subview of this view.
@@ -117,33 +125,50 @@ mod({
                 throw new Error('Subview must be a child of the caller.');
             }
             subView.parent = false;
+            subView.stage = false;
+        };
+        /** * *
+        * Buffers the mesh and stores it in meshBuffer.
+        * * **/
+        GLView.prototype.bufferMeshData = function GLView_bufferMeshData() {
+            this.meshBuffer = this.gl.createBuffer();
+            this.gl.bindBuffer(this.gl.ARRAY_BUFFER, this.meshBuffer);
+            this.gl.bufferData(this.gl.ARRAY_BUFFER, new Float32Array(this.mesh), this.gl.STATIC_DRAW);
+        };
+        /** * *
+        * Sets up the vertex attribute pointers for a draw.
+        * * **/
+        GLView.prototype.setVertices = function GLView_setupVertices() {
+            this.gl.bindBuffer(this.gl.ARRAY_BUFFER, this.meshBuffer);
+            this.shader.setVertexAttribPointers();
+        };
+        /** * *
+        * Sets the shader uniforms.
+        * @param {Transform3d} parentMatrix The parent view's transform matrix.
+        * @return {Transform3d} The compound transform.
+        * * **/
+        GLView.prototype.setUniforms = function GLView_setUniforms(parentMatrix) {
+            var mvMatUniform = this.shader.uniformLocations.uMVMatrix;
+            var transform = parentMatrix ? parentMatrix.multiply(this.transform) : this.transform;
+            this.gl.uniformMatrix4fv(mvMatUniform, false, new Float32Array(transform.transpose()));
+            return transform;
         };
         /** * *
         * Draws the view.
         * * **/
         GLView.prototype.draw = function GLView_draw(parentMatrix) {
             if (!this.meshBuffer && this.mesh) {
-                this.meshBuffer = this.gl.createBuffer();
-                this.gl.bindBuffer(this.gl.ARRAY_BUFFER, this.meshBuffer);
-                this.gl.bufferData(this.gl.ARRAY_BUFFER, new Float32Array(this.mesh), this.gl.STATIC_DRAW);
+                this.bufferMeshData();
             }
             
-            var floatSize = 4;
-            var components = 3/*position*/ + 4/*color*/;
-            
-            this.gl.bindBuffer(this.gl.ARRAY_BUFFER, this.meshBuffer);
-            this.gl.vertexAttribPointer(this.program.shaderAttributeLocations.aVertex, 3, this.gl.FLOAT, false, components*floatSize, 0);
-            this.gl.vertexAttribPointer(this.program.shaderAttributeLocations.aColor, 4, this.gl.FLOAT, false, components*floatSize, 3*floatSize);
-            
-            var mvMatUniform = this.gl.getUniformLocation(this.program.id, 'uMVMatrix');
-            var transform = parentMatrix ? parentMatrix.multiply(this.transform) : this.transform;
-            this.gl.uniformMatrix4fv(mvMatUniform, false, new Float32Array(transform.transpose()));
+            this.setVertices();
+            var compoundTransform = this.setUniforms(parentMatrix);
             
             this.gl.drawArrays(this.gl.TRIANGLE_STRIP, 0, this.mesh.length/7);
             
             for (var i=0; i < this.displayList.length; i++) {
                 var child = this.displayList[i];
-                child.draw(transform);
+                child.draw(compoundTransform);
             }
         };
         
