@@ -33,7 +33,7 @@ mod({
             * A mapping of shader attributes to their attribute locations.  
             * @type {Object}
             * * **/
-            this.shaderAttribLocations = {};
+            this.shaderAttributeLocations = {};
             /** * *
             * A mapping of shader uniforms to their locations.
             * @type {Object}
@@ -66,7 +66,7 @@ mod({
                     var attrib  = shader.attributes[j];
                     var location = this.gl.getAttribLocation(this.id, attrib);
                     this.gl.enableVertexAttribArray(location);
-                    this.shaderAttribLocations[attrib] = location;
+                    this.shaderAttributeLocations[attrib] = location;
                 }
                 for (var j=0; j < shader.uniforms.length; j++) {
                     var uniform = shader.uniforms[j];
@@ -86,7 +86,13 @@ mod({
         * * **/
         Program.prototype.use = function Program_use() {
             this.gl.useProgram(this.id);
+            // Run through and enable all the vertex attributes...
+            for (var i=0; i < this.shaderAttributeLocations.length; i++) {
+                var attrib = this.shaderAttributeLocations[i];
+                this.gl.enableVertexAttribArray(attrib);
+            }
         };
+        
         
         return Program;
     }

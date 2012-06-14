@@ -61,7 +61,7 @@ mod({
             * The projection matrix.
             * @type {Transform3d}
             * * **/
-            this.projection = Transform3d.perspective(45, 640/480, 0.1, 100);
+            this.projection = Transform3d.perspective(45, this.width/this.height, 0.1, 100);
         }
         
         GLStage.prototype = new GLView(false, false);
@@ -85,10 +85,15 @@ mod({
         * Draws this view and its display hierarchy into the given gl.
         * @param {HTMLCanvasRenderingContext2D}
         * * **/
-        GLStage.prototype.draw = function GLStage_draw(gl) {
+        GLStage.prototype.draw = function GLStage_draw() {
             if (!this.initialized) {
                 this.initialize();
             }
+            // Update the projection matrix...
+            var pMatUniform = this.gl.getUniformLocation(this.program.id, 'uPMatrix');
+            this.gl.uniformMatrix4fv(pMatUniform, false, new Float32Array(this.projection.transpose()));
+            // Clear the stage...
+            this.gl.clear(this.gl.COLOR_BUFFER_BIT | this.gl.DEPTH_BUFFER_BIT);
             // Do the draw...
             GLView.prototype.draw.call(this);
         };

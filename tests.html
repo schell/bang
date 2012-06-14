@@ -50,7 +50,7 @@
                 //
                 var bang = document.getElementById('bang');
                 
-                new Task('parallel',
+                new Task(
                     function testWebGL(webglCB) {
                         var context = document.createElement('canvas').getContext('experimental-webgl');
                         
@@ -81,7 +81,12 @@
                         }
                         assert.eq(canLinkProgram, true, 'Can link default shader program.');
                         
-                        var glstage = window.glstage = new GLStage(640, 480);
+                        var glstage = window.glstage = new GLStage(300, 300);
+                        glstage.transform = new Transform3d().translate(0, 0, -6).rotate(Math.PI/8, new Vector(0,1,0));
+                        var child = new GLView();
+                        child.transform = new Transform3d().translate(0, 0, 1).scale(0.5, 0.5, 1);
+                        glstage.addView(child);
+                        
                         bang.appendChild(glstage.canvas);
                         
                         var t = {
@@ -92,16 +97,17 @@
                             properties : {
                                 rotation : 2*Math.PI
                             },
-                            duration : 1000,
+                            duration : 5000,
                             onUpdate : function() {
                                 glstage.transform = new Transform3d().translate(0, 0, -6).rotate(t.rotation, new Vector(0,1,0));
+                                child.transform = new Transform3d().translate(0, 0, 1).rotate(t.rotation, new Vector(0,1,0)).scale(0.5,0.5,1);
                             }
                         });
                         tween.onComplete(function(_, tween) {
                             t.rotation = 0;
                             tween.interpolate();
                         });
-                        tween.interpolate();
+                        //tween.interpolate()
                     },
                     function testEaseAndTask(easeTaskCB) {
                         var stage = new Stage(300, 300);

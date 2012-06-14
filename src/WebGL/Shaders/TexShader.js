@@ -31,6 +31,11 @@ mod({
             * * **/
             attributes = attributes || (type === this.gl.VERTEX_SHADER ? ['aVertex','aTex'] : []);
             /** * *
+            * A list of attribute sizes.
+            * @type {Array.<number>}
+            * * **/
+            this.attributeSizes = attributeSize || (type === this.gl.VERTEX_SHADER ? [3,2] : []);
+            /** * *
             * A list of all the vertex and fragment shader uniforms.
             * @type {Array.<string>}
             * * **/
@@ -65,7 +70,7 @@ mod({
                 
                 case this.gl.VERTEX_SHADER:
                     src += 'attribute vec3 aVertex;\n';
-                    src += 'attribute vec3 aTex;\n';
+                    src += 'attribute vec2 aTex;\n';
 
                     src += 'uniform mat4 uMVMatrix;\n';
                     src += 'uniform mat4 uPMatrix;\n';

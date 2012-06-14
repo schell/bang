@@ -18,7 +18,7 @@ mod({
         * 
         * @constructor
         * * **/
-        function Shader(gl, type, src, attributes, uniforms) {
+        function Shader(gl, type, src, attributes, uniforms, attributeSizes) {
             if (!gl) {
                 throw new Error('Shader must have gl.');
             }
@@ -44,7 +44,12 @@ mod({
             * A list of all the vertex shader attributes.
             * @type {Array.<string>}
             * * **/
-            this.attributes = attributes || (type === this.gl.VERTEX_SHADER ? ['aVertex'] : []);
+            this.attributes = attributes || (type === this.gl.VERTEX_SHADER ? ['aVertex', 'aColor'] : []);
+            /** * *
+            * A list of attribute sizes.
+            * @type {Array.<number>}
+            * * **/
+            this.attributeSizes = attributeSizes || (type === this.gl.VERTEX_SHADER ? [3, 4] : []);
             /** * *
             * A list of all the vertex and fragment shader uniforms.
             * @type {Array.<string>}
@@ -80,16 +85,21 @@ mod({
             var src = '';
             switch (type) {
                 case this.gl.FRAGMENT_SHADER: 
-                    src += 'void main(void) { gl_FragColor = vec4(1.0, 1.0, 1.0, 1.0);}';
+                    src += 'varying mediump vec4 vColor;\n';
+                    src += 'void main(void) { gl_FragColor = vColor;}';
                 break;
                 
                 case this.gl.VERTEX_SHADER:
                     src += 'attribute vec3 aVertex;\n';
+                    src += 'attribute vec4 aColor;\n';
 
                     src += 'uniform mat4 uMVMatrix;\n';
                     src += 'uniform mat4 uPMatrix;\n';
 
+                    src += 'varying vec4 vColor;\n';
+
                     src += 'void main (void) {\n';
+                    src += '    vColor = aColor;\n';
                     src += '    vec4 v = vec4(aVertex, 1);\n';
                     src += '    gl_Position = uPMatrix * uMVMatrix * v;\n';
                     src += '}\n';

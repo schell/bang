@@ -26,15 +26,17 @@ mod({
             * @type {WebGLRenderingContext}
             * * **/
             this.gl = gl;
+            
             /** * *
             * A model mesh.
             * @type {Mesh}
             * * **/
             this.mesh = mesh || new Mesh(
-                1.0,  1.0,  0.0,  
-                -1.0, 1.0,  0.0,  
-                1.0,  -1.0, 0.0,
-                -1.0, -1.0, 0.0
+                // positions        // colors
+                1.0,  1.0,  0.0,    1.0, 1.0, 1.0, 1.0,
+                -1.0, 1.0,  0.0,    1.0, 0.0, 0.0, 1.0,
+                1.0,  -1.0, 0.0,    0.0, 1.0, 0.0, 1.0,
+                -1.0, -1.0, 0.0,    0.0, 0.0, 1.0, 1.0
             );
             /** * *
             * The transformation of the view.
@@ -76,6 +78,12 @@ mod({
             }
             this.displayList.push(subView);
             subView.parent = this;
+            if (!subView.gl) {
+                subView.gl = this.gl;
+            }
+            if (!subView.program) {
+                subView.program = this.program;
+            }
         };
         /** * *
         * Adds a subview to this view at a given index.
@@ -90,6 +98,12 @@ mod({
             }
             this.displayList.splice(insertNdx, 0, subView);
             subView.parent = this;
+            if (!subView.gl) {
+                subView.gl = this.gl;
+            }
+            if (!subView.program) {
+                subView.program = this.program;
+            }
         };
         /** * *
         * Removes a subview of this view.
@@ -107,25 +121,30 @@ mod({
         /** * *
         * Draws the view.
         * * **/
-        GLView.prototype.draw = function GLView_draw() {
+        GLView.prototype.draw = function GLView_draw(parentMatrix) {
             if (!this.meshBuffer && this.mesh) {
                 this.meshBuffer = this.gl.createBuffer();
                 this.gl.bindBuffer(this.gl.ARRAY_BUFFER, this.meshBuffer);
                 this.gl.bufferData(this.gl.ARRAY_BUFFER, new Float32Array(this.mesh), this.gl.STATIC_DRAW);
-                
-                this.transform = this.transform.translate(0, 0, -6);
             }
-
-            this.gl.clear(this.gl.COLOR_BUFFER_BIT | this.gl.DEPTH_BUFFER_BIT);
+            
+            var floatSize = 4;
+            var components = 3/*position*/ + 4/*color*/;
             
             this.gl.bindBuffer(this.gl.ARRAY_BUFFER, this.meshBuffer);
-            this.gl.vertexAttribPointer(this.program.shaderAttribLocations.aVertex, 3, this.gl.FLOAT, false, 0, 0);
+            this.gl.vertexAttribPointer(this.program.shaderAttributeLocations.aVertex, 3, this.gl.FLOAT, false, components*floatSize, 0);
+            this.gl.vertexAttribPointer(this.program.shaderAttributeLocations.aColor, 4, this.gl.FLOAT, false, components*floatSize, 3*floatSize);
             
-            var pMatUniform = this.gl.getUniformLocation(this.program.id, 'uPMatrix');
-            this.gl.uniformMatrix4fv(pMatUniform, false, new Float32Array(this.gl.stage.projection.transpose()));
             var mvMatUniform = this.gl.getUniformLocation(this.program.id, 'uMVMatrix');
-            this.gl.uniformMatrix4fv(mvMatUniform, false, new Float32Array(this.transform.transpose()));
-            this.gl.drawArrays(this.gl.TRIANGLE_STRIP, 0, this.mesh.length/3);
+            var transform = parentMatrix ? parentMatrix.multiply(this.transform) : this.transform;
+            this.gl.uniformMatrix4fv(mvMatUniform, false, new Float32Array(transform.transpose()));
+            
+            this.gl.drawArrays(this.gl.TRIANGLE_STRIP, 0, this.mesh.length/7);
+            
+            for (var i=0; i < this.displayList.length; i++) {
+                var child = this.displayList[i];
+                child.draw(transform);
+            }
         };
         
         return GLView;
