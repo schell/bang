@@ -8,7 +8,7 @@
 * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * **/
 mod({
     name : 'TexShader',
-    dependencies : [ 'bang::WebGL/Shader/Shader.js' ],
+    dependencies : [ 'bang::WebGL/Shaders/Shader.js' ],
     /** * *
     * Initializes the TexShader object constructor.
     * @param {function} Shader The Shader object constructor.
@@ -18,77 +18,95 @@ mod({
         * Creates a new TexShader object.
         * @constructor
         * * **/
-        function TexShader(gl, type, src, attributes, uniforms) {
-            if (!gl) {
-                throw new Error('Shader must have gl.');
-            }
-            if (!type) {
-                throw new Error('Shader must have a type, FRAGMENT_SHADER or VERTEX_SHADER');
-            }
+        function TexShader(gl) {
+            Shader.prototype.constructor.call(this, gl);
+            
             /** * *
-            * A list of all the vertex shader attributes.
+            * An object to hold our initialized textures.
+            * @type {Object.<string, WebGLTexture>}
+            * * **/
+            this.textures = {};
+            /** * *
+            * The fragment shader source.
+            * @type {string}
+            * * **/
+            this.fragmentSrc = [
+                'varying highp vec2 vTex;',
+                
+                'uniform sampler2D uSampler;',
+                
+                'void main(void) {',
+                '   gl_FragColor = texture2D(uSampler, vec2(vTex.s, vTex.t));',
+                '}'
+            ].join('');
+            /** * *
+            * The vertex shader source.
+            * @type {string}
+            * * **/
+            this.vertexSrc = [
+                'attribute vec3 aVertex;',
+                'attribute vec2 aTex;',
+                
+                'uniform mat4 uMVMatrix;',
+                'uniform mat4 uPMatrix;',
+                
+                'varying highp vec2 vTex;',
+                
+                'void main (void) {',
+                '    vTex = aTex;',
+                '    vec4 v = vec4(aVertex, 1);',
+                '    gl_Position = uPMatrix * uMVMatrix * v;',
+                '}'
+            ].join('');
+            /** * *
+            * Returns the names of the vertex attributes.
             * @type {Array.<string>}
             * * **/
-            attributes = attributes || (type === this.gl.VERTEX_SHADER ? ['aVertex','aTex'] : []);
+            this.attributes = [
+                'aVertex',
+                'aTex'
+            ];
             /** * *
-            * A list of attribute sizes.
+            * Returns the component lengths of each vertex attribute.
             * @type {Array.<number>}
             * * **/
-            this.attributeSizes = attributeSize || (type === this.gl.VERTEX_SHADER ? [3,2] : []);
+            this.attributeComponentLengths = [
+                3,
+                2
+            ];
             /** * *
-            * A list of all the vertex and fragment shader uniforms.
+            * Returns the names of the uniforms.
             * @type {Array.<string>}
             * * **/
-            uniforms = uniforms || (type === this.gl.VERTEX_SHADER ? ['uMVMatrix', 'uPMatrix', 'uSampler'] : []);
-            
-            Shader.prototype.constructor.call(this, gl, type, attributes, uniforms);
+            this.uniforms = [
+                'uMVMatrix',
+                'uPMatrix',
+                'uSampler'
+            ];
         }
         
-        TexShader.prototype = {};
+        TexShader.prototype = new Shader();
         
         TexShader.prototype.constructor = TexShader;
         //--------------------------------------
-        //  METHODS
+        //  TEXTURE SPECIFIC METHODS
         //--------------------------------------
         /** * *
-        * The source string for this shader.
-        * @param {number}
-        * @return {string}
+        * Creates and stores a new WebGLTexture.
+        * @param {string} name The name of the texture.
+        * @param {HTMLElement} image The canvas or image to create the texture with.    
         * * **/
-        Shader.prototype.defaultSourceForType = function Shader_defaultSourceForType(type) {
-            var src = '';
-            switch (type) {
-                case this.gl.FRAGMENT_SHADER: 
-                    src += 'varying highp vec2 vTex;\n';
-
-                    src += 'uniform sampler2D uSampler;\n';
-                    
-                    src += 'void main(void) {\n';
-                    src += '    gl_FragColor = texture2D(uSampler, vec2(vTex.s, vTex.t))\n';
-                    src += '}\n';
-                break;
-                
-                case this.gl.VERTEX_SHADER:
-                    src += 'attribute vec3 aVertex;\n';
-                    src += 'attribute vec2 aTex;\n';
-
-                    src += 'uniform mat4 uMVMatrix;\n';
-                    src += 'uniform mat4 uPMatrix;\n';
-
-                    src += 'varying highp vec2 vTex;\n';
-
-                    src += 'void main (void) {\n';
-                    src += '    vec4 v = vec4(aVertex, 1);\n';
-                    src += '    gl_Position = uPMatrix * uMVMatrix * v;\n';
-                    src += '    vTex = aTex;\n';
-                    src += '}\n';
-                break;
-                
-                default:
-            }
-            return src;
+        TexShader.prototype.createTexture = function TexShader_createTexture(name, image) {
+            var texture = this.gl.createTexture();
+            this.gl.bindTexture(this.gl.TEXTURE_2D, texture);
+            this.gl.texImage2D(this.gl.TEXTURE_2D, 0, this.gl.RGBA, this.gl.RGBA, this.gl.UNSIGNED_BYTE, image);
+            this.gl.texParameteri(this.gl.TEXTURE_2D, this.gl.TEXTURE_MAG_FILTER, this.gl.LINEAR);  
+            this.gl.texParameteri(this.gl.TEXTURE_2D, this.gl.TEXTURE_MIN_FILTER, this.gl.LINEAR_MIPMAP_NEAREST);  
+            this.gl.generateMipmap(this.gl.TEXTURE_2D);  
+            this.gl.bindTexture(this.gl.TEXTURE_2D, null); 
+            // Save the texture...
+            this.textures[name] = texture;
         };
-        
         
         return TexShader;
     }

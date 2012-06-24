@@ -50,6 +50,11 @@ mod({
             * @type {boolean}
             * * **/
             this.showRedrawRegions = false;
+            /** * *
+            * Whether or not to use WebGL for rendering.
+            * @type {boolean}
+            * * **/
+            this.useWebGL = true;
         }
         
         Stage.prototype = new View();
@@ -83,8 +88,11 @@ mod({
             if (!context) {
                 return;
             }
+            // Clear the stage...
+            context.clearRect(0, 0, this.width, this.height);
+            
             View.prototype.draw.call(this, context);
-        }
+        };
         /** * *
         * This is the main step of the display list.
         * * **/

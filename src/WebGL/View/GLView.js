@@ -61,11 +61,6 @@ mod({
             * @type {Array.<GLView>}
             * * **/
             this.displayList = [];
-            /** * *
-            * The shader program to use for drawing.
-            * @type {Shader|boolean}
-            * * **/
-            this.shader = this.gl ? new Shader(this.gl) : false;
         }
         
         GLView.prototype = {};
@@ -87,10 +82,11 @@ mod({
             if (!subView.gl) {
                 subView.gl = this.gl;
             }
-            if (!subView.shader) {
-                subView.shader = this.shader;
-            }
             subView.stage = this.stage;
+            // If the view is not initialized, initialize it...
+            if (this.isInitialized() && !subView.isInitialized()) {
+                subView.initialize();
+            }
         };
         /** * *
         * Adds a subview to this view at a given index.
@@ -108,10 +104,11 @@ mod({
             if (!subView.gl) {
                 subView.gl = this.gl;
             }
-            if (!subView.shader) {
-                subView.shader = this.shader;
-            }
             subView.stage = this.stage;
+            // If the view is not initialized, initialize it...
+            if (this.isIinitialized() && !subView.isInitialized()) {
+                subView.initialize();
+            }
         };
         /** * *
         * Removes a subview of this view.
@@ -128,6 +125,26 @@ mod({
             subView.stage = false;
         };
         /** * *
+        * Returns whether or not this view has been initialized.
+        * Use this to determine whether your shaders need to be compiled,
+        * or whether your vertices need to be buffered.
+        * @return {boolean}
+        * * **/
+        GLView.prototype.isInitialized = function GLView_isInitialized() {
+            return (this.mesh && this.meshBuffer);
+        };
+        /** * *
+        * Initializes the view.
+        * * **/
+        GLView.prototype.initialize = function GLView_initialize() {
+            this.bufferMeshData();
+            // Initialize all its children...
+            for (var i=0; i < this.displayList.length; i++) {
+                var child = this.displayList[i];
+                child.initialize();
+            }
+        };
+        /** * *
         * Buffers the mesh and stores it in meshBuffer.
         * * **/
         GLView.prototype.bufferMeshData = function GLView_bufferMeshData() {
@@ -136,39 +153,40 @@ mod({
             this.gl.bufferData(this.gl.ARRAY_BUFFER, new Float32Array(this.mesh), this.gl.STATIC_DRAW);
         };
         /** * *
-        * Sets up the vertex attribute pointers for a draw.
+        * Sends the geometry to WebGL.
+        * @param {Transform3d} mvMatrix The global model view matrix.
         * * **/
-        GLView.prototype.setVertices = function GLView_setupVertices() {
+        GLView.prototype.sendGeometry = function GLView_sendGeometry(mvMatrix) {
+            mvMatrix = mvMatrix || this.transform;
+            
             this.gl.bindBuffer(this.gl.ARRAY_BUFFER, this.meshBuffer);
-            this.shader.setVertexAttribPointers();
-        };
-        /** * *
-        * Sets the shader uniforms.
-        * @param {Transform3d} parentMatrix The parent view's transform matrix.
-        * @return {Transform3d} The compound transform.
-        * * **/
-        GLView.prototype.setUniforms = function GLView_setUniforms(parentMatrix) {
-            var mvMatUniform = this.shader.uniformLocations.uMVMatrix;
-            var transform = parentMatrix ? parentMatrix.multiply(this.transform) : this.transform;
-            this.gl.uniformMatrix4fv(mvMatUniform, false, new Float32Array(transform.transpose()));
-            return transform;
+            this.stage.shader.setVertexAttribPointers();
+
+            var mvMatUniform = this.stage.shader.uniformLocations.uMVMatrix;
+            this.gl.uniformMatrix4fv(mvMatUniform, false, new Float32Array(mvMatrix.transpose()));
+            
+            var numPoints = this.mesh.length/this.stage.shader.numberOfComponents();
+            this.gl.drawArrays(this.gl.TRIANGLE_STRIP, 0, numPoints);  
         };
         /** * *
         * Draws the view.
+        * @param {Transform3d} mvMatrix The current model view transformation matrix.
         * * **/
-        GLView.prototype.draw = function GLView_draw(parentMatrix) {
-            if (!this.meshBuffer && this.mesh) {
-                this.bufferMeshData();
+        GLView.prototype.draw = function GLView_draw(mvMatrix) {
+            if (!this.isInitialized()) {
+                return;
             }
             
-            this.setVertices();
-            var compoundTransform = this.setUniforms(parentMatrix);
+            mvMatrix = mvMatrix || this.transform;
+            if (mvMatrix !== this.transform) {
+                mvMatrix = mvMatrix.multiply(this.transform);
+            }
             
-            this.gl.drawArrays(this.gl.TRIANGLE_STRIP, 0, this.mesh.length/7);
+            this.sendGeometry(mvMatrix);
             
             for (var i=0; i < this.displayList.length; i++) {
                 var child = this.displayList[i];
-                child.draw(compoundTransform);
+                child.draw(mvMatrix);
             }
         };
         

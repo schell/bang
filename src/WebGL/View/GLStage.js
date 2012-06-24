@@ -62,6 +62,11 @@ mod({
             * @type {Transform3d}
             * * **/
             this.projection = Transform3d.perspective(45, this.width/this.height, 0.1, 100);
+            /** * *
+            * The shader program to use for drawing.
+            * @type {Shader|boolean}
+            * * **/
+            this.shader = this.gl ? new Shader(this.gl) : false;
             
             // Set the root view...
             this.stage = this;
@@ -74,6 +79,27 @@ mod({
         //  METHODS
         //--------------------------------------
         /** * *
+        * Sends the geometry for this view to WebGL.
+        * * **/
+        GLStage.prototype.sendGeometry = function GLStage_sendGeometry() {
+            // Clear the stage...
+            this.gl.clear(this.gl.COLOR_BUFFER_BIT | this.gl.DEPTH_BUFFER_BIT);
+            // Update the projection matrix...
+            var pMatUniform = this.shader.uniformLocations.uPMatrix;
+            this.gl.uniformMatrix4fv(pMatUniform, false, new Float32Array(this.projection.transpose()));
+            
+            GLView.prototype.sendGeometry.call(this);
+        };
+        /** * *
+        * Returns whether or not this view has been initialized.
+        * Use this to determine whether your shaders need to be compiled,
+        * or whether your vertices need to be buffered.
+        * @return {boolean}
+        * * **/
+        GLStage.prototype.isInitialized = function GLStage_isInitialized() {
+            return (this.initialized && this.shader && this.shader.id && GLView.prototype.isInitialized.call(this));
+        };
+        /** * *
         * Initializes the stage by compiling and linking shader programs.
         * * **/
         GLStage.prototype.initialize = function GLStage_initialize() {
@@ -83,30 +109,10 @@ mod({
             this.gl.depthFunc(this.gl.LEQUAL);                                
             this.gl.clear(this.gl.COLOR_BUFFER_BIT|this.gl.DEPTH_BUFFER_BIT);
             this.initialized = true;
+            this.shader.compile();
             this.shader.use();
-        };
-        /** * *
-        * Updates the projection matrix and other shader uniforms.
-        * * **/
-        GLStage.prototype.setUniforms = function GLStage_setUniforms() {
-            // Update the projection matrix...
-            var pMatUniform = this.shader.uniformLocations.uPMatrix;
-            this.gl.uniformMatrix4fv(pMatUniform, false, new Float32Array(this.projection.transpose()));
-            
-            return GLView.prototype.setUniforms.call(this);
-        };
-        /** * *
-        * Draws this view and its display hierarchy into the given gl.
-        * @param {HTMLCanvasRenderingContext2D}
-        * * **/
-        GLStage.prototype.draw = function GLStage_draw() {
-            if (!this.initialized) {
-                this.initialize();
-            }
-            // Clear the stage...
-            this.gl.clear(this.gl.COLOR_BUFFER_BIT | this.gl.DEPTH_BUFFER_BIT);
-            // Do the draw...
-            GLView.prototype.draw.call(this);
+
+            GLView.prototype.initialize.call(this);
         };
         /** * *
         * This is the main step of the display list.
@@ -114,7 +120,6 @@ mod({
         GLStage.prototype.step = function GLStage_step(time) {
            this.draw();
         };
-        
         
         return GLStage;
     }

@@ -303,6 +303,15 @@ mod({
             }
             context.restore();
         };
+        /** * *
+        * Draws this view and its subviews into the given WebGLRendering context.
+        * @param {WebGLRenderingContext} context
+        * @param {Transform3d} transform The parent transformation matrix.
+        * * **/
+        View.prototype.drawWebGL = function View_drawWebGL(context, transform) {
+            
+        };
+        
         return View;
     }
 });

@@ -39,10 +39,61 @@ mod({
             * @type {WebGLRenderingContext|false}
             * * **/
             this.gl = gl || false;
-            
-            if (this.gl) {
-                this.compile();
-            }
+            //--------------------------------------
+            //  PROPERTIES TO SET WHEN WRITING A
+            //  NEW SHADER
+            //--------------------------------------
+            /** * *
+            * The fragment shader source.
+            * @type {string}
+            * * **/
+            this.fragmentSrc = [
+                'varying mediump vec4 vColor;',
+                'void main(void) {gl_FragColor = vColor;}'
+            ].join('');
+            /** * *
+            * The vertex shader source.
+            * @type {string}
+            * * **/
+            this.vertexSrc = [
+                'attribute vec3 aVertex;',
+                'attribute vec4 aColor;',
+                
+                'uniform mat4 uMVMatrix;',
+                'uniform mat4 uPMatrix;',
+                
+                'varying vec4 vColor;',
+                
+                'void main (void) {',
+                '    vColor = aColor;',
+                '    vec4 v = vec4(aVertex, 1);',
+                '    gl_Position = uPMatrix * uMVMatrix * v;',
+                '}'
+            ].join('');
+            /** * *
+            * Returns the names of the vertex attributes.
+            * @type {Array.<string>}
+            * * **/
+            this.attributes = [
+                'aVertex',
+                'aColor'
+            ];
+            /** * *
+            * Returns the component lengths of each vertex attribute.
+            * @type {Array.<number>}
+            * * **/
+            this.attributeComponentLengths =  [
+                3,
+                4
+            ];
+            /** * *
+            * Returns the names of the uniforms.
+            * @type {Array.<string>}
+            * * **/
+            this.uniforms = [
+                'uMVMatrix',
+                'uPMatrix'
+            ];
         }
         
         Shader.prototype = {};
@@ -74,9 +125,9 @@ mod({
         * * **/
         Shader.prototype.compile = function Shader_compile() {
             // Compile the fragment shader...
-            this.fragmentId = this.compileShader(this.gl.FRAGMENT_SHADER, this.fragmentSrc());
+            this.fragmentId = this.compileShader(this.gl.FRAGMENT_SHADER, this.fragmentSrc);
             // Compile the vertex shader...
-            this.vertexId = this.compileShader(this.gl.VERTEX_SHADER, this.vertexSrc());
+            this.vertexId = this.compileShader(this.gl.VERTEX_SHADER, this.vertexSrc);
             // Create the program id...
             this.id = this.gl.createProgram();
             
@@ -94,8 +145,8 @@ mod({
             
             // Run through the shaders and get the locations of various attributes
             // and uniforms...
-            var attributeNames = this.attributes();
-            var uniformNames = this.uniforms();
+            var attributeNames = this.attributes;
+            var uniformNames = this.uniforms;
             
             for (var j=0; j < attributeNames.length; j++) {
                 var attrib  = attributeNames[j];
@@ -112,6 +163,9 @@ mod({
         * Tells the WebGLRenderingContext to use this program.
         * * **/
         Shader.prototype.use = function Shader_use() {
+            if (!this.id) {
+                this.compile();
+            }
             this.gl.useProgram(this.id);
             // Run through and enable all the vertex attributes...
             for (var attributeName in this.vertexLocations) {
@@ -123,7 +177,7 @@ mod({
         * * **/
         Shader.prototype.numberOfComponents = function Shader_numberOfComponents() {
             var components = 0;
-            var lengths = this.attributeComponentLengths();
+            var lengths = this.attributeComponentLengths;
             for (var i=0; i < lengths.length; i++) {
                 components += lengths[i];
             }
@@ -157,7 +211,7 @@ mod({
         * @return {number}
         * * **/
         Shader.prototype.vertexOffset = function Shader_vertexOffset(name, dataType) {
-            var ndx = this.attributeNames.indexOf(name);
+            var ndx = this.attributes.indexOf(name);
             if (ndx === -1) {
                 throw new Error(name + ' is not a vertex attribute.');
             }
@@ -182,8 +236,8 @@ mod({
             dataType = dataType || this.gl.FLOAT;
             
             var components = this.numberOfComponents();
-            var attributes = this.attributes();
-            var lengths = this.attributeComponentLengths();
+            var attributes = this.attributes;
+            var lengths = this.attributeComponentLengths;
             
             var dataTypeSize = 1;
             switch (dataType) {
@@ -209,70 +263,6 @@ mod({
                 
                 offset += length;
             }
-        };
-        //--------------------------------------
-        //  METHODS TO OVERRIDE IN YOUR SHADERS
-        //--------------------------------------
-        /** * *
-        * The fragment shader source.
-        * @return {string}
-        * * **/
-        Shader.prototype.fragmentSrc = function Shader_fragmentSrc() {
-            return [
-                'varying mediump vec4 vColor;',
-                'void main(void) {gl_FragColor = vColor;}'
-            ].join('');
-        };
-        /** * *
-        * The vertex shader source.
-        * @return {string}
-        * * **/
-        Shader.prototype.vertexSrc = function Shader_vertexSrc() {
-            return [
-                'attribute vec3 aVertex;',
-                'attribute vec4 aColor;',
-                
-                'uniform mat4 uMVMatrix;',
-                'uniform mat4 uPMatrix;',
-                
-                'varying vec4 vColor;',
-                
-                'void main (void) {',
-                '    vColor = aColor;',
-                '    vec4 v = vec4(aVertex, 1);',
-                '    gl_Position = uPMatrix * uMVMatrix * v;',
-                '}'
-            ].join('');
-        };
-        /** * *
-        * Returns the names of the vertex attributes.
-        * @return {Array.<string>}
-        * * **/
-        Shader.prototype.attributes = function Shader_attributes() {
-            return [
-                'aVertex',
-                'aColor'
-            ];
-        };
-        /** * *
-        * Returns the component lengths of each vertex attribute.
-        * @return {Array.<number>}
-        * * **/
-        Shader.prototype.attributeComponentLengths = function Shader_attributeComponentLengths() {
-            return [
-                3,
-                4
-            ];
-        };
-        /** * *
-        * Returns the names of the uniforms.
-        * @return {Array.<string>}
-        * * **/
-        Shader.prototype.uniforms = function Shader_uniforms() {
-            return [
-                'uMVMatrix',
-                'uPMatrix'
-            ];
         };
         
         return Shader;

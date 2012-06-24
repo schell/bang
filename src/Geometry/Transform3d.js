@@ -55,16 +55,16 @@ mod({
         * @nosideeffects
         * * **/
         Transform3d.frustum = function Transform3d_frustum(left, right, bottom, top, znear, zfar) {
-            var X = 2*znear/(right-left);
-            var Y = 2*znear/(top-bottom);
-            var A = (right+left)/(right-left);
-            var B = (top+bottom)/(top-bottom);
-            var C = -(zfar+znear)/(zfar-znear);
-            var D = -2*zfar*znear/(zfar-znear);
+            var x = 2*znear/(right-left);
+            var y = 2*znear/(top-bottom);
+            var a = (right+left)/(right-left);
+            var b = (top+bottom)/(top-bottom);
+            var c = -(zfar+znear)/(zfar-znear);
+            var d = -2*zfar*znear/(zfar-znear);
             return new Transform3d(
-                X, 0, A, 0,
-                0, Y, B, 0,
-                0, 0, C, D,
+                x, 0, a, 0,
+                0, y, b, 0,
+                0, 0, c, d,
                 0, 0, -1,0
             );
         };
@@ -93,7 +93,7 @@ mod({
         * @return {Transform3d}
         * @nosideeffects
         * * **/
-        Transform3d.prototype.ortho = function Transform3d_perspective(left, right, top, bottom, near, far) {
+        Transform3d.ortho = function Transform3d_ortho(left, right, top, bottom, near, far) {
             return new Transform3d(
                 2/(right-left), 0, 0, -(right+left)/(right-left),
                 0, 2/(top-bottom), 0, -(top+bottom)/(top-bottom),
@@ -239,6 +239,36 @@ mod({
             }
             polygon.length = i;
             return polygon;
+        };
+        //--------------------------------------
+        //  DIRECTIONAL VECTORS
+        //--------------------------------------
+        /** * *
+        * Returns the out vector.
+        * @return {Vector}
+        * * **/
+        Transform3d.prototype.out = function Transform3d_out() {
+            var out = this.row(2);
+            out.pop();
+            return out;
+        };
+        /** * *
+        * Returns the up vector.
+        * @return {Vector}
+        * * **/
+        Transform3d.prototype.up = function Transform3d_up() {
+            var up = this.row(1);
+            up.pop();
+            return up;
+        };
+        /** * *
+        * Returns the right vector.
+        * @return {Vector}
+        * * **/
+        Transform3d.prototype.right = function Transform3d_right() {
+            var right = this.row(0);
+            right.pop();
+            return right;
         };
         
         return Transform3d;

@@ -21,6 +21,7 @@
             mod.useTagInjection = true;
             mod.expansions = {
                 bang : 'src/',
+                meshes : 'meshes/'
             };
             mod({
                 name : "main",
@@ -36,7 +37,11 @@
                     'bang::Utils/Ease.js',
                     'bang::Utils/Task.js',
                     'bang::WebGL/Shaders/Shader.js',
-                    'bang::WebGL/View/GLStage.js'
+                    'bang::WebGL/View/GLStage.js',
+                    'bang::WebGL/Shaders/TexShader.js',
+                    'bang::Geometry/Mesh.js',
+                    'meshes::TrashCan.js',
+                    'bang::Utils/Utils.js'
                 ],
                 init : function initMain () {
                     mod.exportAll();
@@ -44,13 +49,177 @@
                 }
             }).onload(function test(
                 Assert, Vector, Polygon, Rectangle, Matrix, 
-                View, Stage, Animation, Ease, Task, Shader, GLStage
+                View, Stage, Animation, Ease, Task, Shader, 
+                GLStage, TexShader, Mesh
             ) {
                 //
                 var bang = document.getElementById('bang');
                 
                 new Task(
-                    function testWebGL(webglCB) {
+                    function testTrashCan(cb) {
+                        var stage = new GLStage(300, 300);
+                        stage.transform = stage.transform.translate(0,-2,-8);
+                        stage.transform = stage.transform.rotate(-Math.PI/2, stage.transform.right());
+                        stage.transform = stage.transform.rotate(Math.PI/10, stage.transform.right());
+                        bang.appendChild(stage.canvas);
+                        
+                        // Add the trashcan mesh...
+                        stage.mesh = new TrashCan();
+                        // Create the texture shader...
+                        var tshader = stage.shader = new TexShader(stage.gl);
+                        // Create an image for the texture...
+                        var texture = new Image();
+                        texture.onload = function() {
+                            // Create a texture on the shader...
+                            tshader.createTexture('trashcan', texture);
+                            stage.sendGeometry = function(compoundTransform) {
+                                // Clear the stage...
+                                this.gl.clear(this.gl.COLOR_BUFFER_BIT | this.gl.DEPTH_BUFFER_BIT);
+                                // Update the projection matrix...
+                                var pMatUniform = this.shader.uniformLocations.uPMatrix;
+                                this.gl.uniformMatrix4fv(pMatUniform, false, new Float32Array(this.projection.transpose()));
+                                
+                                this.gl.bindBuffer(this.gl.ARRAY_BUFFER, this.meshBuffer);
+                                this.shader.setVertexAttribPointers();
+
+                                this.gl.activeTexture(this.gl.TEXTURE0);
+                                this.gl.bindTexture(this.gl.TEXTURE_2D, this.shader.textures.trashcan);
+                                this.gl.uniform1i(this.shader.uniformLocations.uSampler, 0);
+
+                                var mvMatUniform = this.shader.uniformLocations.uMVMatrix;
+                                this.gl.uniformMatrix4fv(mvMatUniform, false, new Float32Array(compoundTransform.transpose()));
+                                
+                                var numPoints = this.mesh.length/this.shader.numberOfComponents();
+                                this.gl.drawArrays(this.gl.TRIANGLES, 0, numPoints); 
+                            };
+                            stage.initialize();
+                            cb();
+                        };
+                        texture.src = stage.mesh.dataURL;
+                    },
+                    function testMesh(cb) {
+                        var mesh = new Mesh(
+                        //  position   uv      normal     index
+                            0, 0, 0,   1, 1,   2, 2, 2, //0
+                            3, 3, 3,   4, 4,   5, 5, 5, //1
+                            6, 6, 6,   7, 7,   8, 8, 8  //2
+                        );
+                        mesh.attributeComponentNames = ['position','uv','normal'];
+                        mesh.attributeComponentLengths = [3, 2, 3];
+                        assert.eq(mesh.vertexAt(1).toString(), '3,3,3,4,4,5,5,5', 'Mesh can extract vertexAt.');
+                        assert.eq(mesh.componentAt('uv', 2).toString(), '7,7', 'Mesh can extract componentAt.');
+                        cb();
+                    },
+                    function test2DGL(cb) {
+                        var stage2D = new Stage(300, 300);
+                        var view = new View(75, 75, 150, 150);
+                        function drawBox(view) {
+                            view.context.save();
+                            view.context.fillStyle = 'rgba(127, 127, 127, 0.5)';
+                            view.context.strokeStyle = 'rgb(255, 255, 0)';
+                            view.context.fillRect(0, 0, view.width, view.height);
+                            view.context.strokeRect(0, 0, view.width, view.height);
+                            view.context.restore();
+                        }
+                        function createFractalBlock(view, n) {
+                            drawBox(view);
+                            
+                            var tween = new Ease({
+                                target : view,
+                                properties : {
+                                    alpha : 0.3,
+                                    x : view.x + 20,
+                                    rotation : Math.PI/16
+                                }
+                            });
+                            tween.onComplete(function(_, tween) {
+                                view.alpha = 1;
+                                view.x = view.x - 20;
+                                view.rotation = 0;
+                                tween.interpolate();
+                            });
+                            tween.interpolate();
+                            view.tween = tween;
+                            
+                            var w = view.width/2;
+                            var h = view.height/2;
+                            if (w < 5 || h < 5 || n === 0) {
+                                return;
+                            }
+                            var tl = new View(-w/2, -h/2, w, h);
+                            view.addView(tl);
+                            createFractalBlock(tl, n-1);
+                            var tr = new View(w*2-w/2, -h/2, w, h);
+                            view.addView(tr);
+                            createFractalBlock(tr, n-1);
+                            var bl = new View(-w/2, h*2-h/2, w, h);
+                            view.addView(bl);
+                            createFractalBlock(bl, n-1);
+                            var br = new View(w*2-w/2, h*2-h/2, w, h);
+                            view.addView(br);
+                            createFractalBlock(br, n-1);
+                        }
+                        createFractalBlock(view, 2);
+                        stage2D.addView(view);
+                        bang.appendChild(stage2D.compositeCanvas);
+                        
+                        cb();
+                    },
+                    function testTexShader(shaderCB) {
+                        var canvas = document.createElement('canvas');
+                        canvas.width = 256;
+                        canvas.height = 256;
+                        
+                        var ctx = canvas.getContext('2d');
+                        ctx.fillStyle = 'rgb(255, 255, 0)';
+                        ctx.fillRect(0, 0, 256, 256);
+                        ctx.fillStyle = 'rgb(0, 0, 0)';
+                        ctx.textBaseline = 'top';
+                        ctx.font = '20pt Helvetica,Arial,_sans';
+                        ctx.fillText('Texture demo!!!§∆', 0, 0);
+                        
+                        var stage = new GLStage(300, 300);
+                        stage.projection = Transform3d.ortho(0, 300, 0, 300, 0, 1);
+                        // Create the texture shader...
+                        var tshader = stage.shader = new TexShader(stage.gl);
+                        // Create a texture on the shader...
+                        tshader.createTexture('canvas', canvas);
+                        stage.sendGeometry = function(mvMatrix) {
+                            // Clear the stage...
+                            this.gl.clear(this.gl.COLOR_BUFFER_BIT | this.gl.DEPTH_BUFFER_BIT);
+                            // Update the projection matrix...
+                            var pMatUniform = this.shader.uniformLocations.uPMatrix;
+                            this.gl.uniformMatrix4fv(pMatUniform, false, new Float32Array(this.projection.transpose()));
+                                
+                            this.gl.bindBuffer(this.gl.ARRAY_BUFFER, this.meshBuffer);
+                            this.shader.setVertexAttribPointers();
+
+                            this.gl.activeTexture(this.gl.TEXTURE0);
+                            this.gl.bindTexture(this.gl.TEXTURE_2D, this.shader.textures.canvas);
+                            this.gl.uniform1i(this.shader.uniformLocations.uSampler, 0);
+
+                            var mvMatUniform = this.shader.uniformLocations.uMVMatrix;
+                            this.gl.uniformMatrix4fv(mvMatUniform, false, new Float32Array(mvMatrix.transpose()));
+                                
+                            var numPoints = this.mesh.length/this.shader.numberOfComponents();
+                            this.gl.drawArrays(this.gl.TRIANGLE_STRIP, 0, numPoints); 
+                        }
+                        // Add our mesh geometry to the stage...
+                        stage.mesh = new Mesh(
+                            // positions        // texture mapping
+                            256.0, 0.0, 0.0,    1.0, 0.0,
+                            0.0, 0.0, 0.0,    0.0, 0.0,
+                            256.0, 256.0, 0.0,    1.0, 1.0,
+                            0.0, 256.0, 0.0,    0.0, 1.0
+                        );
+                        
+                        stage.initialize();
+                        
+                        bang.appendChild(stage.canvas);
+                        
+                        shaderCB();
+                    },
+                    function testWebGL(cb) {
                         var context = document.createElement('canvas').getContext('experimental-webgl');
                         
                         var canCompileDefaultShader = true;
@@ -70,6 +239,8 @@
                         
                         bang.appendChild(glstage.canvas);
                         
+                        glstage.initialize();
+                        
                         var t = {
                             rotation : 0
                         };
@@ -80,8 +251,8 @@
                             },
                             duration : 5000,
                             onUpdate : function() {
-                                glstage.transform = new Transform3d().translate(0, 0, -6).rotate(t.rotation, new Vector(0,1,0));
-                                child.transform = new Transform3d().translate(0, 0, 1).rotate(t.rotation, new Vector(0,1,0)).scale(0.5,0.5,1);
+                                glstage.transform = new Transform3d().translate(0, 0, -6).rotate(t.rotation, new Vector(0,1,0)).rotate(t.rotation, new Vector(1,0,0));
+                                child.transform = new Transform3d().translate(0, 0, 1).rotate(-4*t.rotation, new Vector(0,1,0)).scale(0.5,0.5,1);
                             }
                         });
                         tween.onComplete(function(_, tween) {
@@ -89,6 +260,8 @@
                             tween.interpolate();
                         });
                         tween.interpolate();
+                        
+                        cb();
                     },
                     function testEaseAndTask(easeTaskCB) {
                         var stage = new Stage(300, 300);
@@ -490,6 +663,11 @@
                         var clippedPoly = clipRectangle.clipPolygon(polyToClip);
                         var checkPoly = new Polygon(10,10,30,10,10,30);
                         assert.eq(checkPoly.toString(), clippedPoly.toString(), 'Rectangle can clip polygon.');
+                        
+                        var t = new Transform3d();
+                        assert.eq(t.right().toString(), 'Vector[1,0,0]', 'Can get right vector.');
+                        assert.eq(t.up().toString(), 'Vector[0,1,0]', 'Can get up vector.');
+                        assert.eq(t.out().toString(), 'Vector[0,0,1]', 'Can get out vector.');
             
                         assert.suite = 'View';
                         var view1 = new View(0, 0, 40, 40);
