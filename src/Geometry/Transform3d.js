@@ -167,7 +167,7 @@ mod({
         * @param {number} z
         * @return {Transform3d}
         * * **/
-        Transform3d.prototype.scale = function Transform3d_scale(x, y) {
+        Transform3d.prototype.scale = function Transform3d_scale(x, y, z) {
             x = typeof x === 'number' ? x : 1;
             y = typeof y === 'number' ? y : 1;
             z = typeof z === 'number' ? z : 1;

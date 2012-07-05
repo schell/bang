@@ -42,6 +42,9 @@ mod({
                 1.0,  1.0,  0.0,    1.0, 1.0, 1.0, 1.0,
                 -1.0, 1.0,  0.0,    1.0, 0.0, 0.0, 1.0,
                 1.0,  -1.0, 0.0,    0.0, 1.0, 0.0, 1.0,
+                
+                -1.0, 1.0,  0.0,    1.0, 0.0, 0.0, 1.0,
+                1.0,  -1.0, 0.0,    0.0, 1.0, 0.0, 1.0,
                 -1.0, -1.0, 0.0,    0.0, 0.0, 1.0, 1.0
             );
             /** * *
@@ -154,9 +157,25 @@ mod({
         };
         /** * *
         * Sends the geometry to WebGL.
+        * If you have defined your own shaders you'll have to update (override)
+        * this function to draw your models in a meaningful way.
         * @param {Transform3d} mvMatrix The global model view matrix.
         * * **/
         GLView.prototype.sendGeometry = function GLView_sendGeometry(mvMatrix) {
+            // By default we'll check to see whether our stage's shader is 
+            // one of the included ones...
+            if (TexShader.prototype.isPrototypeOf(this.stage.shader)) {
+                this.sendGeometryTextured(mvMatrix);
+            } else if (Shader.prototype.isPrototypeOf(this.stage.shader)) {
+                this.sendGeometryNotTextured(mvMatrix);
+            }
+        };
+        /** * *
+        * Sends the geometry to WebGL and assumes the shader is a Shader.
+        * For special views or shaders, override this method.
+        * @param {Transform3d} mvMatrix The global model view matrix.
+        * * **/
+        GLView.prototype.sendGeometryNotTextured = function GLView_sendGeometry(mvMatrix) {
             mvMatrix = mvMatrix || this.transform;
             
             this.gl.bindBuffer(this.gl.ARRAY_BUFFER, this.meshBuffer);
@@ -166,7 +185,28 @@ mod({
             this.gl.uniformMatrix4fv(mvMatUniform, false, new Float32Array(mvMatrix.transpose()));
             
             var numPoints = this.mesh.length/this.stage.shader.numberOfComponents();
-            this.gl.drawArrays(this.gl.TRIANGLE_STRIP, 0, numPoints);  
+            this.gl.drawArrays(this.gl.TRIANGLES, 0, numPoints);  
+        };
+        /** * *
+        * Sends the geometry to WebGL and assumes the shader is a TexShader.
+        * For special views or shaders, override this method.
+        * @param {Transform3d} mvMatrix The global model view matrix.
+        * * **/
+        GLView.prototype.sendGeometryTextured = function GLView_sendGeometryTextured(mvMatrix) {
+            mvMatrix = mvMatrix || this.transform;
+
+            this.gl.bindBuffer(this.gl.ARRAY_BUFFER, this.meshBuffer);
+            this.shader.setVertexAttribPointers();
+
+            this.gl.activeTexture(this.gl.TEXTURE0);
+            this.gl.bindTexture(this.gl.TEXTURE_2D, this.shader.textures.currentTexture);
+            this.gl.uniform1i(this.shader.uniformLocations.uSampler, 0);
+
+            var mvMatUniform = this.shader.uniformLocations.uMVMatrix;
+            this.gl.uniformMatrix4fv(mvMatUniform, false, new Float32Array(mvMatrix.transpose()));
+            
+            var numPoints = this.mesh.length/this.shader.numberOfComponents();
+            this.gl.drawArrays(this.gl.TRIANGLES, 0, numPoints); 
         };
         /** * *
         * Draws the view.
@@ -181,7 +221,7 @@ mod({
             if (mvMatrix !== this.transform) {
                 mvMatrix = mvMatrix.multiply(this.transform);
             }
-            
+
             this.sendGeometry(mvMatrix);
             
             for (var i=0; i < this.displayList.length; i++) {

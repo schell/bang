@@ -34,20 +34,10 @@ mod({
             x = x || 0;
             y = y || 0;
             /** * *
-            * A reference to this view's canvas.
-            * @type {HTMLCanvasElement}
-            * * **/
-            this.canvas = document.createElement('canvas');
-            /** * *
             * A reference to this view's canvas's context.
             * @type {CanvasRenderingContext2D}
             * * **/
-            this.context = this.canvas.getContext('2d');
-            /** * *
-            * Whether or not this view needs redisplaying.
-            * @type {boolean}
-            * * **/
-            this.isDirty = false;
+            this.context = document.createElement('canvas').getContext('2d');
             /** * *
             * The x coordinate of this view.
             * @type {number}
@@ -97,44 +87,17 @@ mod({
             
             // Set the width and height...
             if (typeof w === 'number') {
-                this.canvas.width = w;
+                this.context.canvas.width = w;
             } else {
-                w = this.canvas.width;
+                w = this.context.canvas.width;
             }
             this.width = w;
             if (typeof h === 'number') {
-                this.canvas.height = h;
+                this.context.canvas.height = h;
             } else {
-                h = this.canvas.height;
+                h = this.context.canvas.height;
             }
             this.height = w;
-            
-            // Here we do a little hack to alias the drawing functions 
-            // of CanvasRenderingContext2D...
-            /** * *
-            * Creates an aliased version of a function.
-            * @param {function}
-            * @return {function}
-            * @nosideeffects
-            * * **/
-            function makeAlias(original) {
-                /** * *
-                * Draws something to this view after marking the
-                * view as dirty (needing redisplay).
-                * * **/
-                return function aliasedDrawFunction() {
-                    this.view.markAsDirty();
-                    return original.apply(this, arguments);
-                };
-            }
-            
-            this.context.view = this;
-            for (var key in this.context) {
-                if (typeof this.context[key] === 'function') {
-                    // Alias that function...
-                    this.context[key] = makeAlias(this.context[key]);
-                }
-            }
         }
         
         View.prototype = {};
@@ -150,6 +113,14 @@ mod({
         * * **/
         View.prototype.toString = function View_toString() {
             return 'View{"'+this.tag+'"['+[this.x,this.y,this.width,this.height]+']}';
+        };
+        /** * *
+        * Initializes the view.
+        * Currently empty. This exists to conform View to a GLView,
+        * so View objects can be rendered by a GLView.
+        * * **/
+        View.prototype.initialize = function View_initialize() {
+            
         };
         /** * *
         * Returns this view's transformation in local coordinates.
@@ -240,22 +211,6 @@ mod({
             context.globalAlpha *= this.alpha;
         };
         /** * *
-        * Sets this view as being dirty. Causes the stage to redraw.
-        * * **/
-        View.prototype.markAsDirty = function View_markAsDirty() {
-            this.isDirty = true;
-            var parent = this;
-            // Traverse up the display list and tell the root it should redraw.
-            while (parent) {
-                if (!parent.parent) {
-                    parent.shouldRedraw = true;
-                    parent = false;
-                } else {
-                    parent = parent.parent;
-                }
-            }
-        };
-        /** * *
         * Adds a subview to this view.
         * @param {View}
         * * **/
@@ -265,7 +220,7 @@ mod({
             }
             this.displayList.push(subView);
             subView.parent = this;
-            this.markAsDirty();
+            subView.stage = this.stage;
         };
         /** * *
         * Adds a subview to this view at a given index.
@@ -280,7 +235,7 @@ mod({
             }
             this.displayList.splice(insertNdx, 0, subView);
             subView.parent = this;
-            this.markAsDirty();
+            subView.stage = this.stage;
         };
         /** * *
         * Removes a subview of this view.
@@ -293,18 +248,21 @@ mod({
                 throw new Error('subview must be a child of the caller.');
             }
             subView.parent = false;
-            this.markAsDirty();
+            subView.stage = false;
         };
         /** * *
         * Draws this view and its subviews into the given context.
         * @param {CanvasRenderingContext2D}
         * * **/
         View.prototype.draw = function View_draw(context) {
+            if (!context || !CanvasRenderingContext2D.prototype.isPrototypeOf(context)) {
+                context = this.stage.canvas.getContext('2d');
+            }
             context.save();
             // Apply the transform for subviews...
             this.transformContext(context);
             // Draw these pixels into the context...
-            context.drawImage(this.canvas, 0, 0);
+            context.drawImage(this.context.canvas, 0, 0);
     
             for (var i=0; i < this.displayList.length; i++) {
                 var subView = this.displayList[i];

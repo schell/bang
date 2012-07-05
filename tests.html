@@ -4,10 +4,10 @@
         <title>.:!!:.</title>
         <style type="text/css" media="screen">
             body {
-    			font-family: Verdana,Geneva,Arial,sans-serif;
-    			font-size: 12px;
-    			line-height: 15px;  
-    		}
+                font-family: Verdana,Geneva,Arial,sans-serif;
+                font-size: 12px;
+                line-height: 15px;  
+            }
             canvas {
                 background-color:transparent;
             }
@@ -16,7 +16,6 @@
         <link rel="shortcut icon" href="favicon.png" />
     </head>
     <body id="body">
-        <div id="bang"></div>
         <script type="text/javascript" charset="utf-8">
             mod.useTagInjection = true;
             mod.expansions = {
@@ -36,6 +35,7 @@
                     'bang::Utils/Animation.js',
                     'bang::Utils/Ease.js',
                     'bang::Utils/Task.js',
+                    'bang::Geometry/Transform2d.js',
                     'bang::WebGL/Shaders/Shader.js',
                     'bang::WebGL/View/GLStage.js',
                     'bang::WebGL/Shaders/TexShader.js',
@@ -49,19 +49,17 @@
                 }
             }).onload(function test(
                 Assert, Vector, Polygon, Rectangle, Matrix, 
-                View, Stage, Animation, Ease, Task, Shader, 
-                GLStage, TexShader, Mesh
+                View, Stage, Animation, Ease, Task, Transform2d,
+                Shader, GLStage, TexShader, Mesh, TrashCan, Utils
             ) {
-                //
-                var bang = document.getElementById('bang');
-                
                 new Task(
                     function testTrashCan(cb) {
                         var stage = new GLStage(300, 300);
                         stage.transform = stage.transform.translate(0,-2,-8);
                         stage.transform = stage.transform.rotate(-Math.PI/2, stage.transform.right());
                         stage.transform = stage.transform.rotate(Math.PI/10, stage.transform.right());
-                        bang.appendChild(stage.canvas);
+                        
+                        document.body.appendChild(stage.canvas);
                         
                         // Add the trashcan mesh...
                         stage.mesh = new TrashCan();
@@ -72,28 +70,8 @@
                         texture.onload = function() {
                             // Create a texture on the shader...
                             tshader.createTexture('trashcan', texture);
-                            stage.sendGeometry = function(compoundTransform) {
-                                // Clear the stage...
-                                this.gl.clear(this.gl.COLOR_BUFFER_BIT | this.gl.DEPTH_BUFFER_BIT);
-                                // Update the projection matrix...
-                                var pMatUniform = this.shader.uniformLocations.uPMatrix;
-                                this.gl.uniformMatrix4fv(pMatUniform, false, new Float32Array(this.projection.transpose()));
-                                
-                                this.gl.bindBuffer(this.gl.ARRAY_BUFFER, this.meshBuffer);
-                                this.shader.setVertexAttribPointers();
-
-                                this.gl.activeTexture(this.gl.TEXTURE0);
-                                this.gl.bindTexture(this.gl.TEXTURE_2D, this.shader.textures.trashcan);
-                                this.gl.uniform1i(this.shader.uniformLocations.uSampler, 0);
-
-                                var mvMatUniform = this.shader.uniformLocations.uMVMatrix;
-                                this.gl.uniformMatrix4fv(mvMatUniform, false, new Float32Array(compoundTransform.transpose()));
-                                
-                                var numPoints = this.mesh.length/this.shader.numberOfComponents();
-                                this.gl.drawArrays(this.gl.TRIANGLES, 0, numPoints); 
-                            };
                             stage.initialize();
-                            cb();
+                            //cb();
                         };
                         texture.src = stage.mesh.dataURL;
                     },
@@ -108,61 +86,6 @@
                         mesh.attributeComponentLengths = [3, 2, 3];
                         assert.eq(mesh.vertexAt(1).toString(), '3,3,3,4,4,5,5,5', 'Mesh can extract vertexAt.');
                         assert.eq(mesh.componentAt('uv', 2).toString(), '7,7', 'Mesh can extract componentAt.');
-                        cb();
-                    },
-                    function test2DGL(cb) {
-                        var stage2D = new Stage(300, 300);
-                        var view = new View(75, 75, 150, 150);
-                        function drawBox(view) {
-                            view.context.save();
-                            view.context.fillStyle = 'rgba(127, 127, 127, 0.5)';
-                            view.context.strokeStyle = 'rgb(255, 255, 0)';
-                            view.context.fillRect(0, 0, view.width, view.height);
-                            view.context.strokeRect(0, 0, view.width, view.height);
-                            view.context.restore();
-                        }
-                        function createFractalBlock(view, n) {
-                            drawBox(view);
-                            
-                            var tween = new Ease({
-                                target : view,
-                                properties : {
-                                    alpha : 0.3,
-                                    x : view.x + 20,
-                                    rotation : Math.PI/16
-                                }
-                            });
-                            tween.onComplete(function(_, tween) {
-                                view.alpha = 1;
-                                view.x = view.x - 20;
-                                view.rotation = 0;
-                                tween.interpolate();
-                            });
-                            tween.interpolate();
-                            view.tween = tween;
-                            
-                            var w = view.width/2;
-                            var h = view.height/2;
-                            if (w < 5 || h < 5 || n === 0) {
-                                return;
-                            }
-                            var tl = new View(-w/2, -h/2, w, h);
-                            view.addView(tl);
-                            createFractalBlock(tl, n-1);
-                            var tr = new View(w*2-w/2, -h/2, w, h);
-                            view.addView(tr);
-                            createFractalBlock(tr, n-1);
-                            var bl = new View(-w/2, h*2-h/2, w, h);
-                            view.addView(bl);
-                            createFractalBlock(bl, n-1);
-                            var br = new View(w*2-w/2, h*2-h/2, w, h);
-                            view.addView(br);
-                            createFractalBlock(br, n-1);
-                        }
-                        createFractalBlock(view, 2);
-                        stage2D.addView(view);
-                        bang.appendChild(stage2D.compositeCanvas);
-                        
                         cb();
                     },
                     function testTexShader(shaderCB) {
@@ -184,38 +107,20 @@
                         var tshader = stage.shader = new TexShader(stage.gl);
                         // Create a texture on the shader...
                         tshader.createTexture('canvas', canvas);
-                        stage.sendGeometry = function(mvMatrix) {
-                            // Clear the stage...
-                            this.gl.clear(this.gl.COLOR_BUFFER_BIT | this.gl.DEPTH_BUFFER_BIT);
-                            // Update the projection matrix...
-                            var pMatUniform = this.shader.uniformLocations.uPMatrix;
-                            this.gl.uniformMatrix4fv(pMatUniform, false, new Float32Array(this.projection.transpose()));
-                                
-                            this.gl.bindBuffer(this.gl.ARRAY_BUFFER, this.meshBuffer);
-                            this.shader.setVertexAttribPointers();
-
-                            this.gl.activeTexture(this.gl.TEXTURE0);
-                            this.gl.bindTexture(this.gl.TEXTURE_2D, this.shader.textures.canvas);
-                            this.gl.uniform1i(this.shader.uniformLocations.uSampler, 0);
-
-                            var mvMatUniform = this.shader.uniformLocations.uMVMatrix;
-                            this.gl.uniformMatrix4fv(mvMatUniform, false, new Float32Array(mvMatrix.transpose()));
-                                
-                            var numPoints = this.mesh.length/this.shader.numberOfComponents();
-                            this.gl.drawArrays(this.gl.TRIANGLE_STRIP, 0, numPoints); 
-                        }
                         // Add our mesh geometry to the stage...
                         stage.mesh = new Mesh(
                             // positions        // texture mapping
                             256.0, 0.0, 0.0,    1.0, 0.0,
-                            0.0, 0.0, 0.0,    0.0, 0.0,
-                            256.0, 256.0, 0.0,    1.0, 1.0,
+                            0.0, 0.0, 0.0,      0.0, 0.0,
+                            256.0, 256.0, 0.0,  1.0, 1.0,
+                            0.0, 0.0, 0.0,      0.0, 0.0,
+                            256.0, 256.0, 0.0,  1.0, 1.0,
                             0.0, 256.0, 0.0,    0.0, 1.0
                         );
                         
                         stage.initialize();
                         
-                        bang.appendChild(stage.canvas);
+                        document.body.appendChild(stage.canvas);
                         
                         shaderCB();
                     },
@@ -237,7 +142,7 @@
                         child.transform = new Transform3d().translate(0, 0, 1).scale(0.5, 0.5, 1);
                         glstage.addView(child);
                         
-                        bang.appendChild(glstage.canvas);
+                        document.body.appendChild(glstage.canvas);
                         
                         glstage.initialize();
                         
@@ -267,7 +172,6 @@
                         var stage = new Stage(300, 300);
                         stage.context.fillStyle = 'black';
                         stage.context.fillRect(0, 0, 300, 300);
-                        stage.showRedrawRegions = true;
                 
                         var block = new View(25, 25, 50, 50);
                         var square = new View(0, 0, 50, 50);
@@ -277,7 +181,7 @@
                         square.context.fillRect(0, 0, 50, 50);
                         block.addView(square);
                         stage.addView(block);
-                        bang.appendChild(stage.compositeCanvas);
+                        document.body.appendChild(stage.canvas);
                 
                         // serial task test
                         assert.suite = 'Serial Task Test';
@@ -607,33 +511,10 @@
                         assert.eq(resultAB.toString(), AB.toString(), 'Matrix can multiply');
             
                         mat = mat.identity();
-            
-                        mat = mat.translate(1, 2);
-                        assert.eq(mat.x(), 1, 'Matrix can translate x');
-                        assert.eq(mat.y(), 2, 'Matrix can translate y');
-            
-                        mat = mat.scale(0.5, 0.3, 0.1);
-                        assert.eq(mat.a(), 0.5, 'Matrix can scale x');
-                        assert.eq(mat.e(), 0.3, 'Matrix can scale y');
         
                         mat = mat.identity();
         
                         var vec = new Vector(2, 4);
-        
-                        mat = mat.translate(1, 1);
-                        var tVec = mat.transformVector(vec);
-                        assert.eq(tVec.x(), 3, 'Matrix can translate Vector in x');
-                        assert.eq(tVec.y(), 5, 'Matrix can translate Vector in y');
-        
-                        tVec = mat.transformVector(tVec);
-                        assert.eq(tVec.x(), 4, 'Matrix can translate Vector in x');
-                        assert.eq(tVec.y(), 6, 'Matrix can translate Vector in y');
-        
-                        mat = mat.identity();
-                        mat = mat.scale(0.5, 0.5, 0.5);
-                        tVec = mat.transformVector(tVec);
-                        assert.eq(tVec.x(), 2, 'Matrix can scale Vector in x');
-                        assert.eq(tVec.y(), 3, 'Matrix can scale Vector in y');
                 
                         var unitSquare = new Polygon(
                             -1,  1,
@@ -676,10 +557,9 @@
                         view2.tag = 'view2';
                 
                         var bang = document.getElementById('bang');
-                        bang.appendChild(view1.canvas);
-                        bang.appendChild(view2.canvas);
+                        document.body.appendChild(view1.context.canvas);
+                        document.body.appendChild(view2.context.canvas);
                 
-                        assert.eq(view1.isDirty, false, 'View starts clean.');
                         view1.context.fillRect(0,0,20,20);
                         view1.context.fillStyle = 'red';
                         view1.context.fillRect(20,0,20,20);
@@ -687,16 +567,14 @@
                         view1.context.fillRect(20,20,20,20);
                         view1.context.fillStyle = 'blue';
                         view1.context.fillRect(0,20,20,20);
-                        assert.eq(view1.isDirty, true, 'View is dirty after drawing.');
                 
-                        view2.context.drawImage(view1.canvas, 20,20,20,20, 0,0,20,20);
-                        assert.eq(view2.isDirty, true, 'Receiving view is dirty after drawing into context.');
+                        view2.context.drawImage(view1.context.canvas, 20,20,20,20, 0,0,20,20);
                 
                         var data = view2.context.getImageData(0,0,1,1);
                         assert.eq(data.data[1] > data.data[0] && data.data[1] > data.data[2], true, 'Receiving view gets appropriately drawn into.');
                 
-                        bang.removeChild(view1.canvas);
-                        bang.removeChild(view2.canvas);
+                        bang.removeChild(view1.context.canvas);
+                        bang.removeChild(view2.context.canvas);
                 
                         var container = new Stage(250, 250);
                         container.tag = 'stage';
@@ -704,7 +582,7 @@
                         assert.eq(container.canvas.height, 250, 'Stage constructor sets height.');
                         container.addView(view1);
                         view1.addView(view2);
-                        bang.appendChild(container.canvas);
+                        document.body.appendChild(container.canvas);
                 
                         view2.x = 40;
                         container.draw();
