@@ -8,7 +8,7 @@
 * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * **/
 mod({
     name : 'View',
-    dependencies : [ 'bang::Geometry/Rectangle.js', 'bang::Geometry/Transform2d.js' ],
+    dependencies : [ 'bang::Geometry/Rectangle.js', 'bang::Geometry/Matrix.js' ],
     /** * *
     * Initializes the View type.
     * @param {Object}
@@ -156,11 +156,10 @@ mod({
         * If invert is true, will return the inverse of the
         * local tranformation matrix.
         * @param {boolean=}
-        * @return {Transform2d}
         * @nosideeffects
         * * **/
         View.prototype.localTransform = function View_localTransform(invert) {
-            var matrix = new Transform2d();
+            var matrix = new Matrix();
                 
             if (invert) {
                 // Let's just provide them with an inverse instead of
@@ -241,10 +240,20 @@ mod({
             context.globalAlpha *= this.alpha;
         };
         /** * *
-        * Sets this view as being dirty.
+        * Sets this view as being dirty. Causes the stage to redraw.
         * * **/
         View.prototype.markAsDirty = function View_markAsDirty() {
             this.isDirty = true;
+            var parent = this;
+            // Traverse up the display list and tell the root it should redraw.
+            while (parent) {
+                if (!parent.parent) {
+                    parent.shouldRedraw = true;
+                    parent = false;
+                } else {
+                    parent = parent.parent;
+                }
+            }
         };
         /** * *
         * Adds a subview to this view.
@@ -303,15 +312,6 @@ mod({
             }
             context.restore();
         };
-        /** * *
-        * Draws this view and its subviews into the given WebGLRendering context.
-        * @param {WebGLRenderingContext} context
-        * @param {Transform3d} transform The parent transformation matrix.
-        * * **/
-        View.prototype.drawWebGL = function View_drawWebGL(context, transform) {
-            
-        };
-        
         return View;
     }
 });
