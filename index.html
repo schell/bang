@@ -27,39 +27,36 @@
             mod.useTagInjection = true;
             mod.expansions = {
                 bang : 'src/',
-                
+                meshes : 'meshes/'
             };
             mod({
                 name : "Main",
                 dependencies : [
-                    'tests/ViewTests.js',
-                    'tests/NoteTests.js',
-                    'tests/GeomTests.js',
-                    'tests/GlobalTests.js',
-                    'tests/BitmapTests.js',
-                    'tests/SpriteTests.js',
-                    'tests/TextTests.js',
-                    'tests/UtilsTests.js',
-                    'tests/VideoTests.js'
+                    'bang::WebGL/View/GLStage.js',
+                    'bang::WebGL/Shaders/TexShader.js',
+                    'meshes::TrashCan.js'
                 ],
-                init : function initMain (m) {
-                   interactiveTests = false;
-                    return undefined;
-                },
-                callback : function callbackMain (m) {
-                    go(GlobalTests,
-                       GeomTests, 
-                       NoteTests,
-                       ViewTests,
-                       BitmapTests,
-                       SpriteTests,
-                       TextTests,
-                        //m.VideoTests,
-                       UtilsTests,
-                        function() {
-                           assert.stat();
-                        }
-                    ).start();
+                init : function initMain (GLStage, TexShader, TrashCan) {
+                    var stage = new GLStage(300, 300);
+                    stage.transform = stage.transform.translate(0,-2,-8);
+                    stage.transform = stage.transform.rotate(-Math.PI/2, stage.transform.right());
+                    stage.transform = stage.transform.rotate(Math.PI/10, stage.transform.right());
+                    
+                    document.body.appendChild(stage.canvas);
+                    
+                    // Add the trashcan mesh...
+                    stage.mesh = new TrashCan();
+                    // Create the texture shader...
+                    var tshader = stage.shader = new TexShader(stage.gl);
+                    // Create an image for the texture...
+                    var texture = new Image();
+                    texture.onload = function() {
+                        // Create a texture on the shader...
+                        tshader.createTexture('trashcan', texture);
+                        stage.initialize();
+                    };
+                    texture.src = stage.mesh.dataURL;
+                    return {};
                 }
             });
         </script>

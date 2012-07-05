@@ -8,12 +8,12 @@
 * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * **/
 mod({
     name : 'GLView',
-    dependencies : [ 'bang::Geometry/Transform3d.js', 'bang::Geometry/Mesh.js'],
+    dependencies : [ 'bang::Geometry/Transform3d.js', 'bang::Geometry/Mesh.js', 'bang::WebGL/Shaders/TexShader.js' ],
     /** * *
     * Initializes the GLView object constructor.
     * @param {function} View The View constructor.
     * * **/
-    init : function GLViewFactory (Transform3d, Mesh) {
+    init : function GLViewFactory (Transform3d, Mesh, TexShader) {
         /** * *
         * Creates a new GLView. By default a GLView's mesh will be a flat triangle
         * at the origin of 3d space.

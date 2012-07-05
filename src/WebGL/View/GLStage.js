@@ -8,12 +8,12 @@
 * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * **/
 mod({
     name : 'GLStage',
-    dependencies : [ 'bang::WebGL/View/GLView.js', 'bang::Geometry/Transform3d.js', 'bang::Utils/Animation.js' ],
+    dependencies : [ 'bang::WebGL/View/GLView.js', 'bang::Geometry/Transform3d.js', 'bang::Utils/Animation.js', 'bang::WebGL/Shaders/Shader.js' ],
     /** * *
     * Initializes the Stage object constructor.
     * @return {function}
     * * **/
-    init : function StageFactory (GLView, Transform3d, Animation) {
+    init : function StageFactory (GLView, Transform3d, Animation, Shader) {
         /** * *
         * 
         * @constructor
