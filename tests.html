@@ -4,10 +4,10 @@
         <title>.:!!:.</title>
         <style type="text/css" media="screen">
             body {
-    			font-family: Verdana,Geneva,Arial,sans-serif;
-    			font-size: 12px;
-    			line-height: 15px;  
-    		}
+                font-family: Verdana,Geneva,Arial,sans-serif;
+                font-size: 12px;
+                line-height: 15px;  
+            }
             canvas {
                 background-color:transparent;
             }
@@ -16,22 +16,11 @@
         <link rel="shortcut icon" href="favicon.png" />
     </head>
     <body id="body">
-
-        <div id="bang"></div>
-        <xmp id="output"></xmp>
-        
         <script type="text/javascript" charset="utf-8">
-            /*console = {
-                log : function() {
-                    var args = Array.prototype.slice.apply(arguments);
-                    var output = document.getElementById('output');
-                    output.innerHTML = args.join(' ') + '\n' + output.innerHTML;
-                }
-            };*/
-            
             mod.useTagInjection = true;
             mod.expansions = {
                 bang : 'src/',
+                meshes : 'meshes/'
             };
             mod({
                 name : "main",
@@ -45,20 +34,144 @@
                     'bang::View/Stage.js',
                     'bang::Utils/Animation.js',
                     'bang::Utils/Ease.js',
-                    'bang::Utils/Task.js'
+                    'bang::Utils/Task.js',
+                    'bang::Geometry/Transform2d.js',
+                    'bang::Shaders/Shader.js',
+                    'bang::View/Stage3d.js',
+                    'bang::Shaders/TexShader.js',
+                    'bang::Geometry/Mesh.js',
+                    'meshes::TrashCan.js',
+                    'bang::Utils/Utils.js'
                 ],
                 init : function initMain () {
+                    mod.exportAll();
                     return {};
                 }
-            }).onload(function test(Assert, Vector, Polygon, Rectangle, Matrix, View, Stage, Animation, Ease, Task) {
-                
+            }).onload(function test(
+                Assert, Vector, Polygon, Rectangle, Matrix, 
+                View, Stage, Animation, Ease, Task, Transform2d,
+                Shader, Stage3d, TexShader, Mesh, TrashCan, Utils
+            ) {
                 new Task(
+                    function testTrashCan(cb) {
+                        var stage = new Stage3d(300, 300);
+                        stage.transform = stage.transform.translate(0,-2,-8);
+                        stage.transform = stage.transform.rotate(-Math.PI/2, stage.transform.right());
+                        stage.transform = stage.transform.rotate(Math.PI/10, stage.transform.right());
+                        
+                        document.body.appendChild(stage.canvas);
+                        
+                        // Add the trashcan mesh...
+                        stage.mesh = new TrashCan();
+                        // Create the texture shader...
+                        var tshader = stage.shader = new TexShader(stage.gl);
+                        // Create an image for the texture...
+                        var texture = new Image();
+                        texture.onload = function() {
+                            // Create a texture on the shader...
+                            tshader.createTexture('trashcan', texture);
+                            stage.initialize();
+                            cb();
+                        };
+                        texture.src = stage.mesh.dataURL;
+                    },
+                    function testMesh(cb) {
+                        var mesh = new Mesh(
+                        //  position   uv      normal     index
+                            0, 0, 0,   1, 1,   2, 2, 2, //0
+                            3, 3, 3,   4, 4,   5, 5, 5, //1
+                            6, 6, 6,   7, 7,   8, 8, 8  //2
+                        );
+                        mesh.attributeComponentNames = ['position','uv','normal'];
+                        mesh.attributeComponentLengths = [3, 2, 3];
+                        assert.eq(mesh.vertexAt(1).toString(), '3,3,3,4,4,5,5,5', 'Mesh can extract vertexAt.');
+                        assert.eq(mesh.componentAt('uv', 2).toString(), '7,7', 'Mesh can extract componentAt.');
+                        cb();
+                    },
+                    function testTexShader(shaderCB) {
+                        var canvas = document.createElement('canvas');
+                        canvas.width = 256;
+                        canvas.height = 256;
+                        
+                        var ctx = canvas.getContext('2d');
+                        ctx.fillStyle = 'rgb(255, 255, 0)';
+                        ctx.fillRect(0, 0, 256, 256);
+                        ctx.fillStyle = 'rgb(0, 0, 0)';
+                        ctx.textBaseline = 'top';
+                        ctx.font = '20pt Helvetica,Arial,_sans';
+                        ctx.fillText('Texture demo!!!§∆', 0, 0);
+                        
+                        var stage = new Stage3d(300, 300);
+                        stage.projection = Transform3d.ortho(0, 300, 0, 300, 0, 1);
+                        // Create the texture shader...
+                        var tshader = stage.shader = new TexShader(stage.gl);
+                        // Create a texture on the shader...
+                        tshader.createTexture('canvas', canvas);
+                        // Add our mesh geometry to the stage...
+                        stage.mesh = new Mesh(
+                            // positions        // texture mapping
+                            256.0, 0.0, 0.0,    1.0, 0.0,
+                            0.0, 0.0, 0.0,      0.0, 0.0,
+                            256.0, 256.0, 0.0,  1.0, 1.0,
+                            0.0, 0.0, 0.0,      0.0, 0.0,
+                            256.0, 256.0, 0.0,  1.0, 1.0,
+                            0.0, 256.0, 0.0,    0.0, 1.0
+                        );
+                        
+                        stage.initialize();
+                        
+                        document.body.appendChild(stage.canvas);
+                        
+                        shaderCB();
+                    },
+                    function testWebGL(cb) {
+                        var context = document.createElement('canvas').getContext('experimental-webgl');
+                        
+                        var canCompileDefaultShader = true;
+                        try {
+                            var shader = new Shader(context);
+                        } catch (e) {
+                            console.log(e.toString());
+                            canCompileDefaultShader = false;
+                        }
+                        assert.eq(canCompileDefaultShader, true, 'Can compile and link the default shader program.');
+                        
+                        var glstage = window.glstage = new Stage3d(300, 300);
+                        glstage.transform = new Transform3d().translate(0, 0, -6).rotate(Math.PI/8, new Vector(0,1,0));
+                        var child = new View3d();
+                        child.transform = new Transform3d().translate(0, 0, 1).scale(0.5, 0.5, 1);
+                        glstage.addView(child);
+                        
+                        document.body.appendChild(glstage.canvas);
+                        
+                        glstage.initialize();
+                        
+                        var t = {
+                            rotation : 0
+                        };
+                        var tween = new Ease({
+                            target : t,
+                            properties : {
+                                rotation : 2*Math.PI
+                            },
+                            duration : 5000,
+                            onUpdate : function() {
+                                glstage.transform = new Transform3d().translate(0, 0, -6).rotate(t.rotation, new Vector(0,1,0)).rotate(t.rotation, new Vector(1,0,0));
+                                child.transform = new Transform3d().translate(0, 0, 1).rotate(-4*t.rotation, new Vector(0,1,0)).scale(0.5,0.5,1);
+                            }
+                        });
+                        tween.onComplete(function(_, tween) {
+                            t.rotation = 0;
+                            tween.interpolate();
+                        });
+                        tween.interpolate();
+                        
+                        cb();
+                    },
                     function testEaseAndTask(easeTaskCB) {
-                        var bang = document.getElementById('bang');
                         var stage = new Stage(300, 300);
                         stage.context.fillStyle = 'black';
                         stage.context.fillRect(0, 0, 300, 300);
-                        stage.showRedrawRegions = true;
                 
                         var block = new View(25, 25, 50, 50);
                         var square = new View(0, 0, 50, 50);
@@ -68,7 +181,7 @@
                         square.context.fillRect(0, 0, 50, 50);
                         block.addView(square);
                         stage.addView(block);
-                        bang.appendChild(stage.compositeCanvas);
+                        document.body.appendChild(stage.canvas);
                 
                         // serial task test
                         assert.suite = 'Serial Task Test';
@@ -295,21 +408,78 @@
                 
                         assert.suite = 'Matrix';
                 
-                        var mat = new Matrix(
+                        var mat2x2 = new Matrix(
+                            3, 2,
+                            5, 2
+                        );
+                        assert.eq(Matrix.det2x2(mat2x2), -4, 'Matrix can take determinant of 2x2 matrix.');
+                        
+                        var mat3x3 = new Matrix(
+                            1,3,2,
+                            4,1,3,
+                            2,5,2
+                        );
+                        var mat3x3Inv = new Matrix(
+                            -13/17,  4/17,  7/17,
+                             -2/17, -2/17,  5/17,
+                             18/17,  1/17, -11/17
+                        );
+                        assert.eq(mat3x3.minorAt(0,0), -13, 'Matrix can find minor 0,0 (3x3).');
+                        assert.eq(mat3x3.minorAt(1,0), 2, 'Matrix can find minor 1,0 (3x3).');
+                        assert.eq(mat3x3.cofactorAt(0, 0), -13, 'Matrix can find cofactor 0,0 (3x3).');
+                        assert.eq(mat3x3.cofactorAt(1, 0), -2, 'Matrix can find cofactor 1,0 (3x3).');
+                        assert.eq(mat3x3.determinant(), 17, 'Can get determinant of 3x3.');
+                        assert.eq(mat3x3.inverse().toString(), mat3x3Inv.toString(), 'Can get inverse of 3x3.');
+                        
+                        var largerOrderMatrix = new Matrix(
+                            3,2,0,1,
+                            4,0,1,2,
+                            3,0,2,1,
+                            9,2,3,1
+                        );
+                        assert.eq(largerOrderMatrix.minorAt(1,0), -16, 'Can get minor 1,0 of larger order matrices (4x4).');
+                        assert.eq(largerOrderMatrix.minorAt(1,1), -12, 'Can get minor 1,1 of larger order matrices (4x4).');
+                        assert.eq(largerOrderMatrix.determinant(), 24, 'Can get determinant of larger order matrices (4x4).');
+                        var transposeCheck = new Matrix(
+                            3,4,3,9,
+                            2,0,0,2,
+                            0,1,2,3,
+                            1,2,1,1
+                        );
+                        assert.eq(largerOrderMatrix.transpose().isEqualTo(transposeCheck), true, 'Can transpose matrix (4x4).');
+                        var identity = new Matrix([4,4]);
+                        var identityByInverse = largerOrderMatrix.inverse().multiply(largerOrderMatrix).map(function (el,ndx) {
+                            var diff = identity[ndx] - el;
+                            if (Math.abs(diff) < .000001) {
+                                return identity[ndx];
+                            }
+                        });
+                        assert.eq(identityByInverse.toString(), identity.toString(), 'Can take inverse and multiply to get identity (4x4).');
+                        
+                        var mat = new Transform2d(
                             0, 1, 2,
                             3, 4, 5, 
                             6, 7, 8
                         );
+                        
+                        var matMinus00 = mat.deleteRowAndColumnAt(0,0);
+                        var matMinus10 = mat.deleteRowAndColumnAt(1,0);
+                        var matMinus11 = mat.deleteRowAndColumnAt(1,1);
+                        var matMinus22 = mat.deleteRowAndColumnAt(2,2);
+                        assert.eq(matMinus00.toString(), 'Matrix[4,5,7,8]', 'Matrix can return matrix with deleted row and column.');
+                        assert.eq(matMinus10.toString(), 'Matrix[3,5,6,8]', 'Matrix can return matrix with deleted row and column.');
+                        assert.eq(matMinus11.toString(), 'Matrix[0,2,6,8]', 'Matrix can return matrix with deleted row and column.');
+                        assert.eq(matMinus22.toString(), 'Matrix[0,1,3,4]', 'Matrix can return matrix with deleted row and column.');
             
                         var r0 = mat.row(0);
                         var r2 = mat.row(2);
-                        assert.eq(r0.toString(), '0,1,2', 'Can get matrix row.');
-                        assert.eq(r2.toString(), '6,7,8', 'Can get matrix row.');
+                        assert.eq(r0.toString(), 'Vector[0,1,2]', 'Can get matrix row.');
+                        assert.eq(r2.toString(), 'Vector[6,7,8]', 'Can get matrix row.');
             
                         var c0 = mat.column(0);
                         var c2 = mat.column(2);
-                        assert.eq(c0.toString(), '0,3,6', 'Can get matrix column.');
-                        assert.eq(c2.toString(), '2,5,8', 'Can get matrix column.');
+                        assert.eq(c0.toString(), 'Vector[0,3,6]', 'Can get matrix column.');
+                        assert.eq(c2.toString(), 'Vector[2,5,8]', 'Can get matrix column.');
             
                         var A = new Matrix(
                             5, 9, 2, 
@@ -341,34 +511,10 @@
                         assert.eq(resultAB.toString(), AB.toString(), 'Matrix can multiply');
             
                         mat = mat.identity();
-            
-                        mat = mat.translate(1, 2);
-                        assert.eq(mat.x(), 1, 'Matrix can translate x');
-                        assert.eq(mat.y(), 2, 'Matrix can translate y');
-            
-                        mat = mat.scale(0.5, 0.3, 0.1);
-                        assert.eq(mat.a(), 0.5, 'Matrix can scale x');
-                        assert.eq(mat.e(), 0.3, 'Matrix can scale y');
         
                         mat = mat.identity();
         
                         var vec = new Vector(2, 4);
-        
-                        mat = mat.translate(1, 1);
-        
-                        var tVec = mat.transform2DVector(vec);
-                        assert.eq(tVec.x(), 3, 'Matrix can translate Vector in x');
-                        assert.eq(tVec.y(), 5, 'Matrix can translate Vector in y');
-        
-                        tVec = mat.transform2DVector(tVec);
-                        assert.eq(tVec.x(), 4, 'Matrix can translate Vector in x');
-                        assert.eq(tVec.y(), 6, 'Matrix can translate Vector in y');
-        
-                        mat = mat.identity();
-                        mat = mat.scale(0.5, 0.5, 0.5);
-                        tVec = mat.transform2DVector(tVec);
-                        assert.eq(tVec.x(), 2, 'Matrix can scale Vector in x');
-                        assert.eq(tVec.y(), 3, 'Matrix can scale Vector in y');
                 
                         var unitSquare = new Polygon(
                             -1,  1,
@@ -378,21 +524,13 @@
                         );
                         assert.eq(unitSquare.containsPoint(new Vector(0,0)), true, 'Polygon unit square contains origin');
                 
-                        var D = new Matrix().translate(100, 50).scale(0.5).rotate(Math.PI/4);
-                        var invD = D.inverse();
-                        var I = D.multiply(invD);
-                        I = I.map(function(el,ndx,a) {
-                            return Math.round(el);
-                        });
-                        assert.eq(I.isEqualTo(new Matrix()), true, 'Matrix can return inverse.');
-            
                         var rect = new Polygon(
                                 10, 5,
                                 10, -5,
                                 -10, -5,
                                 -10, 5
                         );
-                        var transform = new Matrix().rotate(Math.PI/2).scale(2, 2);
+                        var transform = new Transform2d().rotate(Math.PI/2).scale(2, 2);
                         rect = transform.transformPolygon(rect);
                         var resultPoly = rect.map(function(el,ndx,a) {
                             return Math.round(el);
@@ -406,6 +544,11 @@
                         var clippedPoly = clipRectangle.clipPolygon(polyToClip);
                         var checkPoly = new Polygon(10,10,30,10,10,30);
                         assert.eq(checkPoly.toString(), clippedPoly.toString(), 'Rectangle can clip polygon.');
+                        
+                        var t = new Transform3d();
+                        assert.eq(t.right().toString(), 'Vector[1,0,0]', 'Can get right vector.');
+                        assert.eq(t.up().toString(), 'Vector[0,1,0]', 'Can get up vector.');
+                        assert.eq(t.out().toString(), 'Vector[0,0,1]', 'Can get out vector.');
             
                         assert.suite = 'View';
                         var view1 = new View(0, 0, 40, 40);
@@ -413,11 +556,9 @@
                         var view2 = new View(0, 0, 40, 40);
                         view2.tag = 'view2';
                 
-                        var bang = document.getElementById('bang');
-                        bang.appendChild(view1.canvas);
-                        bang.appendChild(view2.canvas);
+                        document.body.appendChild(view1.context.canvas);
+                        document.body.appendChild(view2.context.canvas);
                 
-                        assert.eq(view1.isDirty, false, 'View starts clean.');
                         view1.context.fillRect(0,0,20,20);
                         view1.context.fillStyle = 'red';
                         view1.context.fillRect(20,0,20,20);
@@ -425,16 +566,14 @@
                         view1.context.fillRect(20,20,20,20);
                         view1.context.fillStyle = 'blue';
                         view1.context.fillRect(0,20,20,20);
-                        assert.eq(view1.isDirty, true, 'View is dirty after drawing.');
                 
-                        view2.context.drawImage(view1.canvas, 20,20,20,20, 0,0,20,20);
-                        assert.eq(view2.isDirty, true, 'Receiving view is dirty after drawing into context.');
+                        view2.context.drawImage(view1.context.canvas, 20,20,20,20, 0,0,20,20);
                 
                         var data = view2.context.getImageData(0,0,1,1);
                         assert.eq(data.data[1] > data.data[0] && data.data[1] > data.data[2], true, 'Receiving view gets appropriately drawn into.');
                 
-                        bang.removeChild(view1.canvas);
-                        bang.removeChild(view2.canvas);
+                        document.body.removeChild(view1.context.canvas);
+                        document.body.removeChild(view2.context.canvas);
                 
                         var container = new Stage(250, 250);
                         container.tag = 'stage';
@@ -442,7 +581,7 @@
                         assert.eq(container.canvas.height, 250, 'Stage constructor sets height.');
                         container.addView(view1);
                         view1.addView(view2);
-                        bang.appendChild(container.canvas);
+                        document.body.appendChild(container.canvas);
                 
                         view2.x = 40;
                         container.draw();
@@ -460,13 +599,10 @@
                 
                         var children = container.children();
                         assert.eq(children.toString(), 'View{"stage"[0,0,250,250]},View{"view1"[0,0,40,40]},View{"view2"[80,0,40,40]},View{"view3"[40,40,40,40]}', 'Stage flattens display list (and toString works the way we expect).');
-                
-                        assert.eq(container.viewPackages.length, 4, "Draw updates list of clean view states.");
-                
+                                
                         view3.x = 60;
-                        container.redraw();
                 
-                        bang.removeChild(container.canvas);
+                        document.body.removeChild(container.canvas);
                 
                         assert.suite = 'Animation';
                         var calls = 0;

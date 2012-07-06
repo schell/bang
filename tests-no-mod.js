@@ -1191,7 +1191,7 @@
         * @return Vector
         * @nosideeffects
         * * **/
-        Matrix.prototype.transform2DVector = function Matrix_transform2DVector(vec) {
+        Matrix.prototype.transformVector = function Matrix_transformVector(vec) {
             // Make the 2-vector homogenous...
             vec = vec.copy();
             vec[2] = 1; 
@@ -1216,7 +1216,7 @@
                 var x = input[i];
                 var y = input[i+1];
                 var shim = new Vector(x,y);
-                var tvec = this.transform2DVector(shim);
+                var tvec = this.transformVector(shim);
                 polygon[i] = tvec.x();
                 polygon[i+1] = tvec.y();
             }

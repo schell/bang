@@ -1,6 +1,6 @@
 /** * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * *
 * Polygon.js
-* The polygon type.
+* A vector of points in 2 space.
 * Copyright (c) 2012 Schell Scivally. All rights reserved.
 * 
 * @author    Schell Scivally

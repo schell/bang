@@ -27,39 +27,66 @@
             mod.useTagInjection = true;
             mod.expansions = {
                 bang : 'src/',
-                
+                meshes : 'meshes/'
             };
             mod({
                 name : "Main",
                 dependencies : [
-                    'tests/ViewTests.js',
-                    'tests/NoteTests.js',
-                    'tests/GeomTests.js',
-                    'tests/GlobalTests.js',
-                    'tests/BitmapTests.js',
-                    'tests/SpriteTests.js',
-                    'tests/TextTests.js',
-                    'tests/UtilsTests.js',
-                    'tests/VideoTests.js'
+                    'bang::View/Stage3d.js',
+                    'bang::View/View3d.js',
+                    'bang::Geometry/Transform3d.js',
+                    'bang::Utils/Ease.js',
+                    'meshes::TrashCan.js'
                 ],
-                init : function initMain (m) {
-                   interactiveTests = false;
-                    return undefined;
-                },
-                callback : function callbackMain (m) {
-                    go(GlobalTests,
-                       GeomTests, 
-                       NoteTests,
-                       ViewTests,
-                       BitmapTests,
-                       SpriteTests,
-                       TextTests,
-                        //m.VideoTests,
-                       UtilsTests,
-                        function() {
-                           assert.stat();
+                init : function initMain (Stage3d, View3d, Transform3d, Ease, TrashCan) {
+                    var stage = new Stage3d(300, 300);
+                    stage.useShader(stage.shaders.texShader);
+                    stage.y = -2;
+                    stage.z = -8;
+                    stage.rotationX = -Math.PI/3;
+                    document.body.appendChild(stage.canvas);
+                    var spin = new Ease({
+                        target : stage,
+                        duration : 5000,
+                        properties : {
+                            rotationZ : 2*Math.PI
+                        },
+                        onComplete : function (spin) {
+                            stage.rotationZ = 0;
+                            spin.interpolate();
                         }
-                    ).start();
+                    }).interpolate();
+
+                    var view = new View3d();
+                    view.scaleX = 2;
+                    view.scaleY = 2;
+                    view.useShader(stage.shaders.colorShader);
+                    var top = 3;
+                    var trans = new Ease ({
+                        target : view,
+                        duration : 5000,
+                        properties : {
+                            z : top
+                        },
+                        onComplete : function (trans) {
+                            // Cycle up and down...
+                            trans.config.properties.z = view.z == top ? 0 : top;
+                            trans.interpolate();
+                        }
+                    }).interpolate();
+                    stage.addView(view);
+                    
+                    // Add the trashcan mesh...
+                    stage.mesh = new TrashCan();
+                    // Create an image for the texture...
+                    var texture = new Image();
+                    texture.onload = function() {
+                        // Create a texture on the shader...
+                        stage.shaders.texShader.createTexture('trashcan', texture);
+                        stage.initialize();
+                    };
+                    texture.src = stage.mesh.dataURL;
+                    return {};
                 }
             });
         </script>
