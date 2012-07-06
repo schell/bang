@@ -55,12 +55,12 @@
                             stage.transform = stage.transform.rotate(-Math.PI/2, stage.transform.right());
                             stage.transform = stage.transform.rotate(holder.z, stage.transform.up());
                             stage.transform = stage.transform.rotate(Math.PI/10, stage.transform.right());
+                        },
+                        onComplete : function (spin) {
+                            holder.z = 0;
+                            spin.interpolate();
                         }
                     }).interpolate();
-                    spin.onComplete(function (_, ease) {
-                        holder.z = 0;
-                        spin.interpolate();
-                    });
                     
                     // Add the trashcan mesh...
                     stage.mesh = new TrashCan();

@@ -43,6 +43,14 @@ mod({
             }
             /** * *
             * The configuration of this Ease.
+            * There are some special properties in the config object, namely
+            * 'onUpdateParams' and 'onCompleteParams', which should both be
+            * arrays of parameters you'd like passed to your onUpdate and
+            * onComplete functions. What's special about them is that Ease
+            * will add itself to the end of the arrays, so the last parameter
+            * will always be a reference to the Ease object itself. This allows
+            * you to control the ease object inside your onUpdate and onComplete
+            * functions without defining the Ease object itself.
             * @type {Object}
             * * **/
             this.config = config;
@@ -405,9 +413,9 @@ mod({
                         }
                     }
                     // Update...
-                    tween.config.onUpdate.apply(null, tween.config.onUpdateParams);
+                    tween.config.onUpdate.apply(null, tween.config.onUpdateParams.concat(tween));
                     // Call onComplete...
-                    tween.config.onComplete.apply(null, tween.config.onCompleteParams);
+                    tween.config.onComplete.apply(null, tween.config.onCompleteParams.concat(tween));
                     // Call Task's go again...
                     Task.prototype.go.call(tween);
                 } else if (time >= tween.config.delay) {
