@@ -36,9 +36,9 @@
                     'bang::Utils/Ease.js',
                     'bang::Utils/Task.js',
                     'bang::Geometry/Transform2d.js',
-                    'bang::WebGL/Shaders/Shader.js',
-                    'bang::WebGL/View/GLStage.js',
-                    'bang::WebGL/Shaders/TexShader.js',
+                    'bang::Shaders/Shader.js',
+                    'bang::View/Stage3d.js',
+                    'bang::Shaders/TexShader.js',
                     'bang::Geometry/Mesh.js',
                     'meshes::TrashCan.js',
                     'bang::Utils/Utils.js'
@@ -50,11 +50,11 @@
             }).onload(function test(
                 Assert, Vector, Polygon, Rectangle, Matrix, 
                 View, Stage, Animation, Ease, Task, Transform2d,
-                Shader, GLStage, TexShader, Mesh, TrashCan, Utils
+                Shader, Stage3d, TexShader, Mesh, TrashCan, Utils
             ) {
                 new Task(
                     function testTrashCan(cb) {
-                        var stage = new GLStage(300, 300);
+                        var stage = new Stage3d(300, 300);
                         stage.transform = stage.transform.translate(0,-2,-8);
                         stage.transform = stage.transform.rotate(-Math.PI/2, stage.transform.right());
                         stage.transform = stage.transform.rotate(Math.PI/10, stage.transform.right());
@@ -101,7 +101,7 @@
                         ctx.font = '20pt Helvetica,Arial,_sans';
                         ctx.fillText('Texture demo!!!§∆', 0, 0);
                         
-                        var stage = new GLStage(300, 300);
+                        var stage = new Stage3d(300, 300);
                         stage.projection = Transform3d.ortho(0, 300, 0, 300, 0, 1);
                         // Create the texture shader...
                         var tshader = stage.shader = new TexShader(stage.gl);
@@ -136,9 +136,9 @@
                         }
                         assert.eq(canCompileDefaultShader, true, 'Can compile and link the default shader program.');
                         
-                        var glstage = window.glstage = new GLStage(300, 300);
+                        var glstage = window.glstage = new Stage3d(300, 300);
                         glstage.transform = new Transform3d().translate(0, 0, -6).rotate(Math.PI/8, new Vector(0,1,0));
-                        var child = new GLView();
+                        var child = new View3d();
                         child.transform = new Transform3d().translate(0, 0, 1).scale(0.5, 0.5, 1);
                         glstage.addView(child);
                         
@@ -556,7 +556,6 @@
                         var view2 = new View(0, 0, 40, 40);
                         view2.tag = 'view2';
                 
-                        var bang = document.getElementById('bang');
                         document.body.appendChild(view1.context.canvas);
                         document.body.appendChild(view2.context.canvas);
                 
@@ -573,8 +572,8 @@
                         var data = view2.context.getImageData(0,0,1,1);
                         assert.eq(data.data[1] > data.data[0] && data.data[1] > data.data[2], true, 'Receiving view gets appropriately drawn into.');
                 
-                        bang.removeChild(view1.context.canvas);
-                        bang.removeChild(view2.context.canvas);
+                        document.body.removeChild(view1.context.canvas);
+                        document.body.removeChild(view2.context.canvas);
                 
                         var container = new Stage(250, 250);
                         container.tag = 'stage';
@@ -603,7 +602,7 @@
                                 
                         view3.x = 60;
                 
-                        bang.removeChild(container.canvas);
+                        document.body.removeChild(container.canvas);
                 
                         assert.suite = 'Animation';
                         var calls = 0;

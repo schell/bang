@@ -32,17 +32,35 @@
             mod({
                 name : "Main",
                 dependencies : [
-                    'bang::WebGL/View/GLStage.js',
-                    'bang::WebGL/Shaders/TexShader.js',
+                    'bang::View/Stage3d.js',
+                    'bang::Shaders/TexShader.js',
+                    'bang::Geometry/Transform3d.js',
+                    'bang::Utils/Ease.js',
                     'meshes::TrashCan.js'
                 ],
-                init : function initMain (GLStage, TexShader, TrashCan) {
-                    var stage = new GLStage(300, 300);
-                    stage.transform = stage.transform.translate(0,-2,-8);
-                    stage.transform = stage.transform.rotate(-Math.PI/2, stage.transform.right());
-                    stage.transform = stage.transform.rotate(Math.PI/10, stage.transform.right());
-                    
+                init : function initMain (Stage3d, TexShader, Transform3d, Ease, TrashCan) {
+                    var stage = new Stage3d(300, 300);
                     document.body.appendChild(stage.canvas);
+                    var holder = {
+                        z : 0
+                    };
+                    var spin = new Ease({
+                        target : holder,
+                        duration : 5000,
+                        properties : {
+                            z : 2*Math.PI
+                        },
+                        onUpdate : function () {
+                            stage.transform = new Transform3d().translate(0,-2,-8);
+                            stage.transform = stage.transform.rotate(-Math.PI/2, stage.transform.right());
+                            stage.transform = stage.transform.rotate(holder.z, stage.transform.up());
+                            stage.transform = stage.transform.rotate(Math.PI/10, stage.transform.right());
+                        }
+                    }).interpolate();
+                    spin.onComplete(function (_, ease) {
+                        holder.z = 0;
+                        spin.interpolate();
+                    });
                     
                     // Add the trashcan mesh...
                     stage.mesh = new TrashCan();

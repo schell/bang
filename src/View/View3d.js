@@ -1,5 +1,5 @@
 /** * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * *
-* GLView.js
+* View3d.js
 * A View in 3d space. 
 * Copyright (c) 2012 Schell Scivally. All rights reserved.
 * 
@@ -7,20 +7,20 @@
 * @since    Wed May 30 16:08:45 PDT 2012
 * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * **/
 mod({
-    name : 'GLView',
-    dependencies : [ 'bang::Geometry/Transform3d.js', 'bang::Geometry/Mesh.js', 'bang::WebGL/Shaders/TexShader.js' ],
+    name : 'View3d',
+    dependencies : [ 'bang::Geometry/Transform3d.js', 'bang::Geometry/Mesh.js', 'bang::Shaders/TexShader.js' ],
     /** * *
-    * Initializes the GLView object constructor.
+    * Initializes the View3d object constructor.
     * @param {function} View The View constructor.
     * * **/
-    init : function GLViewFactory (Transform3d, Mesh, TexShader) {
+    init : function View3dFactory (Transform3d, Mesh, TexShader) {
         /** * *
-        * Creates a new GLView. By default a GLView's mesh will be a flat triangle
+        * Creates a new View3d. By default a View3d's mesh will be a flat triangle
         * at the origin of 3d space.
         * @param {Mesh} mesh
         * @constructor
         * * **/
-        function GLView(gl, mesh) {
+        function View3d(gl, mesh) {
             /** * *
             * The WebGLRenderingContext that this view renders into.
             * @type {WebGLRenderingContext}
@@ -30,7 +30,7 @@ mod({
             * A reference to the root view.
             * This is important because the root view typically handles
             * the projection matrix.
-            * @type {GLStage}
+            * @type {Stage3d}
             * * **/
             this.stage = false;
             /** * *
@@ -61,22 +61,22 @@ mod({
             this.meshBuffer = false;
             /** * *
             * A list of child views.
-            * @type {Array.<GLView>}
+            * @type {Array.<View3d>}
             * * **/
             this.displayList = [];
         }
         
-        GLView.prototype = {};
+        View3d.prototype = {};
         
-        GLView.prototype.constructor = GLView;
+        View3d.prototype.constructor = View3d;
         //--------------------------------------
         //  METHODS
         //--------------------------------------
         /** * *
         * Adds a subview to this view.
-        * @param {GLView}
+        * @param {View3d}
         * * **/
-        GLView.prototype.addView = function GLView_addView(subView) {
+        View3d.prototype.addView = function View3d_addView(subView) {
             if (subView.parent) {
                 subView.parent.removeView(subView);
             }
@@ -93,10 +93,10 @@ mod({
         };
         /** * *
         * Adds a subview to this view at a given index.
-        * @param {GLView}
+        * @param {View3d}
         * @param {number}
         * * **/
-        GLView.prototype.addViewAt = function GLView_addViewAt(subView, insertNdx) {
+        View3d.prototype.addViewAt = function View3d_addViewAt(subView, insertNdx) {
             insertNdx = insertNdx || 0;
             
             if (subView.parent) {
@@ -115,9 +115,9 @@ mod({
         };
         /** * *
         * Removes a subview of this view.
-        * @param {GLView}
+        * @param {View3d}
         * * **/
-        GLView.prototype.removeView = function GLView_removeView(subView) {
+        View3d.prototype.removeView = function View3d_removeView(subView) {
             var ndx = this.displayList.indexOf(subView);
             if (ndx !== -1) {
                 this.displayList.splice(ndx, 1);
@@ -133,13 +133,13 @@ mod({
         * or whether your vertices need to be buffered.
         * @return {boolean}
         * * **/
-        GLView.prototype.isInitialized = function GLView_isInitialized() {
+        View3d.prototype.isInitialized = function View3d_isInitialized() {
             return (this.mesh && this.meshBuffer);
         };
         /** * *
         * Initializes the view.
         * * **/
-        GLView.prototype.initialize = function GLView_initialize() {
+        View3d.prototype.initialize = function View3d_initialize() {
             this.bufferMeshData();
             // Initialize all its children...
             for (var i=0; i < this.displayList.length; i++) {
@@ -150,7 +150,7 @@ mod({
         /** * *
         * Buffers the mesh and stores it in meshBuffer.
         * * **/
-        GLView.prototype.bufferMeshData = function GLView_bufferMeshData() {
+        View3d.prototype.bufferMeshData = function View3d_bufferMeshData() {
             this.meshBuffer = this.gl.createBuffer();
             this.gl.bindBuffer(this.gl.ARRAY_BUFFER, this.meshBuffer);
             this.gl.bufferData(this.gl.ARRAY_BUFFER, new Float32Array(this.mesh), this.gl.STATIC_DRAW);
@@ -161,7 +161,7 @@ mod({
         * this function to draw your models in a meaningful way.
         * @param {Transform3d} mvMatrix The global model view matrix.
         * * **/
-        GLView.prototype.sendGeometry = function GLView_sendGeometry(mvMatrix) {
+        View3d.prototype.sendGeometry = function View3d_sendGeometry(mvMatrix) {
             // By default we'll check to see whether our stage's shader is 
             // one of the included ones...
             if (TexShader.prototype.isPrototypeOf(this.stage.shader)) {
@@ -175,7 +175,7 @@ mod({
         * For special views or shaders, override this method.
         * @param {Transform3d} mvMatrix The global model view matrix.
         * * **/
-        GLView.prototype.sendGeometryNotTextured = function GLView_sendGeometry(mvMatrix) {
+        View3d.prototype.sendGeometryNotTextured = function View3d_sendGeometry(mvMatrix) {
             mvMatrix = mvMatrix || this.transform;
             
             this.gl.bindBuffer(this.gl.ARRAY_BUFFER, this.meshBuffer);
@@ -192,7 +192,7 @@ mod({
         * For special views or shaders, override this method.
         * @param {Transform3d} mvMatrix The global model view matrix.
         * * **/
-        GLView.prototype.sendGeometryTextured = function GLView_sendGeometryTextured(mvMatrix) {
+        View3d.prototype.sendGeometryTextured = function View3d_sendGeometryTextured(mvMatrix) {
             mvMatrix = mvMatrix || this.transform;
 
             this.gl.bindBuffer(this.gl.ARRAY_BUFFER, this.meshBuffer);
@@ -212,7 +212,7 @@ mod({
         * Draws the view.
         * @param {Transform3d} mvMatrix The current model view transformation matrix.
         * * **/
-        GLView.prototype.draw = function GLView_draw(mvMatrix) {
+        View3d.prototype.draw = function View3d_draw(mvMatrix) {
             if (!this.isInitialized()) {
                 return;
             }
@@ -230,6 +230,6 @@ mod({
             }
         };
         
-        return GLView;
+        return View3d;
     }
 });

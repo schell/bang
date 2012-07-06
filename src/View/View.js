@@ -116,8 +116,8 @@ mod({
         };
         /** * *
         * Initializes the view.
-        * Currently empty. This exists to conform View to a GLView,
-        * so View objects can be rendered by a GLView.
+        * Currently empty. This exists to conform View to a View3d,
+        * so View objects can be rendered by a View3d.
         * * **/
         View.prototype.initialize = function View_initialize() {
             

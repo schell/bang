@@ -8,7 +8,7 @@
 * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * **/
 mod({
     name : 'TexShader',
-    dependencies : [ 'bang::WebGL/Shaders/Shader.js' ],
+    dependencies : [ 'bang::Shaders/Shader.js' ],
     /** * *
     * Initializes the TexShader object constructor.
     * @param {function} Shader The Shader object constructor.

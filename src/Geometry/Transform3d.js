@@ -101,6 +101,12 @@ mod({
                 0, 0, 0, 1
             );
         };
+        /** * *
+        * Creats a projection matrix looking at a specific location.
+        * * **/
+        Transform3d.prototype.lookAt = function Transform3d_lookAt(eyex, eyey, eyez, x, y, z, upx, upy, upz) {
+            
+        };
         //--------------------------------------
         //  METHODS
         //--------------------------------------
