@@ -33,44 +33,56 @@
                 name : "Main",
                 dependencies : [
                     'bang::View/Stage3d.js',
-                    'bang::Shaders/TexShader.js',
+                    'bang::View/View3d.js',
                     'bang::Geometry/Transform3d.js',
                     'bang::Utils/Ease.js',
                     'meshes::TrashCan.js'
                 ],
-                init : function initMain (Stage3d, TexShader, Transform3d, Ease, TrashCan) {
+                init : function initMain (Stage3d, View3d, Transform3d, Ease, TrashCan) {
                     var stage = new Stage3d(300, 300);
+                    stage.useShader(stage.shaders.texShader);
+                    stage.y = -2;
+                    stage.z = -8;
+                    stage.rotationX = -Math.PI/3;
                     document.body.appendChild(stage.canvas);
-                    var holder = {
-                        z : 0
-                    };
                     var spin = new Ease({
-                        target : holder,
+                        target : stage,
                         duration : 5000,
                         properties : {
-                            z : 2*Math.PI
-                        },
-                        onUpdate : function () {
-                            stage.transform = new Transform3d().translate(0,-2,-8);
-                            stage.transform = stage.transform.rotate(-Math.PI/2, stage.transform.right());
-                            stage.transform = stage.transform.rotate(holder.z, stage.transform.up());
-                            stage.transform = stage.transform.rotate(Math.PI/10, stage.transform.right());
+                            rotationZ : 2*Math.PI
                         },
                         onComplete : function (spin) {
-                            holder.z = 0;
+                            stage.rotationZ = 0;
                             spin.interpolate();
                         }
                     }).interpolate();
+
+                    var view = new View3d();
+                    view.scaleX = 2;
+                    view.scaleY = 2;
+                    view.useShader(stage.shaders.colorShader);
+                    var top = 3;
+                    var trans = new Ease ({
+                        target : view,
+                        duration : 5000,
+                        properties : {
+                            z : top
+                        },
+                        onComplete : function (trans) {
+                            // Cycle up and down...
+                            trans.config.properties.z = view.z == top ? 0 : top;
+                            trans.interpolate();
+                        }
+                    }).interpolate();
+                    stage.addView(view);
                     
                     // Add the trashcan mesh...
                     stage.mesh = new TrashCan();
-                    // Create the texture shader...
-                    var tshader = stage.shader = new TexShader(stage.gl);
                     // Create an image for the texture...
                     var texture = new Image();
                     texture.onload = function() {
                         // Create a texture on the shader...
-                        tshader.createTexture('trashcan', texture);
+                        stage.shaders.texShader.createTexture('trashcan', texture);
                         stage.initialize();
                     };
                     texture.src = stage.mesh.dataURL;

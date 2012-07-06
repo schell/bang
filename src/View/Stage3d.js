@@ -8,17 +8,19 @@
 * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * **/
 mod({
     name : 'Stage3d',
-    dependencies : [ 'bang::View/View3d.js', 'bang::Geometry/Transform3d.js', 'bang::Utils/Animation.js', 'bang::Shaders/Shader.js' ],
+    dependencies : [ 'bang::View/View3d.js', 'bang::Geometry/Transform3d.js', 'bang::Utils/Animation.js', 'bang::Shaders/TexShader.js', 'bang::Shaders/Shader.js' ],
     /** * *
     * Initializes the Stage object constructor.
     * @return {function}
     * * **/
-    init : function StageFactory (View3d, Transform3d, Animation, Shader) {
+    init : function StageFactory (View3d, Transform3d, Animation, TexShader, Shader) {
         /** * *
         * 
         * @constructor
         * * **/
         function Stage3d(width, height) {
+            // Run the View3d constructor giving it a reference to a WebGLRenderingContext...
+            View3d.prototype.constructor.call(this);
             /** * *
             * An HTMLCanvasElement to hold our scene.
             * @type {HTMLCanvasElement}
@@ -35,12 +37,14 @@ mod({
             * * **/
             this.height = height || this.canvas.height;
             
+            // Update the canvas's dimensions...
             this.canvas.width = this.width;
             this.canvas.height = this.height;
-            
-            // Run the View3d constructor giving it a reference to a WebGLRenderingContext...
-            View3d.prototype.constructor.call(this, this.canvas.getContext('experimental-webgl'));
-            
+            /** * *
+            * The WebGLRenderingContext
+            * @type {WebGLRenderingContext} gl 
+            * * **/
+            this.gl = this.canvas.getContext('experimental-webgl');
             /** * *
             * An animation timer for scheduling redraws.
             * @type {Animation}
@@ -66,8 +70,12 @@ mod({
             * The shader program to use for drawing.
             * @type {Shader|boolean}
             * * **/
-            this.shader = this.gl ? new Shader(this.gl) : false;
-            
+            this.shaders = {
+                texShader : new TexShader(this.gl),
+                colorShader : new Shader(this.gl)
+            };
+            // By default we'll use the normal color shader...
+            this.useShader(this.shaders.color);
             // Set the root view...
             this.stage = this;
         }
@@ -84,10 +92,6 @@ mod({
         Stage3d.prototype.sendGeometry = function Stage3d_sendGeometry() {
             // Clear the stage...
             this.gl.clear(this.gl.COLOR_BUFFER_BIT | this.gl.DEPTH_BUFFER_BIT);
-            // Update the projection matrix...
-            var pMatUniform = this.shader.uniformLocations.uPMatrix;
-            this.gl.uniformMatrix4fv(pMatUniform, false, new Float32Array(this.projection.transpose()));
-            
             View3d.prototype.sendGeometry.call(this);
         };
         /** * *
@@ -97,20 +101,21 @@ mod({
         * @return {boolean}
         * * **/
         Stage3d.prototype.isInitialized = function Stage3d_isInitialized() {
-            return (this.initialized && this.shader && this.shader.id && View3d.prototype.isInitialized.call(this));
+            return (this.initialized && View3d.prototype.isInitialized.call(this));
         };
         /** * *
         * Initializes the stage by compiling and linking shader programs.
         * * **/
         Stage3d.prototype.initialize = function Stage3d_initialize() {
-            this.gl.stage = this;
             this.gl.clearColor(0,0,0,0);                      
             this.gl.enable(this.gl.DEPTH_TEST);                               
             this.gl.depthFunc(this.gl.LEQUAL);                                
             this.gl.clear(this.gl.COLOR_BUFFER_BIT|this.gl.DEPTH_BUFFER_BIT);
             this.initialized = true;
-            this.shader.compile();
-            this.shader.use();
+            for (var shaderName in this.shaders) {
+                var shader = this.shaders[shaderName];
+                shader.compile();
+            }
 
             View3d.prototype.initialize.call(this);
         };

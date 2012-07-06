@@ -75,10 +75,14 @@ mod({
             * * **/
             this.parent = false;
             /** * *
+            * The stage view.
+            * @type {Stage|false} stage 
+            * * **/
+            this.stage = false;
+            /** * *
             * A list of children of this view.
             * @type {Array.<View>}
             * * **/
-            this.displayList = [];
             /** * *
             * A string that identifies this view.
             * @type {string}
