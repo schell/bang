@@ -88,6 +88,11 @@ mod({
             * @type {string}
             * * **/
             this.tag = (_instances++).toString();
+            /** * *
+            * A list of child views.
+            * @type {Array.<View>}
+            * * **/
+            this.displayList = [];
             
             // Set the width and height...
             if (typeof w === 'number') {

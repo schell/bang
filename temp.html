@@ -1,0 +1,38 @@
+<html>
+    <head>
+        <meta http-equiv="Content-type" content="text/html; charset=utf-8">
+        <title>.:!!:.</title>
+        <style type="text/css" media="screen">
+            body {
+                font-family: Verdana,Geneva,Arial,sans-serif;
+                font-size: 12px;
+                line-height: 15px;  
+            }
+            canvas {
+                background-color:transparent;
+            }
+        </style>
+        <script src="mod.js" type="text/javascript" charset="utf-8"></script>
+        <link rel="shortcut icon" href="favicon.png" />
+    </head>
+    <body id="body">
+        <script type="text/javascript" charset="utf-8">
+            mod.useTagInjection = true;
+            mod.expansions = {
+                bang : 'src/',
+                meshes : 'meshes/'
+            };
+            mod({
+                name : "main",
+                dependencies : [
+                    'bang::View/Stage.js'
+                ],
+                init : function mainFactory(Stage) {
+                    var stage = window.stage = new Stage(300, 300);
+                    stage.context.fillRect(0, 0, 300, 300);
+                    document.body.appendChild(stage.canvas);
+                }
+            });
+        </script>
+    </body>
+</html>
