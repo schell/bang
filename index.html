@@ -45,12 +45,13 @@
                 ) {
                     var stage = window.stage = new Stage3d(300, 300, new ColoredUnitSquare());
                     // Use the color shader by default...
+                    stage.z = -4.5;
                     stage.useShader(stage.shaders.colorShader);
                     document.body.appendChild(stage.canvas);
 
                     var scene = window.scene = new View3d(0,0,0, new ColoredUnitCube());
-                    scene.z = -8;
-                    scene.rotationX = -3*Math.PI/8;
+                    scene.rotationX = -0.82;
+                    scene.rotationZ = -2.37;
                     stage.addView(scene);
 
                     // Add rotation and click events to the window...
@@ -93,10 +94,10 @@
                         stage.z += e.wheelDeltaY*zoomScaler;
 
                         // Clamp the stage between 0 and 5.8...
-                        if (stage.z > 5.8) {
-                            stage.z = 5.8;
-                        } else if (stage.z < 0) {
-                            stage.z = 0;
+                        if (stage.z > -2) {
+                            stage.z = -2;
+                        } else if (stage.z < -4.5) {
+                            stage.z = -4.5;
                         }
 
                         // Prevent the window from scrolling on us...
