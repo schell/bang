@@ -8,12 +8,19 @@
 * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * **/
 mod({
     name : 'Stage3d',
-    dependencies : [ 'bang::View/View3d.js', 'bang::Geometry/Transform3d.js', 'bang::Utils/Animation.js', 'bang::Shaders/TexShader.js', 'bang::Shaders/Shader.js' ],
+    dependencies : [ 
+        'bang::View/View3d.js', 
+        'bang::Geometry/Transform3d.js', 
+        'bang::Utils/Animation.js', 
+        'bang::Shaders/TexShader.js', 
+        'bang::Shaders/Shader.js',
+        'bang::Geometry/Mesh.js'
+    ],
     /** * *
     * Initializes the Stage object constructor.
     * @return {function}
     * * **/
-    init : function StageFactory (View3d, Transform3d, Animation, TexShader, Shader) {
+    init : function StageFactory (View3d, Transform3d, Animation, TexShader, Shader, Mesh) {
         /** * *
         * 
         * @constructor
@@ -74,10 +81,10 @@ mod({
                 texShader : new TexShader(this.gl),
                 colorShader : new Shader(this.gl)
             };
-            // By default we'll use the normal color shader...
-            this.useShader(this.shaders.color);
             // Set the root view...
             this.stage = this;
+            // By default we'll use the normal color shader...
+            this.useShader(this.shaders.colorShader);
         }
         
         Stage3d.prototype = new View3d(false, false);

@@ -8,19 +8,28 @@
 * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * **/
 mod({
     name : 'View3d',
-    dependencies : [ 'bang::Geometry/Transform3d.js', 'bang::Geometry/Mesh.js', 'bang::Shaders/Shader.js', 'bang::Shaders/TexShader.js' ],
+    dependencies : [ 
+        'bang::Geometry/Transform3d.js', 
+        'bang::Geometry/Mesh.js', 
+        'bang::Shaders/Shader.js', 
+        'bang::Shaders/TexShader.js',
+        'bang::Geometry/Vector.js'
+    ],
     /** * *
     * Initializes the View3d object constructor.
     * @param {function} View The View constructor.
     * * **/
-    init : function View3dFactory (Transform3d, Mesh, Shader, TexShader) {
+    init : function View3dFactory (Transform3d, Mesh, Shader, TexShader, Vector) {
         /** * *
         * Creates a new View3d. By default a View3d's mesh will be a flat triangle
         * at the origin of 3d space.
         * @param {Mesh} mesh
         * @constructor
         * * **/
-        function View3d(mesh) {
+        function View3d(x,y,z, mesh) {
+            x = x || 0;
+            y = y || 0;
+            z = z || 0;
             /** * *
             * A reference to the root view.
             * This is important because the root view typically handles
@@ -89,16 +98,7 @@ mod({
             * A model mesh.
             * @type {Mesh}
             * * **/
-            this.mesh = mesh || new Mesh(
-                // positions        // colors
-                1.0,  1.0,  0.0,    1.0, 1.0, 1.0, 1.0,
-                -1.0, 1.0,  0.0,    1.0, 0.0, 0.0, 1.0,
-                1.0,  -1.0, 0.0,    0.0, 1.0, 0.0, 1.0,
-                
-                -1.0, 1.0,  0.0,    1.0, 0.0, 0.0, 1.0,
-                1.0,  -1.0, 0.0,    0.0, 1.0, 0.0, 1.0,
-                -1.0, -1.0, 0.0,    0.0, 0.0, 1.0, 1.0
-            );
+            this.mesh = mesh || new Mesh();
             /** * *
             * A list of child views.
             * @type {Array.<View3d>}
@@ -126,6 +126,14 @@ mod({
             return transform;
         };
         /** * *
+        * Constructs a position vector.
+        * @return {Vector} 
+        * @nosideeffects
+        * * **/
+        View3d.prototype.position = function View3d_position() {
+            return new Vector(this.x, this.y, this.z);
+        };
+        /** * *
         * Adds a subview to this view.
         * @param {View3d}
         * * **/
@@ -136,8 +144,8 @@ mod({
             this.displayList.push(subView);
             subView.parent = this;
             subView.stage = this.stage;
-            if (!this.shader && this.stage.shader) {
-                this.shader = this.stage.shader;
+            if (!subView.shader && this.shader) {
+                subView.shader = this.shader;
             }
         };
         /** * *
@@ -154,8 +162,8 @@ mod({
             this.displayList.splice(insertNdx, 0, subView);
             subView.parent = this;
             subView.stage = this.stage;
-            if (!this.shader && this.stage.shader) {
-                this.shader = this.stage.shader;
+            if (!subView.shader && this.shader) {
+                subView.shader = this.shader;
             }
         };
         /** * *
@@ -215,6 +223,9 @@ mod({
         * * **/
         View3d.prototype.sendGeometry = function View3d_sendGeometry(mvMatrix) {
             // Let's use this shader...
+            if (!this.shader) {
+                return;
+            }
             this.shader.use();
             // Update the projection matrix...
             var pMatUniform = this.shader.uniformLocations.uPMatrix;

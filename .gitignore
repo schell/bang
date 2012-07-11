@@ -2,3 +2,4 @@
 */.DS_Store
 *.mp4 #way too big...
 videos/**
+*.sublime-project

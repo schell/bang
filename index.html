@@ -4,19 +4,18 @@
         <title>.:!:.</title>
         <style type="text/css" media="screen">
             body {
+                    background-color: #AAAAAA;
         			margin:0px;
-        			background: url(http://slaughterballoon.com/SlaughterBalloon-iso.png) fixed bottom left no-repeat;
         			font-family: Verdana,Geneva,Arial,sans-serif;
         			font-size: 12px;
         			line-height: 15px;
-                    text-align:center;
         		}
             canvas {
                 background-color:transparent;
+                border: #000000 1px solid;
             }
         </style>
         <script src="mod.js" type="text/javascript" charset="utf-8"></script>
-        <script src="http://schell.github.com/go/go.js" type="text/javascript" charset="utf-8"></script>
         <link rel="shortcut icon" href="favicon.png" />
     </head>
     <body id="body">
@@ -36,57 +35,78 @@
                     'bang::View/View3d.js',
                     'bang::Geometry/Transform3d.js',
                     'bang::Utils/Ease.js',
-                    'meshes::TrashCan.js'
+                    'meshes::TrashCan.js',
+                    'meshes::ColoredUnitSquare.js',
+                    'meshes::ColoredUnitCube.js'
                 ],
-                init : function initMain (Stage3d, View3d, Transform3d, Ease, TrashCan) {
-                    var stage = new Stage3d(300, 300);
-                    stage.useShader(stage.shaders.texShader);
-                    stage.y = -2;
-                    stage.z = -8;
-                    stage.rotationX = -Math.PI/3;
+                init : function initMain (
+                    Stage3d, View3d, Transform3d, Ease, 
+                    TrashCan, ColoredUnitSquare, ColoredUnitCube
+                ) {
+                    var stage = window.stage = new Stage3d(300, 300, new ColoredUnitSquare());
+                    // Use the color shader by default...
+                    stage.useShader(stage.shaders.colorShader);
                     document.body.appendChild(stage.canvas);
-                    var spin = new Ease({
-                        target : stage,
-                        duration : 5000,
-                        properties : {
-                            rotationZ : 2*Math.PI
-                        },
-                        onComplete : function (spin) {
-                            stage.rotationZ = 0;
-                            spin.interpolate();
-                        }
-                    }).interpolate();
 
-                    var view = new View3d();
-                    view.scaleX = 2;
-                    view.scaleY = 2;
-                    view.useShader(stage.shaders.colorShader);
-                    var top = 3;
-                    var trans = new Ease ({
-                        target : view,
-                        duration : 5000,
-                        properties : {
-                            z : top
-                        },
-                        onComplete : function (trans) {
-                            // Cycle up and down...
-                            trans.config.properties.z = view.z == top ? 0 : top;
-                            trans.interpolate();
+                    var scene = window.scene = new View3d(0,0,0, new ColoredUnitCube());
+                    scene.z = -8;
+                    scene.rotationX = -3*Math.PI/8;
+                    stage.addView(scene);
+
+                    // Add rotation and click events to the window...
+                    var x = 0;
+                    var y = 0;
+                    var rotateScaler = 0.01;
+                    window.addEventListener('mousedown', function startDrag(e) {
+                        x = e.x;
+                        y = e.y;
+                        function didClick(e) {
+                            // Remove everything...
+                            endDrag(e);
+                            // Get the pixels from webgl...
                         }
-                    }).interpolate();
-                    stage.addView(view);
-                    
-                    // Add the trashcan mesh...
-                    stage.mesh = new TrashCan();
-                    // Create an image for the texture...
-                    var texture = new Image();
-                    texture.onload = function() {
-                        // Create a texture on the shader...
-                        stage.shaders.texShader.createTexture('trashcan', texture);
-                        stage.initialize();
-                    };
-                    texture.src = stage.mesh.dataURL;
-                    return {};
+                        function didDrag(e) {
+                            // Cancel the click...
+                            stage.canvas.removeEventListener('mouseup', didClick);
+                            // Rotate the scene...
+                            var dx = e.x - x;
+                            var dy = e.y - y;
+                            x = e.x;
+                            y = e.y;
+                            scene.rotationZ += dx*rotateScaler;
+                            scene.rotationX += dy*rotateScaler;
+                        }
+                        function endDrag(e) {
+                            stage.canvas.removeEventListener('mouseup', didClick);
+                            window.removeEventListener('mousemove', didDrag);
+                            window.removeEventListener('mouseup', endDrag);
+                        }
+
+                        stage.canvas.addEventListener('mouseup', didClick);
+                        window.addEventListener('mousemove', didDrag);
+                        window.addEventListener('mouseup', endDrag);
+                    });
+
+                    // Add zoom events...
+                    var zoomScaler = 0.01;
+                    window.addEventListener('mousewheel', function zoom(e) {
+                        stage.z += e.wheelDeltaY*zoomScaler;
+
+                        // Clamp the stage between 0 and 5.8...
+                        if (stage.z > 5.8) {
+                            stage.z = 5.8;
+                        } else if (stage.z < 0) {
+                            stage.z = 0;
+                        }
+
+                        // Prevent the window from scrolling on us...
+                        if (e.preventDefault) {
+                            e.preventDefault();
+                        } else {
+                            e.returnValue = false;
+                        }
+                        return false;
+                    });
                 }
             });
         </script>
