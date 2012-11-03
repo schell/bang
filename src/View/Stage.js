@@ -94,7 +94,7 @@ mod({
         * @param {number} time The current time in milliseconds.
         * * **/
         Stage.prototype.step = function Stage_step(time) {
-           View.prototype.draw.call(this, this.canvas.getContext('2d'));
+           this.draw(this.canvas.getContext('2d')); 
         };
         
         return Stage;

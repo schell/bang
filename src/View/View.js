@@ -106,7 +106,7 @@ mod({
             } else {
                 h = this.context.canvas.height;
             }
-            this.height = w;
+            this.height = h;
         }
         
         View.prototype = {};
