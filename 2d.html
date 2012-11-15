@@ -1,0 +1,84 @@
+<!DOCTYPE html>
+<html>
+    <head>
+        <meta http-equiv="Content-type" content="text/html; charset=utf-8">
+        <title>.:!:.</title>
+        <style type="text/css" media="screen">
+            body {
+                    background-color: #AAAAAA;
+        			margin:0px;
+        			font-family: Verdana,Geneva,Arial,sans-serif;
+        			font-size: 12px;
+        			line-height: 15px;
+        		}
+            canvas {
+                background-color:transparent;
+                border: #000000 1px solid;
+            }
+        </style>
+        <script src="mod.js" type="text/javascript" charset="utf-8"></script>
+        <link rel="shortcut icon" href="favicon.png" />
+    </head>
+    <body id="body">
+        
+        <div>Click and drag!</div>
+        <div id="bang"></div>
+        
+        <script type="text/javascript" charset="utf-8">
+            mod.useTagInjection = true;
+            mod.expansions = {
+                bang : 'src/'
+            };
+            mod({
+                name : "Main",
+                dependencies : [
+                    'bang::View/Stage.js',
+                    'bang::View/View.js'
+                ],
+                init : function initMain (
+                    Stage, View
+                ) {
+                    var stage = window.stage = new Stage(300, 300);
+                    stage.context.fillStyle = 'white';
+                    stage.context.fillRect(0,0,300,300);
+                    document.body.appendChild(stage.canvas);
+
+                    var c = 0x000000;
+                    var a = 10;
+                    window.addEventListener('mousedown', function startDrag(e) {
+                        function didClick(e) {
+                            // Remove everything...
+                            endDrag(e);
+                        }
+                        function didDrag(e) {
+                            // Cancel the click...
+                            stage.canvas.removeEventListener('mouseup', didClick);
+
+                            function makeR() {
+                                var x = e.x;
+                                var y = e.y;
+
+                                var w = Math.random()*a+a;
+                                var r = new View(x-w/2, y-w/2, w, w);
+                                console.log(r.toString(),x,y,e);
+                                r.context.fillStyle = '#'+((++c).toString(16));
+                                r.context.fillRect(0,0,r.width,r.height);
+                                return r;
+                            }
+                            stage.addView(makeR());
+                        }
+                        function endDrag(e) {
+                            stage.canvas.removeEventListener('mouseup', didClick);
+                            window.removeEventListener('mousemove', didDrag);
+                            window.removeEventListener('mouseup', endDrag);
+                        }
+
+                        stage.canvas.addEventListener('mouseup', didClick);
+                        window.addEventListener('mousemove', didDrag);
+                        window.addEventListener('mouseup', endDrag);
+                    });
+                }
+            });
+        </script>
+    </body>
+</html>

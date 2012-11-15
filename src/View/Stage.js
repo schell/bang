@@ -23,7 +23,12 @@ mod({
         * @extends View
         * * **/
         function Stage(width, height) {
-           View.call(this, 0, 0, width, height);
+            View.call(this, 0, 0, width, height);
+            /** * *
+            * Whether or not the stage needs to be redrawn.
+            * @type {boolean}
+            * * **/
+            this.needsDisplay = true;
             /** * *
             * An animation timer for scheduling redraws.
             * @type {Animation}
@@ -49,6 +54,8 @@ mod({
             * @type {boolean} clearsOnDraw 
             * * **/
             this.clearsOnDraw = true;
+
+            this.stage = this;
         }
         
         Stage.prototype = new View();
@@ -79,15 +86,20 @@ mod({
         * @param context {CanvasRenderingContext2D}
         * * **/
         Stage.prototype.draw = function Stage_draw(context) {
-            context = context || this.canvas.getContext('2d');
-            
-            context.save();
-            if (this.clearsOnDraw) {
-                // Clear the entire stage...
-                context.clearRect(0, 0, this.width, this.height);
+            if (this.needsDisplay) {
+                context = context || this.canvas.getContext('2d');
+                
+                context.save();
+                if (this.clearsOnDraw) {
+                    // Clear the entire stage...
+                    context.clearRect(0, 0, this.width, this.height);
+                }
+                // Call View's draw...
+                View.prototype.draw.call(this, context);
+                if (typeof __defineGetter__ === 'function') {
+                    this.needsDisplay = false;
+                }
             }
-            // Call View's draw...
-            View.prototype.draw.call(this, context);
         };
         /** * *
         * This is the main step of the display list.

@@ -38,36 +38,140 @@ mod({
             * @type {CanvasRenderingContext2D}
             * * **/
             this.context = document.createElement('canvas').getContext('2d');
+            w = w || this.context.canvas.width;
+            this.context.canvas.width = w;
+            h = h || this.context.canvas.height;
+            this.context.canvas.height = h;
+            //-----------------------------
+            //  GETTERS AND SETTERS
+            //-----------------------------
             /** * *
             * The x coordinate of this view.
             * @type {number}
             * * **/
-            this.x = x;
+            if (typeof this.__defineGetter__ === 'function') {
+                this._x = x;
+                this.__defineGetter__('x', function getx() {
+                        return this._x;
+                });
+                this.__defineSetter__('x', function setx(x) {
+                    this.stage.needsDisplay = true;
+                    this._x = x;
+                });
+            } else {
+                this.x = x;
+            }
             /** * *
             * The y coordinate of this view.
             * @type {number}
             * * **/
-            this.y = y;
+            if (typeof this.__defineGetter__ === 'function') {
+                this._y = y;
+                this.__defineGetter__('y', function gety() {
+                    return this._y;
+                });
+                this.__defineSetter__('y', function sety(y) {
+                    this.stage.needsDisplay = true;
+                    this._y = y;
+                });
+            } else {
+                this.y = y;
+            }
+            /** * *
+            * The width of the view and its canvas.
+            * @type {number}
+            * * **/
+            if (typeof this.__defineGetter__ === 'function') {
+                this.__defineGetter__('width', function getwidth() {
+                    return this.context.canvas.width;
+                });
+                this.__defineSetter__('width', function setwidth(width) {
+                    this.context.canvas.width = width;
+                    this.stage.needsDisplay = true;
+                });
+            } else {
+                this.width = w;
+            }
+            /** * *
+            * The height of the view and its canvas.
+            * @type {number}
+            * * **/
+            if (typeof this.__defineGetter__ === 'function') {
+                this._height = h;
+                this.__defineGetter__('height', function getheight() {
+                    return this.context.canvas.height;
+                });
+                this.__defineSetter__('height', function setheight(height) {
+                    this.context.canvas.height = height;
+                    this.stage.needsDisplay = true;
+                });
+            } else {
+                this.height = h;
+            }
             /** * *
             * The x scale of this view.
             * @type {number}
             * * **/
-            this.scaleX = 1;
+            if (typeof this.__defineGetter__ === 'function') {
+                this._scaleX = 1;
+                this.__defineGetter__('scaleX', function getscaleX() {
+                        return this._scaleX;
+                });
+                this.__defineSetter__('scaleX', function setscaleX(scaleX) {
+                    this.stage.needsDisplay = true;
+                    this._scaleX = scaleX;
+                });
+            } else {
+                this.scaleX = 1;
+            }
             /** * *
             * The y scale of this view.
             * @type {number}
             * * **/
-            this.scaleY = 1;
+            if (typeof this.__defineGetter__ === 'function') {
+                this._scaleY = 1;
+                this.__defineGetter__('scaleY', function getscaleY() {
+                    return this._scaleY;
+                });
+                this.__defineSetter__('scaleY', function setscaleY(scaleY) {
+                    this.stage.needsDisplay = true;
+                    this._scaleY = scaleY;
+                });
+            } else {
+                this.scaleY = 1;
+            }
             /** * *
             * The rotation (in radians) of this view.
             * @type {number}
             * * **/
-            this.rotation = 0;
+            if (typeof this.__defineGetter__ === 'function') {
+                this._rotation = 0;
+                this.__defineGetter__('rotation', function getrotation() {
+                        return this._rotation;
+                });
+                this.__defineSetter__('rotation', function setrotation(rotation) {
+                    this.stage.needsDisplay = true; 
+                    this._rotation = rotation;
+                });
+            } else {
+                this.rotation = 0;
+            }
             /** * *
             * The alpha value of this view.
             * @type {number}
             * * **/
-            this.alpha = 1;
+            if (typeof this.__defineGetter__ === 'function') {
+                this._alpha = 1;
+                this.__defineGetter__('alpha', function getalpha() {
+                        return this._alpha;
+                });
+                this.__defineSetter__('alpha', function setalpha(alpha) {
+                    this.stage.needsDisplay = true;
+                    this._alpha = alpha;
+                });
+            } else {
+                this.alpha = 1;
+            }
             /** * *
             * The parent view of this view.
             * False if this view has no parent.
@@ -93,20 +197,6 @@ mod({
             * @type {Array.<View>}
             * * **/
             this.displayList = [];
-            
-            // Set the width and height...
-            if (typeof w === 'number') {
-                this.context.canvas.width = w;
-            } else {
-                w = this.context.canvas.width;
-            }
-            this.width = w;
-            if (typeof h === 'number') {
-                this.context.canvas.height = h;
-            } else {
-                h = this.context.canvas.height;
-            }
-            this.height = h;
         }
         
         View.prototype = {};
@@ -230,6 +320,7 @@ mod({
             this.displayList.push(subView);
             subView.parent = this;
             subView.stage = this.stage;
+            this.stage.needsDisplay = true;
         };
         /** * *
         * Adds a subview to this view at a given index.
@@ -245,6 +336,7 @@ mod({
             this.displayList.splice(insertNdx, 0, subView);
             subView.parent = this;
             subView.stage = this.stage;
+            this.stage.needsDisplay = true;
         };
         /** * *
         * Removes a subview of this view.
@@ -258,6 +350,7 @@ mod({
             }
             subView.parent = false;
             subView.stage = false;
+            this.stage.needsDisplay = true;
         };
         /** * *
         * Draws this view and its subviews into the given context.
