@@ -33,15 +33,36 @@
                 name : "Main",
                 dependencies : [
                     'bang::View/Stage.js',
-                    'bang::View/View.js'
+                    'bang::View/View.js',
+                    'bang::Utils/Ease.js',
+                    'bang::View/CanvasContext.js'
                 ],
                 init : function initMain (
-                    Stage, View
+                    Stage, View, Ease, CanvasContext
                 ) {
                     var stage = window.stage = new Stage(300, 300);
                     stage.context.fillStyle = 'white';
                     stage.context.fillRect(0,0,300,300);
                     document.body.appendChild(stage.canvas);
+
+                    window.canvasCtx = CanvasContext.createContext();
+
+                    var redSquare = new View(0, 0, 20, 20);
+                    redSquare.context.fillStyle = 'red';
+                    redSquare.context.fillRect(0, 0, 20, 20);
+                    stage.addView(redSquare);
+
+                    redSquare.tween = new Ease({
+                        target : redSquare,
+                        duration : 1000,
+                        properties : {
+                            x : 100
+                        },
+                        onComplete : function(tween) {
+                            tween.config.properties.x = redSquare.x == 100 ? 0 : 100;
+                            tween.interpolate();
+                        }
+                    }).interpolate();
 
                     var c = 0x000000;
                     var a = 10;
@@ -78,6 +99,8 @@
                         window.addEventListener('mouseup', endDrag);
                     });
                 }
+            }).onload(function () {
+                mod.exportAll();
             });
         </script>
     </body>

@@ -8,13 +8,17 @@
 * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * **/
 mod({
     name : 'View',
-    dependencies : [ 'bang::Geometry/Rectangle.js', 'bang::Geometry/Matrix.js' ],
+    dependencies : [ 
+        'bang::Geometry/Rectangle.js', 
+        'bang::Geometry/Matrix.js', 
+        'bang::View/CanvasContext.js' 
+    ],
     /** * *
     * Initializes the View type.
     * @param {Object}
     * @nosideeffects
     * * **/
-    init : function initView (Rectangle, Matrix) {
+    init : function initView (Rectangle, Matrix, CanvasContext) {
         /** * *
         * A private variable for holding the number
         * of instantiated View objects.
@@ -37,11 +41,7 @@ mod({
             * A reference to this view's canvas's context.
             * @type {CanvasRenderingContext2D}
             * * **/
-            this.context = document.createElement('canvas').getContext('2d');
-            w = w || this.context.canvas.width;
-            this.context.canvas.width = w;
-            h = h || this.context.canvas.height;
-            this.context.canvas.height = h;
+            this.context = CanvasContext.createContext(w, h);
             //-----------------------------
             //  GETTERS AND SETTERS
             //-----------------------------
@@ -182,11 +182,18 @@ mod({
             * The stage view.
             * @type {Stage|false} stage 
             * * **/
-            this.stage = false;
-            /** * *
-            * A list of children of this view.
-            * @type {Array.<View>}
-            * * **/
+            if (typeof this.__defineGetter__ === 'function') {
+                this._stage = false;
+                this.__defineGetter__('stage', function getstage() {
+                    return this._stage;
+                });
+                this.__defineSetter__('stage', function setstage(stage) {
+                    this.context.stage = stage;
+                    this._stage = stage;
+                });
+            } else {
+                this.stage = false;
+            }
             /** * *
             * A string that identifies this view.
             * @type {string}
