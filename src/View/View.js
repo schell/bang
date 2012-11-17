@@ -188,8 +188,11 @@ mod({
                     return this._stage;
                 });
                 this.__defineSetter__('stage', function setstage(stage) {
-                    this.context.stage = stage;
                     this._stage = stage;
+                    this.context.stage = stage;
+                    for (var i=0; i < this.displayList.length; i++) {
+                        this.displayList[i].stage = stage;
+                    }
                 });
             } else {
                 this.stage = false;
