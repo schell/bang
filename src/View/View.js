@@ -10,7 +10,7 @@ mod({
     name : 'View',
     dependencies : [ 
         'bang::Geometry/Rectangle.js', 
-        'bang::Geometry/Matrix.js', 
+        'bang::Geometry/Transform2d.js', 
         'bang::View/CanvasContext.js' 
     ],
     /** * *
@@ -18,7 +18,7 @@ mod({
     * @param {Object}
     * @nosideeffects
     * * **/
-    init : function initView (Rectangle, Matrix, CanvasContext) {
+    init : function initView (Rectangle, Transform2d, CanvasContext) {
         /** * *
         * A private variable for holding the number
         * of instantiated View objects.
@@ -239,7 +239,7 @@ mod({
         * @nosideeffects
         * * **/
         View.prototype.localTransform = function View_localTransform(invert) {
-            var matrix = new Matrix();
+            var matrix = new Transform2d();
                 
             if (invert) {
                 // Let's just provide them with an inverse instead of
