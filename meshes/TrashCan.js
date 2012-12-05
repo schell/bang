@@ -8,7 +8,7 @@
 * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * **/
 mod({
     name : 'TrashCan',
-    dependencies : [ 'bang::Geometry/Mesh.js' ],
+    dependencies : [ 'bang3d::Geometry/Mesh.js' ],
     /** * *
     * Initializes the TrashCan object constructor.
     * @param {function} Mesh The mesh object constructor.

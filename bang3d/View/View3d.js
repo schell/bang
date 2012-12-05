@@ -9,10 +9,10 @@
 mod({
     name : 'View3d',
     dependencies : [ 
-        'bang::Geometry/Transform3d.js', 
-        'bang::Geometry/Mesh.js', 
-        'bang::Shaders/Shader.js', 
-        'bang::Shaders/TexShader.js',
+        'bang3d::Geometry/Transform3d.js', 
+        'bang3d::Geometry/Mesh.js', 
+        'bang3d::Shaders/Shader.js', 
+        'bang3d::Shaders/TexShader.js',
         'bang::Geometry/Vector.js'
     ],
     /** * *

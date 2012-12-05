@@ -7,7 +7,7 @@
 * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * **/
 mod({
     name : 'ColoredUnitCube',
-    dependencies : [ 'bang::Geometry/Mesh.js' ],
+    dependencies : [ 'bang3d::Geometry/Mesh.js' ],
     /** * *
     * Initializes the ColoredUnitCube object constructor.
     * @param {function} Mesh The Mesh object constructor.

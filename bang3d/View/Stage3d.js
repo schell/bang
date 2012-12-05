@@ -9,18 +9,18 @@
 mod({
     name : 'Stage3d',
     dependencies : [ 
-        'bang::View/View3d.js', 
-        'bang::Geometry/Transform3d.js', 
+        'bang3d::View/View3d.js', 
+        'bang3d::Geometry/Transform3d.js', 
+        'bang3d::Shaders/TexShader.js', 
+        'bang3d::Shaders/Shader.js',
+        'bang3d::Geometry/Mesh.js',
         'bang::Utils/Animation.js', 
-        'bang::Shaders/TexShader.js', 
-        'bang::Shaders/Shader.js',
-        'bang::Geometry/Mesh.js'
     ],
     /** * *
     * Initializes the Stage object constructor.
     * @return {function}
     * * **/
-    init : function StageFactory (View3d, Transform3d, Animation, TexShader, Shader, Mesh) {
+    init : function StageFactory (View3d, Transform3d, TexShader, Shader, Mesh, Animation) {
         /** * *
         * 
         * @constructor

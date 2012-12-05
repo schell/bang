@@ -1,10 +1,10 @@
+<!DOCTYPE html>
 <html>
     <head>
         <meta http-equiv="Content-type" content="text/html; charset=utf-8">
         <title>.:!:.</title>
         <style type="text/css" media="screen">
             body {
-                    background-color: #AAAAAA;
         			margin:0px;
         			font-family: Verdana,Geneva,Arial,sans-serif;
         			font-size: 12px;
@@ -15,101 +15,31 @@
                 border: #000000 1px solid;
             }
         </style>
-        <script src="mod.js" type="text/javascript" charset="utf-8"></script>
         <link rel="shortcut icon" href="favicon.png" />
     </head>
     <body id="body">
-        
-        <div id="bang"></div>
-        
-        <script type="text/javascript" charset="utf-8">
-            mod.useTagInjection = true;
-            mod.expansions = {
-                bang : 'src/',
-                meshes : 'meshes/'
-            };
-            mod({
-                name : "Main",
-                dependencies : [
-                    'bang::View/Stage3d.js',
-                    'bang::View/View3d.js',
-                    'bang::Geometry/Transform3d.js',
-                    'bang::Utils/Ease.js',
-                    'meshes::TrashCan.js',
-                    'meshes::ColoredUnitSquare.js',
-                    'meshes::ColoredUnitCube.js'
-                ],
-                init : function initMain (
-                    Stage3d, View3d, Transform3d, Ease, 
-                    TrashCan, ColoredUnitSquare, ColoredUnitCube
-                ) {
-                    var stage = window.stage = new Stage3d(300, 300, new ColoredUnitSquare());
-                    // Use the color shader by default...
-                    stage.z = -4.5;
-                    stage.useShader(stage.shaders.colorShader);
-                    document.body.appendChild(stage.canvas);
-
-                    var scene = window.scene = new View3d(0,0,0, new ColoredUnitCube());
-                    scene.rotationX = -0.82;
-                    scene.rotationZ = -2.37;
-                    stage.addView(scene);
-
-                    // Add rotation and click events to the window...
-                    var x = 0;
-                    var y = 0;
-                    var rotateScaler = 0.01;
-                    window.addEventListener('mousedown', function startDrag(e) {
-                        x = e.x;
-                        y = e.y;
-                        function didClick(e) {
-                            // Remove everything...
-                            endDrag(e);
-                            // Get the pixels from webgl...
-                        }
-                        function didDrag(e) {
-                            // Cancel the click...
-                            stage.canvas.removeEventListener('mouseup', didClick);
-                            // Rotate the scene...
-                            var dx = e.x - x;
-                            var dy = e.y - y;
-                            x = e.x;
-                            y = e.y;
-                            scene.rotationZ += dx*rotateScaler;
-                            scene.rotationX += dy*rotateScaler;
-                        }
-                        function endDrag(e) {
-                            stage.canvas.removeEventListener('mouseup', didClick);
-                            window.removeEventListener('mousemove', didDrag);
-                            window.removeEventListener('mouseup', endDrag);
-                        }
-
-                        stage.canvas.addEventListener('mouseup', didClick);
-                        window.addEventListener('mousemove', didDrag);
-                        window.addEventListener('mouseup', endDrag);
-                    });
-
-                    // Add zoom events...
-                    var zoomScaler = 0.01;
-                    window.addEventListener('mousewheel', function zoom(e) {
-                        stage.z += e.wheelDeltaY*zoomScaler;
-
-                        // Clamp the stage between 0 and 5.8...
-                        if (stage.z > -2) {
-                            stage.z = -2;
-                        } else if (stage.z < -4.5) {
-                            stage.z = -4.5;
-                        }
-
-                        // Prevent the window from scrolling on us...
-                        if (e.preventDefault) {
-                            e.preventDefault();
-                        } else {
-                            e.returnValue = false;
-                        }
-                        return false;
-                    });
-                }
-            });
-        </script>
+        <header>
+            <h1>Bang!</h1>
+            <p>A display list and event system for creating HTML5 canvas apps.</p>
+        </header>
+        <p>Here's some tests and examples:</p>
+        <ul>
+            <li>
+                <a href="http://incorrectangle.github.com/game-off-2012" title="The Moonening">The Moonening</a> 
+                - a game demo written in a month for github's 2012 game jam
+            </li>
+            <li><a href="2d.html" title="example 2d canvas app">2d</a></li>
+            <li><a href="3d.html" title="example 3d canvas app">3d</a></li>
+            <li><a href="tests.html" title="tests">2d &amp; 3d tests</a></li>
+        </ul>
+        <p>
+            Please check out the 
+            <a href="https://github.com/schell/bang/wiki" title="bang wiki">wiki</a>
+            and submit 
+            <a href="https://github.com/schell/bang/issues" title="bang issue tracker">issues</a>!
+        </p>
+        <footer>
+            Written by Schell Scivally. 2012.
+        </footer>
     </body>
 </html>
