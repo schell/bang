@@ -7,9 +7,16 @@ Each view has its own canvas API, so every view can be drawn into just as if it 
 feature requests using github's (issues)[https://github.com/schell/bang/issues]
 
 ## Features ##
+
+### Completed ###
 * Flash-like display list API
 * Efficient, on-demand stage drawing
-* Matrix transformations
+* Vector and Matrix support
+* Polygonal hit testing 
+
+### In propress ###
+* Getters/Setters 
+
+### Future ###
 * Actions (Events)
-* Polygonal hit testing
 * Broad phase hit testing using quadtrees
