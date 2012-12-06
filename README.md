@@ -1,10 +1,15 @@
 # bang #
 
-What do you get after the Flash? The bang!
-`bang` is a javascript scene graph framework for rendering 2D (and soon 3D) 
-display lists. It takes some inspiration from Adobe's Flash and seeks to
-supplant the Flash Actionscript API in your web authoring toolchain. 
-Using the canvas tag `bang` enables you to create rich media applications, 
-games and advertising widgets. 
+`bang` is a display list and event framework for creating canvas based HTML5 apps. The API is similar to flash,
+making the transition from AS3 very easy. It uses getters and setters for most of the view altering properties.
+Each view has its own canvas API, so every view can be drawn into just as if it were a canvas (because they are). 
+`bang` is in pre-alpha. Please read/participate in the (wiki)[https://github.com/schell/bang/wiki] and submit bugs
+feature requests using github's (issues)[https://github.com/schell/bang/issues]
 
-Come on in, the API is just fine.
+## Features ##
+* Flash-like display list API
+* Efficient, on-demand stage drawing
+* Matrix transformations
+* Actions (Events)
+* Polygonal hit testing
+* Broad phase hit testing using quadtrees
