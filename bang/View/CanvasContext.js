@@ -53,7 +53,7 @@ mod({
             function createDirtyAlias(func) {
                 return function aliasedDrawFunc() {
                     context.stage.needsDisplay = true;
-                    func.apply(context, arguments);
+                    return func.apply(context, arguments);
                 }
             }
             for (var propName in context) {

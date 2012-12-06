@@ -1,3 +1,4 @@
+<!DOCTYPE html />
 <html>
     <head>
         <meta http-equiv="Content-type" content="text/html; charset=utf-8">
@@ -19,7 +20,8 @@
         <script type="text/javascript" charset="utf-8">
             mod.useTagInjection = true;
             mod.expansions = {
-                bang : 'src/',
+                bang : 'bang/',
+                bang3d : 'bang3d/',
                 meshes : 'meshes/'
             };
             mod({
@@ -36,10 +38,10 @@
                     'bang::Utils/Ease.js',
                     'bang::Utils/Task.js',
                     'bang::Geometry/Transform2d.js',
-                    'bang::Shaders/Shader.js',
-                    'bang::View/Stage3d.js',
-                    'bang::Shaders/TexShader.js',
-                    'bang::Geometry/Mesh.js',
+                    'bang3d::Shaders/Shader.js',
+                    'bang3d::View/Stage3d.js',
+                    'bang3d::Shaders/TexShader.js',
+                    'bang3d::Geometry/Mesh.js',
                     'meshes::TrashCan.js',
                     'bang::Utils/Utils.js'
                 ],
@@ -55,9 +57,6 @@
                 new Task(
                     function testTrashCan(cb) {
                         var stage = new Stage3d(300, 300);
-                        stage.transform = stage.transform.translate(0,-2,-8);
-                        stage.transform = stage.transform.rotate(-Math.PI/2, stage.transform.right());
-                        stage.transform = stage.transform.rotate(Math.PI/10, stage.transform.right());
                         
                         document.body.appendChild(stage.canvas);
                         
