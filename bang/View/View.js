@@ -42,161 +42,12 @@ mod({
             * @type {CanvasRenderingContext2D}
             * * **/
             this.context = CanvasContext.createContext(w, h);
-            //-----------------------------
-            //  GETTERS AND SETTERS
-            //-----------------------------
-            /** * *
-            * The x coordinate of this view.
-            * @type {number}
-            * * **/
-            if (typeof this.__defineGetter__ === 'function') {
-                this._x = x;
-                this.__defineGetter__('x', function getx() {
-                        return this._x;
-                });
-                this.__defineSetter__('x', function setx(x) {
-                    this.stage.needsDisplay = true;
-                    this._x = x;
-                });
-            } else {
-                this.x = x;
-            }
-            /** * *
-            * The y coordinate of this view.
-            * @type {number}
-            * * **/
-            if (typeof this.__defineGetter__ === 'function') {
-                this._y = y;
-                this.__defineGetter__('y', function gety() {
-                    return this._y;
-                });
-                this.__defineSetter__('y', function sety(y) {
-                    this.stage.needsDisplay = true;
-                    this._y = y;
-                });
-            } else {
-                this.y = y;
-            }
-            /** * *
-            * The width of the view and its canvas.
-            * @type {number}
-            * * **/
-            if (typeof this.__defineGetter__ === 'function') {
-                this.__defineGetter__('width', function getwidth() {
-                    return this.context.canvas.width;
-                });
-                this.__defineSetter__('width', function setwidth(width) {
-                    this.context.canvas.width = width;
-                    this.stage.needsDisplay = true;
-                });
-            } else {
-                this.width = w;
-            }
-            /** * *
-            * The height of the view and its canvas.
-            * @type {number}
-            * * **/
-            if (typeof this.__defineGetter__ === 'function') {
-                this._height = h;
-                this.__defineGetter__('height', function getheight() {
-                    return this.context.canvas.height;
-                });
-                this.__defineSetter__('height', function setheight(height) {
-                    this.context.canvas.height = height;
-                    this.stage.needsDisplay = true;
-                });
-            } else {
-                this.height = h;
-            }
-            /** * *
-            * The x scale of this view.
-            * @type {number}
-            * * **/
-            if (typeof this.__defineGetter__ === 'function') {
-                this._scaleX = 1;
-                this.__defineGetter__('scaleX', function getscaleX() {
-                        return this._scaleX;
-                });
-                this.__defineSetter__('scaleX', function setscaleX(scaleX) {
-                    this.stage.needsDisplay = true;
-                    this._scaleX = scaleX;
-                });
-            } else {
-                this.scaleX = 1;
-            }
-            /** * *
-            * The y scale of this view.
-            * @type {number}
-            * * **/
-            if (typeof this.__defineGetter__ === 'function') {
-                this._scaleY = 1;
-                this.__defineGetter__('scaleY', function getscaleY() {
-                    return this._scaleY;
-                });
-                this.__defineSetter__('scaleY', function setscaleY(scaleY) {
-                    this.stage.needsDisplay = true;
-                    this._scaleY = scaleY;
-                });
-            } else {
-                this.scaleY = 1;
-            }
-            /** * *
-            * The rotation (in radians) of this view.
-            * @type {number}
-            * * **/
-            if (typeof this.__defineGetter__ === 'function') {
-                this._rotation = 0;
-                this.__defineGetter__('rotation', function getrotation() {
-                        return this._rotation;
-                });
-                this.__defineSetter__('rotation', function setrotation(rotation) {
-                    this.stage.needsDisplay = true; 
-                    this._rotation = rotation;
-                });
-            } else {
-                this.rotation = 0;
-            }
-            /** * *
-            * The alpha value of this view.
-            * @type {number}
-            * * **/
-            if (typeof this.__defineGetter__ === 'function') {
-                this._alpha = 1;
-                this.__defineGetter__('alpha', function getalpha() {
-                        return this._alpha;
-                });
-                this.__defineSetter__('alpha', function setalpha(alpha) {
-                    this.stage.needsDisplay = true;
-                    this._alpha = alpha;
-                });
-            } else {
-                this.alpha = 1;
-            }
             /** * *
             * The parent view of this view.
             * False if this view has no parent.
             * @type {View|false}
             * * **/
             this.parent = false;
-            /** * *
-            * The stage view.
-            * @type {Stage|false} stage 
-            * * **/
-            if (typeof this.__defineGetter__ === 'function') {
-                this._stage = false;
-                this.__defineGetter__('stage', function getstage() {
-                    return this._stage;
-                });
-                this.__defineSetter__('stage', function setstage(stage) {
-                    this._stage = stage;
-                    this.context.stage = stage;
-                    for (var i=0; i < this.displayList.length; i++) {
-                        this.displayList[i].stage = stage;
-                    }
-                });
-            } else {
-                this.stage = false;
-            }
             /** * *
             * A string that identifies this view.
             * @type {string}
@@ -207,11 +58,194 @@ mod({
             * @type {Array.<View>}
             * * **/
             this.displayList = [];
+
+            this.x = x;
+            this.y = y;
         }
         
         View.prototype = {};
         
         View.prototype.constructor = View;
+        //-----------------------------
+        //  GETTERS/SETTERS
+        //-----------------------------
+        /** * *
+        * Gets the x property.
+        * 
+        * @returns {number} x 
+        * * **/
+        View.prototype.__defineGetter__('x', function View_getx() {
+            if (!this._x) {
+                this._x = 0;
+            }
+            return this._x;
+        });
+        /** * *
+        * Sets the x property.
+        * 
+        * @param {number} 
+        * * **/
+        View.prototype.__defineSetter__('x', function View_setx(x) {
+            this.stage.needsDisplay = true;
+            this._x = x;
+        });
+        /** * *
+        * Gets the y property.
+        * 
+        * @returns {number} y 
+        * * **/
+        View.prototype.__defineGetter__('y', function View_gety() {
+            if (!this._y) {
+                this._y = 0;
+            }
+            return this._y;
+        });
+        /** * *
+        * Sets the y property.
+        * 
+        * @param {number} 
+        * * **/
+        View.prototype.__defineSetter__('y', function View_sety(y) {
+            this.stage.needsDisplay = true;
+            this._y = y;
+        });
+        /** * *
+        * Gets the width property.
+        * This is the width of the view and its canvas and context.
+        * @returns {number} width 
+        * * **/
+        View.prototype.__defineGetter__('width', function View_getwidth() {
+            return this.context.canvas.width;
+        });
+        /** * *
+        * Sets the width property.
+        * This forwards to the context's canvas width and sets the stage to redraw.
+        * @param {number} 
+        * * **/
+        View.prototype.__defineSetter__('width', function View_setwidth(width) {
+            this.context.canvas.height = width;
+            this.stage.needsDisplay = true;
+        });
+        /** * *
+        * Gets the height property.
+        * This is the height of the view and its canvas and context.
+        * @returns {number} height 
+        * * **/
+        View.prototype.__defineGetter__('height', function View_getheight() {
+            return this.context.canvas.height;
+        });
+        /** * *
+        * Sets the height property.
+        * This forwards to the context's canvas height and sets the stage to redraw.
+        * @param {number} 
+        * * **/
+        View.prototype.__defineSetter__('height', function View_setheight(height) {
+            this.context.canvas.height = height;
+            this.stage.needsDisplay = true;
+        });
+        /** * *
+        * Gets the scaleX property.
+        * This is the scale of the view on the x axis.
+        * @returns {number} scaleX 
+        * * **/
+        View.prototype.__defineGetter__('scaleX', function View_getscaleX() {
+            if (!this._scaleX) {
+                this._scaleX = 1;
+            }
+            return this._scaleX;
+        });
+        /** * *
+        * Sets the scaleX property.
+        * Sets the stage to redraw.
+        * @param {number} 
+        * * **/
+        View.prototype.__defineSetter__('scaleX', function View_setscaleX(scaleX) {
+            this._scaleX = scaleX;
+            this.stage.needsDisplay = true;
+        });
+        /** * *
+        * Gets the scaleY property.
+        * This is the scale of the view on the y axis.
+        * @returns {number} scaleY 
+        * * **/
+        View.prototype.__defineGetter__('scaleY', function View_getscaleY() {
+            if (!this._scaleY) {
+                this._scaleY = 1;
+            }
+            return this._scaleY;
+        });
+        /** * *
+        * Sets the scaleY property.
+        * Sets the stage to redraw.
+        * @param {number} 
+        * * **/
+        View.prototype.__defineSetter__('scaleY', function View_setscaleY(scaleY) {
+            this._scaleY = scaleY;
+            this.stage.needsDisplay = true;
+        });
+        /** * *
+        * Gets the rotation property.
+        * The clockwise rotation in degrees.
+        * @returns {number} rotation 
+        * * **/
+        View.prototype.__defineGetter__('rotation', function View_getrotation() {
+            if (!this._rotation) {
+                this._rotation = 0;
+            }
+            return this._rotation;
+        });
+        /** * *
+        * Sets the rotation property.
+        * Sets the stage to redraw.
+        * @param {number} 
+        * * **/
+        View.prototype.__defineSetter__('rotation', function View_setrotation(rotation) {
+            this._rotation = rotation;
+            this.stage.needsDisplay = true;
+        });
+        /** * *
+        * Gets the alpha property.
+        * This is the opacity of the view, 1 represents a fully opaque view, 0 is fully translucent.
+        * @returns {number} alpha 
+        * * **/
+        View.prototype.__defineGetter__('alpha', function View_getalpha() {
+            if (!this._alpha) {
+                this._alpha = 1;
+            }
+            return this._alpha;
+        });
+        /** * *
+        * Sets the alpha property.
+        * Sets the stage to redraw.
+        * @param {number} 
+        * * **/
+        View.prototype.__defineSetter__('alpha', function View_setalpha(alpha) {
+            this._alpha = alpha;
+            this.stage.needsDisplay = true;
+        });
+        /** * *
+        * Gets the stage property.
+        * The root of the views.
+        * @returns {Stage} stage 
+        * * **/
+        View.prototype.__defineGetter__('stage', function View_getstage() {
+            if (!this._stage) {
+                this._stage = false;
+            }
+            return this._stage;
+        });
+        /** * *
+        * Sets the stage property.
+        * Runs through all the children of this view and sets their stage propeties too.
+        * @param {Stage} 
+        * * **/
+        View.prototype.__defineSetter__('stage', function View_setstage(stage) {
+            this._stage = stage;
+            this.context.stage = stage;
+            for (var i=0; i < this.displayList.length; i++) {
+                this.displayList[i].stage = stage;
+            }
+        });
         //--------------------------------------
         //  METHODS
         //--------------------------------------
