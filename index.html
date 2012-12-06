@@ -3,41 +3,55 @@
     <head>
         <meta http-equiv="Content-type" content="text/html; charset=utf-8">
         <title>.:!:.</title>
-        <style type="text/css" media="screen">
-            body {
-        			margin:0px;
-        			font-family: Verdana,Geneva,Arial,sans-serif;
-        			font-size: 12px;
-        			line-height: 15px;
-        		}
-            canvas {
-                background-color:transparent;
-                border: #000000 1px solid;
-            }
-        </style>
         <link rel="shortcut icon" href="favicon.png" />
+        <link href="//netdna.bootstrapcdn.com/twitter-bootstrap/2.2.1/css/bootstrap-combined.min.css" rel="stylesheet">
+        <script src="//netdna.bootstrapcdn.com/twitter-bootstrap/2.2.1/js/bootstrap.min.js"></script>
     </head>
     <body id="body">
         <header>
             <h1>Bang!</h1>
-            <p>A display list and event system for creating HTML5 canvas apps.</p>
         </header>
-        <p>Here's some tests and examples:</p>
-        <ul>
-            <li>
-                <a href="http://incorrectangle.github.com/game-off-2012" title="The Moonening">The Moonening</a> 
-                - a game demo written in a month for github's 2012 game jam
-            </li>
-            <li><a href="2d.html" title="example 2d canvas app">2d</a></li>
-            <li><a href="3d.html" title="example 3d canvas app">3d</a></li>
-            <li><a href="tests.html" title="tests">2d &amp; 3d tests</a></li>
-        </ul>
-        <p>
-            Please check out the 
-            <a href="https://github.com/schell/bang/wiki" title="bang wiki">wiki</a>
-            and submit 
-            <a href="https://github.com/schell/bang/issues" title="bang issue tracker">issues</a>!
-        </p>
+        <article>
+            <p>
+                Bang is a display list and event framework for creating canvas based HTML5 apps. The API is similar to flash,
+                making the transition from AS3 very easy. It uses getters and setters for most of the view altering properties.
+                Each view has its own canvas API, so every view can be drawn into just as if it were a canvas (because they are).
+                It is currently in an alpha stage.
+            </p>
+            <h2>Features</h2>
+            <h3>Completed</h3>
+            <ul>
+                <li>Flash-like display list API</li>
+                <li>Efficient, on-demand stage drawing</li>
+                <li>Vector and Matrix support</li>
+                <li>Polygonal hit testing</li>
+            </ul>
+            <h3>In progress</h3>
+            <ul>
+                <li>Getters/Setters</li>
+            </ul>
+            <h3>Future</h3>
+            <ul>
+                <li>Actions (Events)</li>
+                <li>Broad phase hit testing using quadtrees</li>
+            </ul>
+            <h2>Tests and examples</h2>
+            <ul>
+                <li>
+                    <a href="http://incorrectangle.github.com/game-off-2012" title="The Moonening">The Moonening</a> 
+                    - a game demo written in a month for github's 2012 game jam
+                </li>
+                <li><a href="2d.html" title="example 2d canvas app">2d</a></li>
+                <li><a href="3d.html" title="example 3d canvas app">3d</a></li>
+                <li><a href="tests.html" title="tests">2d &amp; 3d tests</a></li>
+            </ul>
+            <p>
+                Please check out the 
+                <a href="https://github.com/schell/bang/wiki" title="bang wiki">wiki</a>
+                and submit 
+                <a href="https://github.com/schell/bang/issues" title="bang issue tracker">issues</a>!
+            </p>
+        </article>
         <footer>
             Written by Schell Scivally. 2012.
         </footer>
