@@ -43,21 +43,10 @@ mod({
             * * **/
             this.context = CanvasContext.createContext(w, h);
             /** * *
-            * The parent view of this view.
-            * False if this view has no parent.
-            * @type {View|false}
-            * * **/
-            this.parent = false;
-            /** * *
             * A string that identifies this view.
             * @type {string}
             * * **/
             this.tag = (_instances++).toString();
-            /** * *
-            * A list of child views.
-            * @type {Array.<View>}
-            * * **/
-            this.displayList = [];
 
             this.x = x;
             this.y = y;
@@ -246,6 +235,42 @@ mod({
                 this.displayList[i].stage = stage;
             }
         });
+        /** * *
+        * Gets the parent property.
+        * The parent view of this view. False if this view has no parent.
+        * @returns {View|false} parent 
+        * * **/
+        View.prototype.__defineGetter__('parent', function View_getparent() {
+            if (!this._parent) {
+                this._parent = false;
+            }
+            return this._parent;
+        });
+        /** * *
+        * Gets the displayList property.
+        * A list of this view's child views.
+        * @returns {Array.<View>} 
+        * * **/
+        View.prototype.__defineGetter__('displayList', function View_getdisplayList() {
+            if (!this._displayList) {
+                this._displayList = [];
+            }
+            return this._displayList;
+        });
+        /** * *
+        * Sets the displayList property.
+        * Runs through the old list and removes all the views, then runs
+        * through the new list and adds all the new views.
+        * @param {Array.<View>} displayList
+        * * **/
+        View.prototype.__defineSetter__('displayList', function View_setdisplayList(displayList) {
+            while (this.displayList.length) {
+                this.removeView(this.displayList[0]);
+            }
+            for (var i=0; i < displayList.length; i++) {
+                this.addView(displayList[i]);
+            }
+        });
         //--------------------------------------
         //  METHODS
         //--------------------------------------
@@ -255,7 +280,7 @@ mod({
         * @nosideeffects
         * * **/
         View.prototype.toString = function View_toString() {
-            return 'View{"'+this.tag+'"['+[this.x,this.y,this.width,this.height]+']}';
+            return 'View-"'+this.tag+'"('+[this.x,this.y,this.width,this.height]+')';
         };
         /** * *
         * Initializes the view.
@@ -362,7 +387,7 @@ mod({
                 subView.parent.removeView(subView);
             }
             this.displayList.push(subView);
-            subView.parent = this;
+            subView._parent = this;
             subView.stage = this.stage;
             this.stage.needsDisplay = true;
         };
@@ -378,7 +403,7 @@ mod({
                 subView.parent.removeView(subView);
             }
             this.displayList.splice(insertNdx, 0, subView);
-            subView.parent = this;
+            subView._parent = this;
             subView.stage = this.stage;
             this.stage.needsDisplay = true;
         };
@@ -392,7 +417,7 @@ mod({
             } else {
                 throw new Error('subview must be a child of the caller.');
             }
-            subView.parent = false;
+            subView._parent = false;
             subView.stage = false;
             this.stage.needsDisplay = true;
         };

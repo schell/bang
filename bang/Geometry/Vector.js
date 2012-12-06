@@ -35,7 +35,7 @@ mod({
         * @return {string}
         * * **/
         Vector.prototype.toString = function Vector_toString() {
-            return 'Vector['+Array.prototype.toString.call(this)+']';
+            return 'Vector('+Array.prototype.toString.call(this)+')';
         };
         /** * *
         * Folds left (starting at zero) along the vector using function f, 
