@@ -36,17 +36,117 @@ mod({
             w = w || 0;
             h = h || 0;
             
-            this.left(x);
-            this.top(y);
-            this.width(w);
-            this.height(h);
+            this.left = x;
+            this.top = y;
+            this.width = w;
+            this.height = h;
             this.length = 8;
         }
         
         Rectangle.prototype = new Polygon();
         
         Rectangle.prototype.constructor = Rectangle;
-        
+        //-----------------------------
+        //  GETTERS/SETTERS
+        //-----------------------------
+        /** * *
+        * Gets the left property.
+        * The left edge of the Rectangle.
+        * @returns {number} 
+        * * **/
+        Rectangle.prototype.__defineGetter__('left', function Rectangle_getleft() {
+            return this.x;
+        });
+        /** * *
+        * Sets the left edge of the Rectangle.
+        * @param {number} left
+        * * **/
+        Rectangle.prototype.__defineSetter__('left', function Rectangle_setleft(left) {
+            this[0] = left;
+            this[6] = left;
+        });
+        /** * *
+        * Gets the top edge of the Rectangl.
+        * @returns {number} 
+        * * **/
+        Rectangle.prototype.__defineGetter__('top', function Rectangle_gettop() {
+            return this.y;
+        });
+        /** * *
+        * Sets the top edge of the Rectangle.
+        * @param {number} top
+        * * **/
+        Rectangle.prototype.__defineSetter__('top', function Rectangle_settop(top) {
+            this[1] = top;
+            this[3] = top;
+        });
+        /** * *
+        * Gets the right edge of the Rectangle.
+        * @returns {number} 
+        * * **/
+        Rectangle.prototype.__defineGetter__('right', function Rectangle_getright() {
+            return this[2];
+        });
+        /** * *
+        * Sets the right edge of the Rectangle.
+        * @param {number} right
+        * * **/
+        Rectangle.prototype.__defineSetter__('right', function Rectangle_setright(right) {
+            this[2] = right;
+            this[4] = right;
+        });
+        /** * *
+        * Gets the bottom edge of the Rectangle.
+        * @returns {number} 
+        * * **/
+        Rectangle.prototype.__defineGetter__('bottom', function Rectangle_getbottom() {
+            return this[5];
+        });
+        /** * *
+        * Sets the bottom edge of the Rectangle.
+        * @param {number} bottom
+        * * **/
+        Rectangle.prototype.__defineSetter__('bottom', function Rectangle_setbottom(bottom) {
+            this[5] = bottom;
+            this[7] = bottom;
+        });
+        /** * *
+        * Gets the width of the Rectangle.
+        * @returns {number} 
+        * * **/
+        Rectangle.prototype.__defineGetter__('width', function Rectangle_getwidth() {
+            return this.right - this.left;
+        });
+        /** * *
+        * Sets the width property.
+        * @param {number} width
+        * * **/
+        Rectangle.prototype.__defineSetter__('width', function Rectangle_setwidth(width) {
+            var x = this.left + width;
+            this.right = x;
+        });
+        /** * *
+        * Gets the height of the Rectangle.
+        * @returns {number} 
+        * * **/
+        Rectangle.prototype.__defineGetter__('height', function Rectangle_getheight() {
+            return this.bottom - this.top;
+        });
+        /** * *
+        * Sets the height property.
+        * @param {number} height
+        * * **/
+        Rectangle.prototype.__defineSetter__('height', function Rectangle_setheight(height) {
+            var y = this.top + height;
+            this.bottom = y;
+        });
+        /** * *
+        * Gets the area of the Rectangle.
+        * @returns {number} 
+        * * **/
+        Rectangle.prototype.__defineGetter__('area', function Rectangle_getarea() {
+            return this.width * this.height;
+        });
         //--------------------------------------
         //  METHODS
         //--------------------------------------
@@ -55,89 +155,7 @@ mod({
         * @return {string}
         * * **/
         Rectangle.prototype.toString = function Rectangle_toString() {
-            return 'Rectangle['+this.left()+','+this.top()+','+this.width()+','+this.height()+']';
-        };
-        /** * *
-        * Gets and sets the left edge x value.
-        * @param {number}
-        * @return {number}
-        ** * */
-        Rectangle.prototype.left = function Rectangle_left(l) {
-            if (typeof l === 'number') {
-                this[0] = l;
-                this[6] = l;
-            }
-            return this[0];
-        };
-        /** * *
-        * Gets and sets the top edge y value.
-        * @param {number}
-        * @return {number}
-        ** * */
-        Rectangle.prototype.top = function Rectangle_top(t) {
-            if (typeof t === 'number') {
-                this[1] = t;
-                this[3] = t;
-            }
-            return this[1];
-        };
-        /** * *
-        * Gets and sets the right edge x value.
-        * @param {number}
-        * @return {number}
-        * * **/
-        Rectangle.prototype.right = function Rectangle_right(r) {
-            if (typeof r === 'number') {
-                this[2] = r;
-                this[4] = r;
-            }
-            return this.left() + this.width();
-        };
-        /** * *
-        * Gets and sets the bottom edge y value.
-        * @param {number}
-        * @return {number}
-        * * **/
-        Rectangle.prototype.bottom = function Rectangle_bottom(b) {
-            if (typeof b === 'number') {
-                this[5] = b;
-                this[7] = b;
-            }
-            return this.top() + this.height();
-        };
-        /** * *
-        * Gets and sets the width of this Rectangle.
-        * @param {number}
-        * @return {number}
-        * * **/
-        Rectangle.prototype.width = function Rectangle_width(w) {
-            if (typeof w === 'number') {
-                var x = this.left() + w;
-                this[2] = x;
-                this[4] = x;
-            }
-            return this[2] - this[0];
-        };
-        /** * *
-        * Returns the height of this Rectangle
-        * @param {number}
-        * @return {number}
-        * * **/
-        Rectangle.prototype.height = function Rectangle_height(h) {
-            if (typeof h === 'number') {
-                var y = this.top() + h;
-                this[5] = y;
-                this[7] = y;
-            }
-            return this[5] - this[1];
-        };
-        /** * *
-        * Returns the area (in pixels^2) of this rectangle
-        * @return {number}
-        * @nosideeffects
-        * * **/
-        Rectangle.prototype.area = function Rectangle_area () {
-            return this.width() * this.height();
+            return 'Rectangle('+this.x+','+this.y+','+this.width+','+this.height+')';
         };
         /** * *
         * Returns whether or not this rectangle intersects rectangle r.
@@ -147,10 +165,10 @@ mod({
         * @nosideeffects
         * * **/
         Rectangle.prototype.intersectsRectangle = function Rectangle_intersectsRectangle(r) {
-            return !(this.left() >= r.right() || 
-                     r.left() >= this.right() || 
-                     this.top() >= r.bottom() || 
-                     r.top() >= this.bottom());
+            return !(this.left >= r.right || 
+                     r.left >= this.right || 
+                     this.top >= r.bottom || 
+                     r.top >= this.bottom);
         };
         /** * *
         * Returns whether or not this rectangle contains rectangle r.
@@ -160,7 +178,7 @@ mod({
         * @nosideeffects
         * * **/
         Rectangle.prototype.containsRectangle = function Rectangle_contains(r) {
-            return this.left() <= r.left() && this.top() <= r.top() && this.right() >= r.right() && this.bottom() >= r.bottom();
+            return this.left <= r.left && this.top <= r.top && this.right >= r.right && this.bottom >= r.bottom;
         };
         /** * *
         * Returns the intersection of this rectangle with rectangle r. If the rectangles
@@ -180,8 +198,8 @@ mod({
         * @return {boolean}
         * * **/
         Rectangle.prototype.containsPoint = function Rectangle_containsPoint(point) {
-            return (this.left() <= point.x() && this.right() >= point.x() &&
-                this.top() <= point.y() && this.bottom() >= point.y());
+            return (this.left <= point.x && this.right >= point.x &&
+                this.top <= point.y && this.bottom >= point.y);
         };
         /** * *
         * Returns a polygon clipped by this rectangle using a Sutherland-Hodgeman Algorithm.
@@ -199,13 +217,13 @@ mod({
             function cp_inside(p, r, side) {
                 switch(side) {
                     case CP_LEFT:
-                        return p.x() >= r.left();
+                        return p.x >= r.left;
                     case CP_RIGHT:
-                        return p.x() <= r.right();
+                        return p.x <= r.right;
                     case CP_TOP:
-                        return p.y() >= r.top();
+                        return p.y >= r.top;
                     case CP_BOTTOM:
-                        return p.y() <= r.bottom();
+                        return p.y <= r.bottom;
                 }
             }
             
@@ -218,25 +236,25 @@ mod({
                 var a, b;
 
                 /* find slope and intercept of segment pq */
-                a = ( q.y() - p.y() ) / ( q.x() - p.x() );
-                b = p.y() - p.x() * a;
+                a = ( q.y - p.y ) / ( q.x - p.x );
+                b = p.y - p.x * a;
 
                 switch(side) {
                     case CP_LEFT:
-                        t.x(r.left());
-                        t.y(t.x() * a + b);
+                        t.x = r.left;
+                        t.y = t.x * a + b;
                         break;
                     case CP_RIGHT:
-                        t.x(r.right());
-                        t.y(t.x() * a + b);
+                        t.x = r.right;
+                        t.y = t.x * a + b;
                         break;
                     case CP_TOP:
-                        t.y(r.top());
-                        t.x(isfinite(a) ? ( t.y() - b ) / a : p.x());
+                        t.y = r.top;
+                        t.x = isfinite(a) ? ( t.y - b ) / a : p.x;
                         break;
                     case CP_BOTTOM:
-                        t.y(r.bottom());
-                        t.x(isfinite(a) ? ( t.y() - b ) / a : p.x());
+                        t.y = r.bottom;
+                        t.x = isfinite(a) ? ( t.y - b ) / a : p.x;
                         break;
                 }
 
@@ -307,14 +325,14 @@ mod({
                     output.push({
                         id : i,
                         type : 's',
-                        x : rect.left(),
+                        x : rect.left,
                         intersections : [],
                         rectangle : rect
                     });
                     output.push({
                         id : i,
                         type : 'e',
-                        x : rect.right(),
+                        x : rect.right,
                         intersections : [],
                         rectangle : rect
                     });
@@ -332,7 +350,7 @@ mod({
                     
             // We're going to need this function during end events...
             function mapIntersectionToScan(el) {
-                var newScan = new Rectangle(e.x, el.top(), 0, el.height());
+                var newScan = new Rectangle(e.x, el.top, 0, el.height);
                 newScan.intersects = [el];
                 return newScan;
             }
@@ -350,7 +368,7 @@ mod({
                 // Update the current scans...
                 for (j=0; j < scans.length; j++) {
                     scan = scans[j];
-                    scan.right(e.x);
+                    scan.right = e.x;
                 }
                             
                 if (e.type === 's') {
@@ -368,9 +386,9 @@ mod({
                         var intersected = false;
                         for (j=0; j < scans.length; j++) {
                             scan = scans[j];
-                            if (!(e.rectangle.top() >= scan.bottom() || scan.top() >= e.rectangle.bottom())) {
+                            if (!(e.rectangle.top >= scan.bottom || scan.top >= e.rectangle.bottom)) {
                                 // The scan and event intersect in y...
-                                if ((e.rectangle.top() >= scan.top() && e.rectangle.bottom() <= scan.bottom())) {
+                                if ((e.rectangle.top >= scan.top && e.rectangle.bottom <= scan.bottom)) {
                                     // This scan contains the event's rectangle, so we don't need to make a new scan
                                     // but we will need to know that it intersects...
                                     scan.intersects.push(e.rectangle);
@@ -379,17 +397,17 @@ mod({
                                 }
                                 // We have to check if it has a width, if not, it was added by an earlier intersection
                                 // during this event...
-                                if (scan.width()) {
+                                if (scan.width) {
                                     // This scan was from an earlier event, so output a rectangle...
                                     output.push(scan);
                                 }
                                 // Replace this scan with a scan that represents the intersection...
-                                var t = Math.min(e.rectangle.top(), scan.top());
-                                var b = Math.max(e.rectangle.bottom(), scan.bottom());
+                                var t = Math.min(e.rectangle.top, scan.top);
+                                var b = Math.max(e.rectangle.bottom, scan.bottom);
                                 if (intersected) {
                                     // We've already created one intersection, so group it with this one...
-                                    intersected.top(Math.min(intersected.top(), t));
-                                    intersected.bottom(Math.max(intersected.bottom(), b));
+                                    intersected.top(Math.min(intersected.top, t));
+                                    intersected.bottom(Math.max(intersected.bottom, b));
                                     intersected.intersects = intersected.intersects.concat(scan.intersects);
                                 } else {
                                     intersected = new Rectangle(e.x, t, 0, b - t);
@@ -424,7 +442,7 @@ mod({
                     for (j=0; j < scans.length; j++) {
                         scan = scans[j];
                         // Find the scan that intersects this end event...
-                        if (scan.intersects.length === 1 && scan.top() === e.rectangle.top() && scan.bottom() === e.rectangle.bottom()) {
+                        if (scan.intersects.length === 1 && scan.top === e.rectangle.top && scan.bottom === e.rectangle.bottom) {
                             // This end event corresponds specifically to this scan, so output it...
                             output.push(scan);
                             scans.splice(j--, 1);
@@ -451,10 +469,10 @@ mod({
                                                 continue;
                                             }
                                             var newScan = newScans[l];
-                                            if (!(newScan.top() > intersection.bottom() || intersection.top() > newScan.bottom())) {
+                                            if (!(newScan.top > intersection.bottom || intersection.top > newScan.bottom)) {
                                                 // The two overlap, so absorb the intersection scan into this scan...
-                                                intersection.top(Math.min(newScan.top(), intersection.top()));
-                                                intersection.bottom(Math.max(newScan.bottom(), intersection.bottom()));
+                                                intersection.top(Math.min(newScan.top, intersection.top));
+                                                intersection.bottom(Math.max(newScan.bottom, intersection.bottom));
                                                 intersection.intersects = newScan.intersects.concat(intersection.intersects);
                                                 // Now we have to test this scan against the others again, since it has changed...
                                                 newScans.splice(l, 1);

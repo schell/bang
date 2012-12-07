@@ -22,7 +22,7 @@
             mod.expansions = {
                 bang : 'bang/',
                 bang3d : 'bang3d/',
-                meshes : 'meshes/'
+                meshes : 'examples/meshes/'
             };
             mod({
                 name : "main",
@@ -386,24 +386,27 @@
                         var sub2 = vcopy.subtract(new Vector(2,2,2,2,2,2));
                         assert.eq(sub2.isEqualTo(new Vector(-2,-1,0,1,2,3)), true, 'Vector can subtract.');
                         v = new Vector(1,2,3);
-                        var magv = v.magnitude();
+                        var magv = v.magnitude;
                         assert.eq(magv >= 3.74165 && magv <= 3.74166, true, 'Vector can calc magnitude ('+magv+').');
-                        var unit = v.normalize();
-                        assert.eq(unit.magnitude(), 1, 'Vector can calc normal vector.');
+                        var unit = v.normalize;
+                        assert.eq(unit.magnitude, 1, 'Vector can calc normal vector.');
                 
                         assert.suite = 'Rectangle';
                         var r1 = new Rectangle(0,0,100,100);
                         var r2 = new Rectangle(50,50,100,100)
-                        assert.eq(r1.right(10),10, 'Rectangle sets right.');
-                        assert.eq(r1.width(), 10, 'Rectangle updates width after set right.');
-                        r1.right(100);
-                        assert.eq(r1.left(10),10, 'Rectangle sets left.');
-                        r1.left(0);
-                        assert.eq(r1.width(100),100,'Rectangle updates width after set left.');
+                        r1.right = 10;
+                        assert.eq(r1.right,10, 'Rectangle sets right.');
+                        assert.eq(r1.width, 10, 'Rectangle updates width after set right.');
+                        r1.right = 100;
+                        r1.left = 10;
+                        assert.eq(r1.left,10, 'Rectangle sets left.');
+                        r1.left = 0;
+                        r1.width = 100;
+                        assert.eq(r1.width,100,'Rectangle updates width after set left.');
                         assert.eq(r1.intersectsRectangle(r2), true, 'Rectangle knows intersection.');
                         var output = new Rectangle.reduceRectangles([r1,r2]);
                         assert.eq(output.length, 3, 'Rectangle reduces to correct number of rects.');
-                        assert.eq(output.toString(), 'Rectangle[0,0,50,100],Rectangle[50,0,50,150],Rectangle[100,50,50,100]', 'Rectangle reduces to correct rectangles.');
+                        assert.eq(output.toString(), 'Rectangle(0,0,50,100),Rectangle(50,0,50,150),Rectangle(100,50,50,100)', 'Rectangle reduces to correct rectangles.');
                 
                         assert.suite = 'Matrix';
                 
@@ -472,13 +475,13 @@
             
                         var r0 = mat.row(0);
                         var r2 = mat.row(2);
-                        assert.eq(r0.toString(), 'Vector[0,1,2]', 'Can get matrix row.');
-                        assert.eq(r2.toString(), 'Vector[6,7,8]', 'Can get matrix row.');
+                        assert.eq(r0.toString(), 'Vector(0,1,2)', 'Can get matrix row.');
+                        assert.eq(r2.toString(), 'Vector(6,7,8)', 'Can get matrix row.');
             
                         var c0 = mat.column(0);
                         var c2 = mat.column(2);
-                        assert.eq(c0.toString(), 'Vector[0,3,6]', 'Can get matrix column.');
-                        assert.eq(c2.toString(), 'Vector[2,5,8]', 'Can get matrix column.');
+                        assert.eq(c0.toString(), 'Vector(0,3,6)', 'Can get matrix column.');
+                        assert.eq(c2.toString(), 'Vector(2,5,8)', 'Can get matrix column.');
             
                         var A = new Matrix(
                             5, 9, 2, 
@@ -545,9 +548,9 @@
                         assert.eq(checkPoly.toString(), clippedPoly.toString(), 'Rectangle can clip polygon.');
                         
                         var t = new Transform3d();
-                        assert.eq(t.right().toString(), 'Vector[1,0,0]', 'Can get right vector.');
-                        assert.eq(t.up().toString(), 'Vector[0,1,0]', 'Can get up vector.');
-                        assert.eq(t.out().toString(), 'Vector[0,0,1]', 'Can get out vector.');
+                        assert.eq(t.right().toString(), 'Vector(1,0,0)', 'Can get right vector.');
+                        assert.eq(t.up().toString(),    'Vector(0,1,0)', 'Can get up vector.');
+                        assert.eq(t.out().toString(),   'Vector(0,0,1)', 'Can get out vector.');
             
                         assert.suite = 'View';
                         var view1 = new View(0, 0, 40, 40);

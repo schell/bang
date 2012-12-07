@@ -45,8 +45,8 @@ mod({
         * @nosideeffects
         * * **/
         Polygon.prototype.containsPoint = function Polygon_containsPoint(p) {
-            var x = p[0];
-            var y = p[1];
+            var x = p.x;
+            var y = p.y;
             var xp = [];
             var yp = [];
             var ncomp = this.length;

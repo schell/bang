@@ -27,6 +27,72 @@ mod({
         Vector.prototype = [];
         
         Vector.prototype.constructor = Vector;
+        //-----------------------------
+        //  GETTERS/SETTERS
+        //-----------------------------
+        /** * *
+        * Gets the x property.
+        * The first element of the vector.
+        * @returns {number} 
+        * * **/
+        Vector.prototype.__defineGetter__('x', function Vector_getx() {
+            return this[0]; 
+        });
+        /** * *
+        * Sets the x property.
+        * Sets the first element of the vector.
+        * @param {number} x
+        * * **/
+        Vector.prototype.__defineSetter__('x', function Vector_setx(x) {
+            this[0] = x;
+        });
+        /** * *
+        * Gets the y property.
+        * The second element of the vector.
+        * @returns {number} 
+        * * **/
+        Vector.prototype.__defineGetter__('y', function Vector_gety() {
+            return this[1]; 
+        });
+        /** * *
+        * Sets the y property.
+        * Sets the first element of the vector.
+        * @param {number} y
+        * * **/
+        Vector.prototype.__defineSetter__('y', function Vector_sety(y) {
+            this[1] = y;
+        });
+        /** * *
+         * Gets the magnitude property.
+         * 
+         * @returns {number} 
+         * * **/
+        Vector.prototype.__defineGetter__('magnitude', function Vector_getmagnitude() {
+            var total = this.foldr(function (element, acc) {
+                return element*element+acc;
+            }, 0);
+            return Math.sqrt(total);
+        });
+        /** * *
+        * Gets the normalize property.
+        * The unit vector of this vector.
+        * @returns {Vector} 
+        * * **/
+        Vector.prototype.__defineGetter__('normalize', function Vector_getnormalize() {
+            var magnitude = this.magnitude;
+            return this.foldr(function (element, acc) {
+                acc.unshift(element/magnitude);
+                return acc;
+            }, new this.constructor());
+        });
+        /** * *
+        * Gets the unitVector property.
+        * An alias of normalize.
+        * @returns {Vector} 
+        * * **/
+        Vector.prototype.__defineGetter__('unitVector', function Vector_getunitVector() {
+            return this.normalize;
+        });
         //--------------------------------------
         //  METHODS
         //--------------------------------------
@@ -153,53 +219,9 @@ mod({
             }, new this.constructor());
         };
         /** * *
-        * Gets and sets the x value.
-        * @param {number}
-        * @return {number}
-        * * **/
-        Vector.prototype.x = function Vector_x(x) {
-            if (arguments.length) {
-                this[0] = x;
-            }
-            return this[0];
-        };
-        /** * *
-        * Gets and sets the y value.
-        * @param {number}
-        * @return {number}
-        * * **/
-        Vector.prototype.y = function Vector_y(y) {
-            if (arguments.length) {
-                this[1] = y;
-            }
-            return this[1];
-        };
-        /** * *
-        * Returns the magnitude of this vector.
-        * @return {number}
-        * @nosideeffects
-        * * **/
-        Vector.prototype.magnitude = function Vector_magnitude() {
-            var total = this.foldr(function (element, acc) {
-                return element*element+acc;
-            }, 0);
-            return Math.sqrt(total);
-        };
-        /** * *
-        * Returns the unit vector of this vector.
-        * @return {Vector}
-        * @nosideeffects
-        * * **/
-        Vector.prototype.normalize = function Vector_normalize() {
-            var magnitude = this.magnitude();
-            return this.foldr(function (element, acc) {
-                acc.unshift(element/magnitude);
-                return acc;
-            }, new this.constructor());
-        };
-        /** * *
         * Returns the point at a given index. Zero indexed.
         * For example, pointAt(1) would return the second point.
+        * A point is considered two contigious elements in the vector.
         * @param {number}
         * @return {Vector}
         * * **/
@@ -207,7 +229,6 @@ mod({
             var ndx = 2*n;
             return new Vector(this[ndx], this[ndx+1]);
         };
-        
         /** * *
         * Returns the intersection point of two lines or false
         * if they do not intersect.
@@ -228,8 +249,8 @@ mod({
                 // y = mx + b
                 // b = y - mx
                 // x = (y - b) / m
-                var m = (p2.y() - p1.y()) / (p2.x() - p1.x());
-                var b = p2.y() - m*p2.x();
+                var m = (p2.y - p1.y) / (p2.x - p1.x);
+                var b = p2.y - m*p2.x;
                 return {
                     // slope, rise over run...
                     m : m,
@@ -251,10 +272,10 @@ mod({
                 // These lines are co-linear and do not intersect...
                 return false;
             } else if (Math.abs(e1.m) === Number.POSITIVE_INFINITY) {
-                x = p2.x();
+                x = p2.x;
                 y = e2.yAtx(x);
             } else if (Math.abs(e2.m) === Number.POSITIVE_INFINITY) {
-                x = p4.x();
+                x = p4.x;
                 y = e1.yAtx(x);
             } else {
                 x = e2.b / (e1.m + e1.b - e2.m);
