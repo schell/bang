@@ -35,11 +35,12 @@
                     'bang::View/Stage.js',
                     'bang::View/View.js',
                     'bang::Utils/Ease.js',
-                    'bang::View/CanvasContext.js'
+                    'bang::View/CanvasContext.js',
+                    'bang::Geometry/Vector.js'
                 ],
                 init : function initMain (
-                    Stage, View, Ease, CanvasContext
-                ) {
+                    Stage, View, Ease, CanvasContext, Vector
+                ) { try {
                     var stage = window.stage = new Stage(300, 300);
                     stage.context.fillStyle = 'white';
                     stage.context.fillRect(0,0,300,300);
@@ -47,25 +48,9 @@
 
                     window.canvasCtx = CanvasContext.createContext();
 
-                    var redSquare = new View(0, 0, 20, 20);
-                    redSquare.context.fillStyle = 'red';
-                    redSquare.context.fillRect(0, 0, 20, 20);
-                    stage.addView(redSquare);
-
-                    redSquare.tween = new Ease({
-                        target : redSquare,
-                        duration : 1000,
-                        properties : {
-                            x : 100
-                        },
-                        onComplete : function(tween) {
-                            tween.config.properties.x = redSquare.x == 100 ? 0 : 100;
-                            tween.interpolate();
-                        }
-                    }).interpolate();
-
                     var c = 0x000000;
                     var a = 10;
+                    var lastR = stage;
                     window.addEventListener('mousedown', function startDrag(e) {
                         function didClick(e) {
                             // Remove everything...
@@ -76,17 +61,20 @@
                             stage.canvas.removeEventListener('mouseup', didClick);
 
                             function makeR() {
-                                var x = e.x;
-                                var y = e.y;
+                                var p = new Vector(e.x, e.y);
+                                var local = lastR.vectorToLocal(p);
+                                var x = local.x;
+                                var y = local.y;
 
                                 var w = Math.random()*a+a;
                                 var r = new View(x-w/2, y-w/2, w, w);
-                                console.log(r.toString(),x,y,e);
                                 r.context.fillStyle = '#'+((++c).toString(16));
                                 r.context.fillRect(0,0,r.width,r.height);
                                 return r;
                             }
-                            stage.addView(makeR());
+                            var newR = makeR();
+                            lastR.addView(newR);
+                            lastR = newR;
                         }
                         function endDrag(e) {
                             stage.canvas.removeEventListener('mouseup', didClick);
@@ -98,8 +86,10 @@
                         window.addEventListener('mousemove', didDrag);
                         window.addEventListener('mouseup', endDrag);
                     });
+                } catch(e) {
+                    console.log(e.stack);
                 }
-            }).onload(function () {
+            }}).onload(function () {
                 mod.exportAll();
             });
         </script>

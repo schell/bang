@@ -271,6 +271,29 @@ mod({
                 this.addView(displayList[i]);
             }
         });
+        /** * *
+        * Gets the needsDisplay property.
+        * Whether or not the stage needs to be redrawn.
+        * @returns {boolean} 
+        * * **/
+        View.prototype.__defineGetter__('needsDisplay', function View_getneedsDisplay() {
+            if (!this._needsDisplay) {
+                this._needsDisplay = false;
+            }
+            return this._needsDisplay;
+        });
+        /** * *
+        * Sets the needsDisplay property.
+        * Triggers a recache.
+        * @param {boolean} needsDisplay
+        * * **/
+        View.prototype.__defineSetter__('needsDisplay', function View_setneedsDisplay(needsDisplay) {
+            if (this._needsDisplay !== needsDisplay && needsDisplay) {
+                this.parent.needsDisplay = true;
+            }
+            this._needsDisplay = needsDisplay;
+        });
+
         //--------------------------------------
         //  METHODS
         //--------------------------------------

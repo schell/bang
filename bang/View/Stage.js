@@ -25,21 +25,6 @@ mod({
         function Stage(width, height) {
             View.call(this, 0, 0, width, height);
             /** * *
-            * Whether or not the stage needs to be redrawn.
-            * @type {boolean}
-            * * **/
-            this.needsDisplay = true;
-            /** * *
-            * An animation timer for scheduling redraws.
-            * @type {Animation}
-            * * **/
-            this.timer = new Animation();
-            /** * *
-            * An object that identifies the Stage's step animation in the Stage's timer.
-            * @type {Object}
-            * * **/
-            this.stepAnimation = this.timer.requestAnimation(this.step, this);
-            /** * *
             * A canvas for drawing the display list into.
             * Since the Stage is also a View, we need to separate the canvas's
             * into the Stage as a View's canvas and the entire display list's canvas.
@@ -61,6 +46,41 @@ mod({
         Stage.prototype = new View();
         
         Stage.prototype.constructor = Stage;
+        //-----------------------------
+        //  GETTERS/SETTERS
+        //-----------------------------
+        /** * *
+        * Gets the timer property.
+        * @returns {Animation} 
+        * * **/
+        Stage.prototype.__defineGetter__('timer', function Stage_gettimer() {
+            if (!this._timer) {
+                this._timer = new Animation();
+            }
+            return this._timer;
+        }); 
+        /** * *
+        * Gets the needsDisplay property.
+        * Whether or not the stage needs to be redrawn.
+        * @returns {boolean} 
+        * * **/
+        Stage.prototype.__defineGetter__('needsDisplay', function Stage_getneedsDisplay() {
+            if (!this._needsDisplay) {
+                this._needsDisplay = false;
+            }
+            return this._needsDisplay;
+        });
+        /** * *
+        * Sets the needsDisplay property.
+        * Triggers a redraw.
+        * @param {boolean} needsDisplay
+        * * **/
+        Stage.prototype.__defineSetter__('needsDisplay', function Stage_setneedsDisplay(needsDisplay) {
+            if (this._needsDisplay !== needsDisplay && needsDisplay) {
+                this.timer.requestAnimationOnce(this.step, this);    
+            }
+            this._needsDisplay = needsDisplay;
+        });
         //--------------------------------------
         //  METHODS
         //--------------------------------------
@@ -86,27 +106,22 @@ mod({
         * @param context {CanvasRenderingContext2D}
         * * **/
         Stage.prototype.draw = function Stage_draw(context) {
-            if (this.needsDisplay) {
-                context = context || this.canvas.getContext('2d');
-                
-                context.save();
-                if (this.clearsOnDraw) {
-                    // Clear the entire stage...
-                    context.clearRect(0, 0, this.width, this.height);
-                }
-                // Call View's draw...
-                View.prototype.draw.call(this, context);
-                if (typeof __defineGetter__ === 'function') {
-                    this.needsDisplay = false;
-                }
+            context = context || this.canvas.getContext('2d');
+            
+            context.save();
+            if (this.clearsOnDraw) {
+                // Clear the entire stage...
+                context.clearRect(0, 0, this.width, this.height);
             }
+            // Call View's draw...
+            View.prototype.draw.call(this, context);
+            this.needsDisplay = false;
         };
         /** * *
-        * This is the main step of the display list.
-        * @param {number} time The current time in milliseconds.
+        * The stepping function.
         * * **/
         Stage.prototype.step = function Stage_step(time) {
-           this.draw(this.canvas.getContext('2d')); 
+            this.draw();
         };
         
         return Stage;

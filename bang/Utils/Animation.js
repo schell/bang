@@ -82,6 +82,16 @@ mod({
             };
         };
         /** * *
+        * Requests a single animation.
+        * @param {function(number=)} stepFunc
+        * @param {Object} context
+        * * **/
+        Animation.prototype.requestAnimationOnce = function Animation_requestAnimationOnce(stepFunc, context) {
+            request(function() {
+                stepFunc.apply(context, arguments);
+            });
+        };
+        /** * *
         * Calls animationFunction over and over again.
         * @param animationFunction {function(number=)} The function to call over and over, repeatedly.
         * @param context {Object} The object to use as the 'this' property with calling animationFunction.
