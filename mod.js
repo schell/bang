@@ -335,7 +335,11 @@
                     case 'function':
                         // Get the parameters to pass to the factory...
                         var keysAndModules = getKeysAndModuleParamsForPkg(pkg);
-                        mod.modules[pkg.name] = pkg.init.apply(null, keysAndModules.modules);
+                        try {
+                            mod.modules[pkg.name] = pkg.init.apply(null, keysAndModules.modules);
+                        } catch (e) {
+                            console.error('mod encountered an error in module"',pkg.name+'":\n',e.stack);
+                        }
                         // Set its initString for compilation later...
                         pkg.initString = stringifyFactory(pkg.init, keysAndModules.keys);
                     break;

@@ -39,6 +39,11 @@ mod({
             * @type {boolean} clearsOnDraw 
             * * **/
             this.clearsOnDraw = true;
+            /** * *
+            * Whether or not the stage has requested a draw.
+            * @type {number|boolean}
+            * * **/
+            this.stepRequested = false;
 
             this.stage = this;
         }
@@ -76,8 +81,8 @@ mod({
         * @param {boolean} needsDisplay
         * * **/
         Stage.prototype.__defineSetter__('needsDisplay', function Stage_setneedsDisplay(needsDisplay) {
-            if (this._needsDisplay !== needsDisplay && needsDisplay) {
-                this.timer.requestAnimationOnce(this.step, this);    
+            if (needsDisplay && !this.stepRequested) {
+                this.stepRequested = this.timer.requestAnimationOnce(this.step, this);    
             }
             this._needsDisplay = needsDisplay;
         });
@@ -122,6 +127,7 @@ mod({
         * * **/
         Stage.prototype.step = function Stage_step(time) {
             this.draw();
+            this.stepRequested = false;
         };
         
         return Stage;

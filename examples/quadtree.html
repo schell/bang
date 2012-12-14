@@ -1,0 +1,178 @@
+ <!DOCTYPE html>
+<html>
+    <head>
+        <meta http-equiv="Content-type" content="text/html; charset=utf-8">
+        <title>.::Quadtrees!::.</title>
+        <style type="text/css" media="screen">
+            body {
+                    background-color: #AAAAAA;
+        			margin:0px;
+        			font-family: Verdana,Geneva,Arial,sans-serif;
+        			font-size: 12px;
+        			line-height: 15px;
+                    text-align:center;
+        		}
+            canvas {
+                background-color:white;
+            }
+        </style>
+        <script src="../mod.js" type="text/javascript" charset="utf-8"></script>
+        <link rel="shortcut icon" href="favicon.png" />
+    </head>
+    <body id="body">
+    <script type="text/javascript">
+        mod.useTagInjection = true;
+        mod.expansions = {
+            bang : '../bang/',
+            example : 'js/'
+        };
+        mod({
+            name : 'main',
+            dependencies : [
+                'bang::View/Stage.js',
+                'bang::View/View.js',
+                'bang::Geometry/Rectangle.js',
+                'bang::Data/Quadtree.js',
+                'bang::Geometry/Vector.js'
+            ],
+            init : function initMain(Stage, View, Rectangle, Quadtree, Vector) {
+                var stage = window.stage = new Stage(500,500);
+                stage.context.fillStyle = 'white';
+                document.body.appendChild(stage.canvas); 
+
+                var container = new View(0,0,500,500);
+                stage.addView(container);
+
+                var outlines = new View(0,0,500,500);
+                stage.addView(outlines);
+
+                var quad = new Quadtree(0,0,500,500);
+
+                // Draws rectangles...
+                function drawRect(r, c, v) {
+                    c = c || 'rgba(0,0,0,0.5)';
+                    v = v || stage;
+                    v.context.save();
+                    v.context.strokeStyle = c;
+                    v.context.strokeRect(r.x,r.y,r.width,r.height); 
+                    v.context.restore();
+                }
+
+                // Draws the quadtrees...
+                function drawQuad(quad, c) {
+                    drawRect(quad.boundary);
+                    for (var i=0; i < quad.nodes.length; i++) {
+                        drawQuad(quad.nodes[i]);
+                    }
+                }
+
+                // Create a function to return a random CSS color...
+                function randoColor() {
+                    function rando8bit() {
+                        return Math.round(Math.random()*0xFF);
+                    }
+                    return '#'+rando8bit().toString(16)+rando8bit().toString(16)+rando8bit().toString(16);
+                }
+
+                // Add a hit tester...
+                function queryPoint(e) {
+                    var x = e.clientX - stage.canvas.offsetLeft;
+                    var y = e.clientY - stage.canvas.offsetTop;
+                    var p = new Vector(x,y);
+                    
+                    outlines.context.clearRect(0,0,500,500);
+                    var rects = quad.queryPoint(p);
+                    function recurse(quad) {
+                        if (quad.queryPoint(p).length) {
+                            drawRect(quad.boundary, 'rgba(255,0,0,0.5)', outlines);
+                            for (var i=0; i < quad.nodes.length; i++) {
+                                recurse(quad.nodes[i]);
+                            }
+                        }
+                    }
+                    if (rects.length) {
+                        recurse(quad);
+                        for (var i=0; i < rects.length; i++) {
+                            drawRect(rects[i], 'red', outlines);
+                        }
+                    }
+                }
+                document.addEventListener('mousemove', queryPoint);
+
+                // Add a click handler to add views to the stage...
+                function mouseDown(e) {
+                    document.removeEventListener('mousemove', queryPoint);
+                    var x = e.clientX - stage.canvas.offsetLeft;
+                    var y = e.clientY - stage.canvas.offsetTop;
+            
+                    var view = new View(x, y, 1, 1);
+                    view.alpha = 0.7;
+                    var color = randoColor();
+                    container.addView(view);
+
+                    function sizeRect(e) {
+                        var x2 = e.clientX - stage.canvas.offsetLeft;
+                        var y2 = e.clientY - stage.canvas.offsetTop;
+                        var dx = x2 - x;
+                        var dy = y2 -y;
+
+                        if (!dy || !dx) {
+                            return;
+                        }
+
+                        if (dx > 0) {
+                            view.x = x;
+                            view.width = dx;
+                        } else {
+                            view.x = x + dx;
+                            view.width = -dx;
+                        }
+
+                        if (dy > 0) {
+                            view.y = y;
+                            view.height = dy;
+                        } else {
+                            view.y = y + dy;
+                            view.height = -dy;
+                        }
+                        view.context.fillStyle = color;
+                        view.context.fillRect(0,0,view.width,view.height);
+                    }
+                    function mouseUp(e) {
+                        document.removeEventListener('mousemove', sizeRect);
+                        document.removeEventListener('mouseup', mouseUp);
+                        document.addEventListener('mousemove', queryPoint);
+                        quad.insert(new Rectangle(view.x,view.y,view.width,view.height));
+                        drawQuad(quad);
+                    }
+
+                    document.addEventListener('mousemove', sizeRect);                    
+                    document.addEventListener('mouseup', mouseUp);                    
+                }
+                document.addEventListener('mousedown', mouseDown);
+
+                // For stress testing...
+                window.addRandoRects = function addRandoRects(n) {
+                    while(n--) {
+                        var x = Math.random() * stage.width;
+                        var y = Math.random() * stage.height;
+                        var w = Math.random() * 300; 
+                        var h = Math.random() * 300;
+                        w = Math.max(2, Math.min(stage.width - x - 2, w));
+                        h = Math.max(2, Math.min(stage.height - y - 2, h));
+                        var view = new View(x,y,w,h);
+                        view.context.fillStyle = randoColor();
+                        view.context.fillRect(0,0,w,h);
+                        view.alpha = 0.5;
+                        container.addView(view);
+                        quad.insert(new Rectangle(x,y,w,h));
+                    }
+                    drawQuad(quad);
+                }
+            }
+        }).onload(function onload() {
+            mod.exportAll();
+        });
+    </script>
+    </body>
+</html>

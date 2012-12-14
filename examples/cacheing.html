@@ -1,0 +1,43 @@
+ <!DOCTYPE html>
+<html>
+    <head>
+        <meta http-equiv="Content-type" content="text/html; charset=utf-8">
+        <title>.::Cacheing!::.</title>
+        <style type="text/css" media="screen">
+            body {
+                    background-color: #AAAAAA;
+        			margin:0px;
+        			font-family: Verdana,Geneva,Arial,sans-serif;
+        			font-size: 12px;
+        			line-height: 15px;
+                    text-align:center;
+        		}
+            canvas {
+                background-color:transparent;
+                border-bottom: #333 2px solid;
+            }
+        </style>
+        <script src="../mod.js" type="text/javascript" charset="utf-8"></script>
+        <link rel="shortcut icon" href="favicon.png" />
+    </head>
+    <body id="body">
+    <script type="text/javascript">
+        mod.useTagInjection = true;
+        mod.expansions = {
+            bang : '../bang/',
+            example : 'js/'
+        };
+        mod({
+            name : 'main',
+            dependencies : [
+                'example::Cacheing.js'
+            ],
+            init : function initMain(Cacheing) {
+                document.body.appendChild(new Cacheing().stage.canvas); 
+            }
+        }).onload(function onload() {
+            mod.exportAll();
+        });
+    </script>
+    </body>
+</html>

@@ -83,11 +83,12 @@ mod({
         };
         /** * *
         * Requests a single animation.
+        *
         * @param {function(number=)} stepFunc
         * @param {Object} context
         * * **/
         Animation.prototype.requestAnimationOnce = function Animation_requestAnimationOnce(stepFunc, context) {
-            request(function() {
+            return request(function() {
                 stepFunc.apply(context, arguments);
             });
         };

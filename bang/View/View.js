@@ -37,16 +37,25 @@ mod({
         function View(x, y, w, h) {
             x = x || 0;
             y = y || 0;
+            var id = _instances++;
             /** * *
             * A reference to this view's canvas's context.
             * @type {CanvasRenderingContext2D}
             * * **/
-            this.context = CanvasContext.createContext(w, h);
+            this.context = CanvasContext.createContext(w, h, this);
             /** * *
             * A string that identifies this view.
             * @type {string}
             * * **/
-            this.tag = (_instances++).toString();
+            this.tag = id.toString();
+            /** * *
+            * Gets the id property.
+            * A unique id to represent this view from all others.
+            * @returns {number} 
+            * * **/
+            this.__defineGetter__('id', function View_getid() {
+                return id;
+            });
 
             this.x = x;
             this.y = y;
@@ -75,7 +84,7 @@ mod({
         * @param {number} 
         * * **/
         View.prototype.__defineSetter__('x', function View_setx(x) {
-            this.stage.needsDisplay = true;
+            this.needsDisplay = true;
             this._x = x;
         });
         /** * *
@@ -95,7 +104,7 @@ mod({
         * @param {number} 
         * * **/
         View.prototype.__defineSetter__('y', function View_sety(y) {
-            this.stage.needsDisplay = true;
+            this.needsDisplay = true;
             this._y = y;
         });
         /** * *
@@ -112,8 +121,8 @@ mod({
         * @param {number} 
         * * **/
         View.prototype.__defineSetter__('width', function View_setwidth(width) {
-            this.context.canvas.height = width;
-            this.stage.needsDisplay = true;
+            this.context.canvas.width = width;
+            this.needsDisplay = true;
         });
         /** * *
         * Gets the height property.
@@ -130,7 +139,7 @@ mod({
         * * **/
         View.prototype.__defineSetter__('height', function View_setheight(height) {
             this.context.canvas.height = height;
-            this.stage.needsDisplay = true;
+            this.needsDisplay = true;
         });
         /** * *
         * Gets the scaleX property.
@@ -150,7 +159,7 @@ mod({
         * * **/
         View.prototype.__defineSetter__('scaleX', function View_setscaleX(scaleX) {
             this._scaleX = scaleX;
-            this.stage.needsDisplay = true;
+            this.needsDisplay = true;
         });
         /** * *
         * Gets the scaleY property.
@@ -170,7 +179,7 @@ mod({
         * * **/
         View.prototype.__defineSetter__('scaleY', function View_setscaleY(scaleY) {
             this._scaleY = scaleY;
-            this.stage.needsDisplay = true;
+            this.needsDisplay = true;
         });
         /** * *
         * Gets the rotation property.
@@ -190,7 +199,7 @@ mod({
         * * **/
         View.prototype.__defineSetter__('rotation', function View_setrotation(rotation) {
             this._rotation = rotation;
-            this.stage.needsDisplay = true;
+            this.needsDisplay = true;
         });
         /** * *
         * Gets the alpha property.
@@ -210,7 +219,7 @@ mod({
         * * **/
         View.prototype.__defineSetter__('alpha', function View_setalpha(alpha) {
             this._alpha = alpha;
-            this.stage.needsDisplay = true;
+            this.needsDisplay = true;
         });
         /** * *
         * Gets the stage property.
@@ -288,7 +297,7 @@ mod({
         * @param {boolean} needsDisplay
         * * **/
         View.prototype.__defineSetter__('needsDisplay', function View_setneedsDisplay(needsDisplay) {
-            if (this._needsDisplay !== needsDisplay && needsDisplay) {
+            if (needsDisplay && this.parent) {
                 this.parent.needsDisplay = true;
             }
             this._needsDisplay = needsDisplay;
@@ -412,7 +421,7 @@ mod({
             this.displayList.push(subView);
             subView._parent = this;
             subView.stage = this.stage;
-            this.stage.needsDisplay = true;
+            this.needsDisplay = true;
         };
         /** * *
         * Adds a subview to this view at a given index.
@@ -428,7 +437,7 @@ mod({
             this.displayList.splice(insertNdx, 0, subView);
             subView._parent = this;
             subView.stage = this.stage;
-            this.stage.needsDisplay = true;
+            this.needsDisplay = true;
         };
         /** * *
         * Removes a subview of this view.
@@ -442,7 +451,7 @@ mod({
             }
             subView._parent = false;
             subView.stage = false;
-            this.stage.needsDisplay = true;
+            this.needsDisplay = true;
         };
         /** * *
         * Draws this view and its subviews into the given context.
