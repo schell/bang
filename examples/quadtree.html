@@ -41,15 +41,24 @@
                 document.body.appendChild(stage.canvas); 
 
                 var container = new View(0,0,500,500);
+                container.alpha = 0.7;
+                container.tag = 'container';
                 stage.addView(container);
 
+                var square = new View(0,0,500,500);
+                square.alpha = 0.7;
+                square.tag = 'square';
+                stage.addView(square);
+
                 var outlines = new View(0,0,500,500);
+                outlines.tag = 'outlines';
+                window.outlines = outlines;
                 stage.addView(outlines);
 
                 var quad = new Quadtree(0,0,500,500);
 
                 // Draws rectangles...
-                function drawRect(r, c, v) {
+                window.drawRect = function drawRect(r, c, v) {
                     c = c || 'rgba(0,0,0,0.5)';
                     v = v || stage;
                     v.context.save();
@@ -60,7 +69,7 @@
 
                 // Draws the quadtrees...
                 function drawQuad(quad, c) {
-                    drawRect(quad.boundary);
+                    drawRect(quad.boundary, outlines);
                     for (var i=0; i < quad.nodes.length; i++) {
                         drawQuad(quad.nodes[i]);
                     }
@@ -84,7 +93,7 @@
                     var rects = quad.queryPoint(p);
                     function recurse(quad) {
                         if (quad.queryPoint(p).length) {
-                            drawRect(quad.boundary, 'rgba(255,0,0,0.5)', outlines);
+                            drawRect(quad.boundary, 'red', outlines);
                             for (var i=0; i < quad.nodes.length; i++) {
                                 recurse(quad.nodes[i]);
                             }
@@ -104,11 +113,8 @@
                     document.removeEventListener('mousemove', queryPoint);
                     var x = e.clientX - stage.canvas.offsetLeft;
                     var y = e.clientY - stage.canvas.offsetTop;
-            
-                    var view = new View(x, y, 1, 1);
-                    view.alpha = 0.7;
                     var color = randoColor();
-                    container.addView(view);
+                    var r = new Rectangle(x,y,1,1);
 
                     function sizeRect(e) {
                         var x2 = e.clientX - stage.canvas.offsetLeft;
@@ -121,28 +127,33 @@
                         }
 
                         if (dx > 0) {
-                            view.x = x;
-                            view.width = dx;
+                            r.x = x;
+                            r.width = dx;
                         } else {
-                            view.x = x + dx;
-                            view.width = -dx;
+                            r.x = x + dx;
+                            r.width = -dx;
                         }
 
                         if (dy > 0) {
-                            view.y = y;
-                            view.height = dy;
+                            r.y = y;
+                            r.height = dy;
                         } else {
-                            view.y = y + dy;
-                            view.height = -dy;
+                            r.y = y + dy;
+                            r.height = -dy;
                         }
-                        view.context.fillStyle = color;
-                        view.context.fillRect(0,0,view.width,view.height);
+                        square.context.clearRect(0,0,500,500);
+                        square.context.fillStyle = color;
+                        square.context.fillRect(r.x,r.y,r.width,r.height);
                     }
                     function mouseUp(e) {
                         document.removeEventListener('mousemove', sizeRect);
                         document.removeEventListener('mouseup', mouseUp);
                         document.addEventListener('mousemove', queryPoint);
-                        quad.insert(new Rectangle(view.x,view.y,view.width,view.height));
+
+                        quad.insert(r);
+                        square.context.clearRect(0,0,500,500);
+                        container.context.fillStyle = color;
+                        container.context.fillRect(r.x,r.y,r.width,r.height);
                         drawQuad(quad);
                     }
 
@@ -156,15 +167,13 @@
                     while(n--) {
                         var x = Math.random() * stage.width;
                         var y = Math.random() * stage.height;
-                        var w = Math.random() * 300; 
-                        var h = Math.random() * 300;
+                        var w = Math.random() * 50; 
+                        var h = Math.random() * 50;
                         w = Math.max(2, Math.min(stage.width - x - 2, w));
                         h = Math.max(2, Math.min(stage.height - y - 2, h));
-                        var view = new View(x,y,w,h);
-                        view.context.fillStyle = randoColor();
-                        view.context.fillRect(0,0,w,h);
-                        view.alpha = 0.5;
-                        container.addView(view);
+                        container.context.globalAlpha = 0.7;
+                        container.context.fillStyle = randoColor();
+                        container.context.fillRect(x,y,w,h);
                         quad.insert(new Rectangle(x,y,w,h));
                     }
                     drawQuad(quad);

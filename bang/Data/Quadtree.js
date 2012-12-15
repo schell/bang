@@ -115,13 +115,15 @@ mod({
                         new Quadtree(this.boundary.x, this.boundary.y + this.boundary.height/2, this.boundary.width/2, this.boundary.height/2),
                         new Quadtree(this.boundary.x + this.boundary.width/2, this.boundary.y + this.boundary.height/2, this.boundary.width/2, this.boundary.height/2)
                     ];
+                    nodes[0].parent = this;
+                    nodes[1].parent = this;
+                    nodes[2].parent = this;
+                    nodes[3].parent = this;
                     var entries = this.entries.slice();
                     while (entries.length) {
                         var entry = entries.pop();
                         for (var i=0; i < nodes.length; i++) {
                             var node = nodes[i];
-                            // Set this quad as the node's parent...
-                            node.parent = this;
                             if (node.insert(entry)) {
                                 // Remove the entry from this quad's entries...
                                 this.entries.splice(this.entries.indexOf(entry), 1);
